@@ -1,0 +1,2 @@
+[workspace]
+members =["fast_admin","fast_api","fast_common"]
