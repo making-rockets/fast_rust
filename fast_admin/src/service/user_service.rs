@@ -1,7 +1,7 @@
 use fast_common::common::orm_config::RB;
 use fast_common::models::domain::user::User;
 use fast_common::models::dto::user_dto::UserDTO;
-use fast_common::utils::redis_util;
+
 use rbatis::core::value::DateTimeNow;
 use rbatis::core::Result;
 use rbatis::plugin::page::{PageRequest, Page};

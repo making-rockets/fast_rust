@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ApiResult<T> {
-    pub code: Option<String>,
+    pub code: Option<u32>,
     pub msg: Option<String>,
     pub data: Option<T>,
 }
@@ -15,13 +15,13 @@ impl<T> ApiResult<T> where T: Serialize + DeserializeOwned + Clone {
     pub fn from_result(result: &Result<T, Error>) -> Self {
         if result.is_ok() {
             Self {
-                code: Some("success".to_string()),
+                code: Some(200),
                 msg: None,
                 data: result.clone().ok(),
             }
         } else {
             Self {
-                code: Some("fail".to_string()),
+                code: Some(400),
                 msg: Some(result.clone().err().unwrap().to_string()),
                 data: None,
             }

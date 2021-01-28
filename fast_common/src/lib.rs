@@ -5,7 +5,8 @@ extern crate  rbatis;
 
 pub mod common;
 pub mod middleware;
-pub mod utils;
+//这个工具类还不行
+//pub mod utils;
 pub mod models;
 
 

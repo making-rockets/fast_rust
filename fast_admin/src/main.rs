@@ -5,7 +5,7 @@ use fast_common::common::orm_config::RB;
 use fast_common::common;
 use fast_common::middleware;
 use fast_common::models;
-use fast_common::utils;
+
 
 use fast_common::common::orm_config::InitDb;
 use fast_common::models::domain::user::User;
@@ -21,15 +21,15 @@ use crate::controller::user_controller::UserController;
 fn init_logger() {
     let env = Env::default().filter_or("MY_LOG_LEVEL","trace")
         .write_style_or("MY_LOG_STYLE","always");
-    Builder::from_env(env).filter_level(LevelFilter::Trace)
+    Builder::from_env(env).filter_level(LevelFilter::Debug)
         .format_level(true)
-        .format_timestamp_nanos()
+        .format_timestamp_micros()
         .init();
 }
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    println!("Hello, world!");
+    std::env::set_var("RUST_LOG", "actix_web=DEBUG");
 
     RB.link_opt("mysql://root:root@localhost:3306/go", &InitDb::db_option()).await.unwrap();
     init_logger();
@@ -40,8 +40,8 @@ async fn main() -> std::io::Result<()> {
             .wrap(actix_web::middleware::Logger::default())
             .wrap(middleware::auth::Auth)
             .service(get!("/", UserController::index))
-            .service(post!("/user/new", UserController::new_user))
-            .service(get!("/user/list", UserController::list))
+            .service(post!("/admin/user/new", UserController::new_user))
+            .service(get!("/admin/user/list", UserController::list))
     }).workers(4)
         .bind("127.0.0.1:8000")?
         .run()
