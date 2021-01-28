@@ -11,20 +11,17 @@ pub struct ApiResult<T> {
     pub data: Option<T>,
 }
 
-impl<T> ApiResult<T>
-where
-    T: Serialize + DeserializeOwned + Clone,
-{
+impl<T> ApiResult<T> where T: Serialize + DeserializeOwned + Clone {
     pub fn from_result(result: &Result<T, Error>) -> Self {
         if result.is_ok() {
             Self {
-                code: Some("SUCCESS".to_string()),
+                code: Some("success".to_string()),
                 msg: None,
                 data: result.clone().ok(),
             }
         } else {
             Self {
-                code: Some("FAIL".to_string()),
+                code: Some("fail".to_string()),
                 msg: Some(result.clone().err().unwrap().to_string()),
                 data: None,
             }
@@ -33,7 +30,7 @@ where
 
     pub fn resp(&self) -> Response {
         return HttpResponse::Ok()
-            .content_type("json")
+            .content_type("application/json")
             .body(self.to_string());
     }
 

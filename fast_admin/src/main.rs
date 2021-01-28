@@ -9,16 +9,21 @@ use fast_common::common::base::DB_POOL_OPTIONS;
 use fast_common::common::base::RB;
 use fast_common::models::domain::user::User;
 
-use fast_common::env_logger::{Builder, Env};
+use env_logger::{Builder, Env};
 use log::LevelFilter;
 use actix_web::{App, HttpServer};
 use actix_http::body::MessageBody;
 mod service;
 mod controller;
+use crate::controller::user_controller::UserController;
 
 fn init_logger() {
-    let env = Env::default().filter("MY_LOG_LEVEL").write_style("MY_LOG_STYLE");
-    Builder::from_env(env).filter_level(LevelFilter::max()).format_level(true).format_timestamp_nanos().init();
+    let env = Env::default().filter("MY_LOG_LEVEL")
+        .write_style("MY_LOG_STYLE");
+    Builder::from_env(env).filter_level(LevelFilter::max())
+        .format_level(true)
+        .format_timestamp_nanos()
+        .init();
 }
 
 
@@ -36,9 +41,9 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .wrap(actix_web::middleware::Logger::default())
             .wrap(middleware::auth::Auth)
-            .service(get!("/", User::index))
-            .service(post!("/user/new", User::new_user))
-            .service(get!("/user/list", User::list))
+            .service(get!("/", UserController::index))
+            .service(post!("/user/new", UserController::new_user))
+            .service(get!("/user/list", UserController::list))
     }).workers(4)
         .bind("127.0.0.1:8000")?
         .run()

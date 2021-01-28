@@ -2,28 +2,27 @@ use fast_common::common::base::RB;
 use fast_common::models::domain::user::User;
 use fast_common::models::dto::user_dto::UserDTO;
 use fast_common::utils::redis_util;
-
+use fast_common::rbatis::core::value::DateTimeNow;
+use fast_common::rbatis::core::Result;
+use fast_common::rbatis::plugin::page::{PageRequest, Page};
+use fast_common::rbatis::core::db::DBExecResult;
+use fast_common::rbatis::crud::CRUD;
+use fast_common::rbatis::plugin::snowflake::async_snowflake_id;
 use chrono::NaiveDateTime;
-use rbatis::core::db::DBExecResult;
-use rbatis::core::value::DateTimeNow;
-use rbatis::core::Result;
-use rbatis::crud::CRUD;
-use rbatis::plugin::page::{Page, PageRequest};
-
 
 pub struct UserService {}
 
 impl UserService {
     pub async fn add(arg: &UserDTO) -> Result<DBExecResult> {
-        let id = rbatis::plugin::snowflake::async_snowflake_id().await;
+        let id = async_snowflake_id().await;
         let user = User {
-            id: id,
+            id,
             user_name: (*arg.user_name).to_string(),
             age: arg.age,
             create_time: NaiveDateTime::now(),
         };
 
-        let result = RB.save("context_id_110", &user).await?;
+        let result = RB.save("", &user).await?;
         return Ok(result);
     }
 

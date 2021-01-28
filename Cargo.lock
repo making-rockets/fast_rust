@@ -1023,7 +1023,13 @@ checksum = "f7531096570974c3a9dcf9e4b8e1cede1ec26cf5046219fb3b9d897503b9be59"
 name = "fast_admin"
 version = "0.1.0"
 dependencies = [
+ "actix-http",
+ "actix-web",
+ "chrono",
+ "env_logger",
  "fast_common",
+ "fast_log",
+ "log",
 ]
 
 [[package]]

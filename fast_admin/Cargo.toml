@@ -8,3 +8,11 @@ edition = "2018"
 
 [dependencies]
 fast_common  ={path = "../fast_common"}
+#log日志支持(必须)
+log = "0.4"
+fast_log="1.2.9"
+env_logger = "0.8"
+actix-web = "3.3.2"
+actix-http = "2.2.0"
+
+chrono ="0.4.19"

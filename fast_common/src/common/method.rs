@@ -4,7 +4,6 @@ macro_rules! get {
         actix_web::web::resource($path).route(actix_web::web::get().to($func))
     }};
 }
-
 #[macro_export]
 macro_rules! post {
     ($path:expr,$func:expr) => {{
