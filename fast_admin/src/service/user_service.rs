@@ -1,13 +1,13 @@
-use fast_common::common::base::RB;
+use fast_common::common::orm_config::RB;
 use fast_common::models::domain::user::User;
 use fast_common::models::dto::user_dto::UserDTO;
 use fast_common::utils::redis_util;
-use fast_common::rbatis::core::value::DateTimeNow;
-use fast_common::rbatis::core::Result;
-use fast_common::rbatis::plugin::page::{PageRequest, Page};
-use fast_common::rbatis::core::db::DBExecResult;
-use fast_common::rbatis::crud::CRUD;
-use fast_common::rbatis::plugin::snowflake::async_snowflake_id;
+use rbatis::core::value::DateTimeNow;
+use rbatis::core::Result;
+use rbatis::plugin::page::{PageRequest, Page};
+use rbatis::core::db::DBExecResult;
+use rbatis::crud::CRUD;
+use rbatis::plugin::snowflake::async_snowflake_id;
 use chrono::NaiveDateTime;
 
 pub struct UserService {}
@@ -18,7 +18,7 @@ impl UserService {
         let user = User {
             id,
             user_name: (*arg.user_name).to_string(),
-            age: arg.age,
+            age:arg.age,
             create_time: NaiveDateTime::now(),
         };
 

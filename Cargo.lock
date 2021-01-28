@@ -1030,6 +1030,7 @@ dependencies = [
  "fast_common",
  "fast_log",
  "log",
+ "rbatis",
 ]
 
 [[package]]

@@ -4,7 +4,7 @@ use actix_web::HttpResponse;
 use fast_common::common::api_result::ApiResult;
 use fast_common::models::domain::user::User;
 use fast_common::models::dto::user_dto::UserDTO;
-use crate:: service::user::UserService;
+use crate:: service::user_service::UserService;
 
 pub struct UserController;
 

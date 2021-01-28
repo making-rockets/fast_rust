@@ -1,5 +1,6 @@
 use chrono::NaiveDateTime;
 use serde_derive::{Deserialize, Serialize};
+use crate::rbatis;
 
 #[crud_enable]
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
