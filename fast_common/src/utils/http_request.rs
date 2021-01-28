@@ -1,21 +1,23 @@
 use std::collections::HashMap;
-use serde_json::Value;
+
 use reqwest::header::HeaderMap;
 use std::result::Result;
 use reqwest::{Response, Error};
-use reqwest::RequestBuilder;
+
 use std::collections::hash_map::RandomState;
 use actix_http::http::HeaderValue;
+use reqwest::Url;
+use std::cell::RefCell;
 
-trait HttpRequest<K, V> {
-    async fn post(&url: &str, headers: &mut HeaderMap, data: &mut HashMap<K, V>) -> Result<HashMap<String, String>, reqwest::Error>;
-    fn get(&url: &str) -> Result<HashMap<String, String>, reqwest::Error>;
-}
+
 
 struct HttpUtil {}
 
-impl<K, V> HttpRequest<K, V> for HttpUtil {
-    async fn post(&url: &str, mut headers: HeaderMap<HeaderValue>, data: &mut HashMap<K, V, RandomState>) -> Result<HashMap<String, String, RandomState>, Error> {
+impl HttpUtil{
+    async fn post(url: &str, headers: &mut HeaderMap<HeaderValue>, data: &mut HashMap<String, String, RandomState>) -> Result<Response, Error> {
+        let violations = RefCell::new(Vec::new());
+        let url = Url::options().syntax_violation_callback(Some(&|v| violations.borrow_mut().push(v))).parse(url).unwrap();
+
         let client = reqwest::Client::new();
 
         headers.insert("Content-Type", "application/json".parse().unwrap());
@@ -23,12 +25,18 @@ impl<K, V> HttpRequest<K, V> for HttpUtil {
         let mut data = HashMap::new();
         data.insert("user", "tangjz");
         data.insert("password", "dev-tang.com");
+        let result = client.post(url).send().await.unwrap();
 
-        Ok(client.post(url.into()).headers(headers).json(&data).send().await?.json::<HashMap<String, Value>>().await?)
+        Ok(result)
     }
 
-    fn get(&url: &str) -> Result<HashMap<String, String, RandomState>, Error> {
-        Ok(reqwest::get(url.into()).await?.json::<HashMap<String, String>>().await?)
+    async fn get(url: &str) -> Result<Response, Error> {
+        let violations = RefCell::new(Vec::new());
+        let url = Url::options().syntax_violation_callback(Some(&|v| violations.borrow_mut().push(v))).parse(url).unwrap();
+        let response = reqwest::get(url).await?;
+        Ok(response)
+
+        //Ok(reqwest::get(url).json::<HashMap<String, String>>().await.unwrap())
     }
 }
 

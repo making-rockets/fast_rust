@@ -1,13 +1,11 @@
-use actix_web::Result;
+
 use log::{debug, error, info, trace, warn, LevelFilter};
 use rbatis::core::db::DBPoolOptions;
 use rbatis::core::Error;
 use rbatis::plugin::intercept::SqlIntercept;
 use rbatis::plugin::log::LogPlugin;
 use rbatis::rbatis::Rbatis;
-use serde::de::Deserialize;
-use serde::Serialize;
-use std::sync::Arc;
+
 use std::time::Duration;
 
 lazy_static!{
