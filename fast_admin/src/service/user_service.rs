@@ -2,13 +2,13 @@ use fast_common::common::orm_config::RB;
 use fast_common::models::domain::user::User;
 use fast_common::models::domain::user::UserRequest;
 
+use chrono::NaiveDateTime;
+use rbatis::core::db::DBExecResult;
 use rbatis::core::value::DateTimeNow;
 use rbatis::core::Result;
-use rbatis::plugin::page::{PageRequest, Page};
-use rbatis::core::db::DBExecResult;
 use rbatis::crud::CRUD;
+use rbatis::plugin::page::{Page, PageRequest};
 use rbatis::plugin::snowflake::async_snowflake_id;
-use chrono::NaiveDateTime;
 
 pub struct UserService {}
 
@@ -33,9 +33,7 @@ impl UserService {
     pub async fn list(arg: UserRequest) -> Result<Page<User>> {
         let page_req = PageRequest::new(arg.page_num.unwrap(), arg.page_size.unwrap());
         let wrapper = RB.new_wrapper().check().unwrap();
-        let page: Result<Page<User>> = RB
-            .fetch_page_by_wrapper("", &wrapper, &page_req)
-            .await;
+        let page: Result<Page<User>> = RB.fetch_page_by_wrapper("", &wrapper, &page_req).await;
         return page;
     }
 }

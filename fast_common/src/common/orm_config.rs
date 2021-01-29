@@ -1,4 +1,3 @@
-
 use log::{debug, error, info, trace, warn, LevelFilter};
 use rbatis::core::db::DBPoolOptions;
 use rbatis::core::Error;
@@ -8,14 +7,11 @@ use rbatis::rbatis::Rbatis;
 
 use std::time::Duration;
 
-lazy_static!{
-    pub static ref RB:Rbatis = InitDb::new();
+lazy_static! {
+    pub static ref RB: Rbatis = InitDb::new();
 }
 
-
 pub struct InitDb {}
-
-
 
 impl InitDb {
     pub fn new() -> Rbatis {
@@ -35,8 +31,6 @@ impl InitDb {
         opt.test_before_acquire = true;
         return opt;
     }
-
-
 }
 
 #[derive(Debug)]

@@ -11,7 +11,10 @@ pub struct ApiResult<T> {
     pub data: Option<T>,
 }
 
-impl<T> ApiResult<T> where T: Serialize + DeserializeOwned + Clone {
+impl<T> ApiResult<T>
+where
+    T: Serialize + DeserializeOwned + Clone,
+{
     pub fn from_result(result: &Result<T, Error>) -> Self {
         if result.is_ok() {
             Self {
