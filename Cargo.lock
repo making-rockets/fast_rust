@@ -574,6 +574,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a4521f3e3d031370679b3b140beb36dfe4801b09ac77e30c61941f97df3ef28b"
 
 [[package]]
+name = "base32"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "23ce669cd6c8588f79e15cf450314f9638f967fc5770ff1c7c1deb0925ea7cfa"
+
+[[package]]
 name = "base64"
 version = "0.12.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -584,6 +590,15 @@ name = "base64"
 version = "0.13.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "904dfeac50f3cdaba28fc6f57fdcddb75f49ed61346676a78c4ffe55877802fd"
+
+[[package]]
+name = "base64-url"
+version = "1.4.8"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c8a7558a139be0909d407d70873248681e70bac73595c3ded9dba98a625c8acb"
+dependencies = [
+ "base64 0.13.0",
+]
 
 [[package]]
 name = "bigdecimal"
@@ -851,6 +866,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "crc-any"
+version = "2.3.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c3784befdf9469f4d51c69ef0b774f6a99de6bcc655285f746f16e0dd63d9007"
+dependencies = [
+ "debug-helper",
+]
+
+[[package]]
 name = "crc32fast"
 version = "1.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -940,6 +964,12 @@ dependencies = [
  "cfg-if 1.0.0",
  "num_cpus",
 ]
+
+[[package]]
+name = "debug-helper"
+version = "0.3.10"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9a8a5bb894f24f42c247f19b25928a88e31867c0f84552c05df41a9dd527435e"
 
 [[package]]
 name = "derive_more"
@@ -1036,6 +1066,9 @@ dependencies = [
 [[package]]
 name = "fast_api"
 version = "0.1.0"
+dependencies = [
+ "fast_common",
+]
 
 [[package]]
 name = "fast_common"
@@ -1056,6 +1089,7 @@ dependencies = [
  "serde",
  "serde_derive",
  "serde_json",
+ "short-crypt",
 ]
 
 [[package]]
@@ -2692,6 +2726,18 @@ dependencies = [
  "cpuid-bool",
  "digest",
  "opaque-debug",
+]
+
+[[package]]
+name = "short-crypt"
+version = "1.0.23"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2f5faee42832bc8f15ed9106c9e1475d7e6bf698c4a3012f2e77b251c9833b4a"
+dependencies = [
+ "base32",
+ "base64-url",
+ "crc-any",
+ "debug-helper",
 ]
 
 [[package]]
