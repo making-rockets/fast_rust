@@ -29,7 +29,7 @@ fn init_logger() {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    std::env::set_var("RUST_LOG", "actix_web=DEBUG");
+    std::env::set_var("RUST_LOG", "actix_web=debug");
 
     RB.link_opt("mysql://root:root@localhost:3306/go", &InitDb::db_option()).await.unwrap();
     init_logger();
@@ -42,7 +42,7 @@ async fn main() -> std::io::Result<()> {
             .service(get!("/", UserController::index))
             .service(post!("/admin/user/new", UserController::new_user))
             .service(get!("/admin/user/list", UserController::list))
-    }).workers(4)
+    }).workers(1)
         .bind("127.0.0.1:8000")?
         .run()
         .await
