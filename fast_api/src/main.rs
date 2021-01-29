@@ -11,8 +11,35 @@ fn main() {
     println!("{:?}", result);
 
     let result1 = crypt_util::decrypt_string(result.unwrap().as_ref());
-    println!("{:?}", result1)
+    println!("{:?}", result1);
+    let stu = Student{ person: Person { name: "tt".to_string(), age: 10 }, school: "ac".to_string() };
+    println!("{:?}",stu.get_person());
 }
+
+//java的继承
+#[derive(Debug)]
+struct Person {
+    name: String,
+    age: i32,
+}
+#[derive(Debug)]
+struct Student {
+    person: Person,
+    school: String,
+}
+
+impl Person {
+    fn get_person(&self) -> Self {
+        Person { name: self.name.clone(), age: 0 }
+    }
+}
+
+impl Student {
+    fn get_person(&self) ->Person {
+        self.person.get_person()
+    }
+}
+
 
 #[derive(Debug)]
 enum Version {

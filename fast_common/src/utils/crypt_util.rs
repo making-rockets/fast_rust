@@ -1,7 +1,7 @@
 use serde::Serialize;
 use short_crypt::ShortCrypt;
 
-const KEY_PR: &'static str = "A391D)@!9sdk#ayS$*#6123#lVB@^?<5"; // key, 32位长度
+const KEY_PR: &'static str = "abcdefjhigklmnopqrstuvwxyz"; // key, 32位长度
 
 pub fn encrypt<T: Serialize>(obj: &T) -> Result<String, &'static str> {
     let value = if let Ok(v) = serde_json::to_string(obj) {
