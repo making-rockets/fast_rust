@@ -31,7 +31,7 @@ impl UserService {
     }
 
     pub async fn list(arg: UserRequest) -> Result<Page<User>> {
-        RB.update_batch_by_id()
+
         let page_req = PageRequest::new(arg.page_num.unwrap(), arg.page_size.unwrap());
         let wrapper = RB.new_wrapper().check().unwrap();
         let page: Result<Page<User>> = RB.fetch_page_by_wrapper("", &wrapper, &page_req).await;

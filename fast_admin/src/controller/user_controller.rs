@@ -1,6 +1,5 @@
 use actix_web::web::{Data, Form, Json, Query};
 use actix_web::HttpResponse;
-
 use crate::service::user_service::UserService;
 use fast_common::common::api_result::ApiResult;
 use fast_common::models::domain::user::User;

@@ -1,76 +1,39 @@
 use log::error;
 use log::info;
-use rbatis::core::Result;
-use redis::aio::Connection;
-use redis::Client;
+
+
+use redis::{Client, RedisResult};
 use serde::de::DeserializeOwned;
 use serde::Serialize;
+use redis_tang::{Builder, Pool, RedisManager};
+
+use std::result::Result;
+use actix_web::web::Data;
+use redis::aio::MultiplexedConnection;
+
 ///缓存服务
 pub struct RedisUtil {
     pub client: Client,
 }
 
 impl RedisUtil {
-    pub fn new() -> Self {
-        let client: redis::Client = redis::Client::open("redis://127.0.0.1").unwrap();
-        info!("connect redis success!");
-        Self { client }
-    }
-
-    pub async fn get_conn(&self) -> Result<Connection> {
-        let conn = self.client.get_async_connection().await;
-        if conn.is_err() {
-            let err = conn.err().unwrap().to_string();
-            error!("CacheService get_conn fail! {}", err.as_str());
-            return Err(rbatis::core::Error::from(err));
-        }
-        return Ok(conn.unwrap());
-    }
-
-    pub async fn set_json<T>(&self, k: &str, v: &T) -> Result<String>
-    where
-        T: Serialize,
-    {
-        let data = serde_json::to_string(v);
-        if data.is_err() {
-            return Err(rbatis::core::Error::from(data.err().unwrap().to_string()));
-        }
-        let data = self.set_string(k, data.unwrap().as_str()).await?;
-        Ok(data)
-    }
-
-    pub async fn get_json<T>(&self, k: &str) -> Result<T>
-    where
-        T: DeserializeOwned,
-    {
-        let r = self.get_string(k).await?;
-        let data: serde_json::Result<T> = serde_json::from_str(r.as_str());
-        if data.is_err() {
-            return Err(rbatis::core::Error::from(data.err().unwrap().to_string()));
-        }
-        Ok(data.unwrap())
-    }
-
-    pub async fn set_string(&self, k: &str, v: &str) -> Result<String> {
-        let mut conn = self.get_conn().await?;
-        let r: String = redis::cmd("SET")
-            .arg(&[k, v])
-            .query_async(&mut conn)
+    pub async fn build_pool(num_cpus: usize, redis_url: String) -> Result<Pool<RedisManager>, ()> {
+        let mgr = RedisManager::new(redis_url);
+        Builder::new()
+            .always_check(false)
+            .idle_timeout(None)
+            .max_lifetime(None)
+            .min_idle(num_cpus * 2)
+            .max_size(num_cpus * 2)
+            .build(mgr)
             .await
-            .unwrap_or(String::new());
-        Ok(r)
+            .map_err(|_| ())
     }
 
-    pub async fn get_string(&self, k: &str) -> Result<String> {
-        let mut conn = self.get_conn().await?;
-        let r: String = redis::cmd("GET")
-            .arg(&[k])
-            .query_async(&mut conn)
-            .await
-            .unwrap_or(String::new());
-        if r.is_empty() {
-            return Err(rbatis::core::Error::from("cache data is empty!"));
-        }
-        Ok(r)
+    pub async fn get_connection(&self, pool: Data<Pool<RedisManager>>) -> &mut redis::aio::MultiplexedConnection {
+        let pool_ref = pool.get().await.unwrap().get_conn();
+
+        return pool_ref;
     }
 }
+
