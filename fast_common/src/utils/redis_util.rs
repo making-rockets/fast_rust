@@ -30,10 +30,12 @@ impl RedisUtil {
             .map_err(|_| ())
     }
 
-    pub async fn get_connection(&self, pool: Data<Pool<RedisManager>>) -> &mut redis::aio::MultiplexedConnection {
-        let pool_ref = pool.get().await.unwrap().get_conn();
-
-        return pool_ref;
+    pub async fn get_connection(&self, pool: Data<Pool<RedisManager>>)  {
+        let  connection = pool.get().await.ok().unwrap().get_conn();
+        redis::cmd("PING")
+            .query_async::<_, ()>( connection)
+            .await
+            .unwrap();
     }
 }
 
