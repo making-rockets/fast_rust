@@ -9,11 +9,13 @@ use redis_tang::{Builder, Pool, RedisManager};
 
 use std::result::Result;
 use actix_web::web::Data;
+use actix::web::crate::HttpRequsetPool;
 use redis::aio::MultiplexedConnection;
+use actix_web::HttpRequest;
 
 ///缓存服务
 pub struct RedisUtil {
-    pub client: Client,
+
 }
 
 impl RedisUtil {
@@ -30,12 +32,15 @@ impl RedisUtil {
             .map_err(|_| ())
     }
 
-    pub async fn get_connection(&self, pool: Data<Pool<RedisManager>>)  {
-        let  connection = pool.get().await.ok().unwrap().get_conn();
+    pub async fn set(&self,key:String,value:String)  {
+        let req:HttpRequest = HttpRequestPool::get_request().unwrap();
+        let pool = req.app_data::<Pool<RedisManager>>().unwrap();
+        let mut connection = pool.get().await.unwrap().clone();
         redis::cmd("PING")
-            .query_async::<_, ()>( connection)
+            .query_async::<_, ()>( &mut connection)
             .await
             .unwrap();
     }
+
 }
 
