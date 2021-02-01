@@ -1,60 +1,23 @@
-#[macro_use]
-extern crate fast_common;
+use std::cmp::Ordering;
 
-use fast_common::utils::crypt_util;
+#[derive(Eq, PartialEq, PartialOrd, Ord)]
+struct G<'a, T: Ord> { m: &'a T }
 
-use std::fmt::Error;
+#[derive(Eq, PartialEq, PartialOrd, Ord)]
+struct Value { v: i32 }
+
+fn longer<'a, T: Ord>(s1: &'a T, s2: &'a T) -> &'a T {
+    if s1 > s2 { s1 } else { s2 }
+}
 
 fn main() {
-    let x = r#"{"persons":[{"name" : "Joe","age" : 12}]}"#;
-    let result = crypt_util::encrypt(&x);
-    println!("{:?}", result);
+    let v0 = Value { v: 12 };
+    let v1 = Value { v: 15 };
+    let res_v = longer(&v0, &v1);
+    println!("{}", res_v.v);//15
 
-    let result1 = crypt_util::decrypt_string(result.unwrap().as_ref());
-    println!("{:?}", result1);
-    let stu = Student{ person: Person { name: "tt".to_string(), age: 10 }, school: "ac".to_string() };
-    println!("{:?}",stu.get_person());
-}
-
-//java的继承
-#[derive(Debug)]
-struct Person {
-    name: String,
-    age: i32,
-}
-#[derive(Debug)]
-struct Student {
-    person: Person,
-    school: String,
-}
-
-impl Person {
-    fn get_person(&self) -> Self {
-        Person { name: self.name.clone(), age: 0 }
-    }
-}
-
-impl Student {
-    fn get_person(&self) ->Person {
-        self.person.get_person()
-    }
-}
-
-
-#[derive(Debug)]
-enum Version {
-    Version1,
-    Version2,
-}
-
-fn parse_version(header: &[i32]) -> Result<Version, &'static str> {
-    for x in header {
-        let re = match x {
-            0..=10 => Ok(Version::Version2),
-            _ => Err("meiyou a"),
-        };
-        return re;
-    }
-
-    return Err("zhaobudao");
+    let g0 = G { m: &v0 };
+    let g1 = G { m: &v1 };
+    let res_g = longer(&g0, &g1);//15
+    println!("{}", res_g.m.v);
 }

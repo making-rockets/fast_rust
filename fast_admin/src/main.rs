@@ -28,7 +28,7 @@ fn init_logger() {
 }
 
 async fn init_redis(redis_url:String ) -> Pool<RedisManager>{
-    let pool = RedisUtil::build_pool(num_cpus::get(), redis_url.as_str()).await.expect("fail to build pool");
+    let pool = RedisUtil::build_pool(num_cpus::get(), redis_url).await.expect("fail to build pool");
     return pool;
 }
 

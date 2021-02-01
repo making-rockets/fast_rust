@@ -9,7 +9,7 @@ use redis_tang::{Builder, Pool, RedisManager};
 
 use std::result::Result;
 use actix_web::web::Data;
-use actix::web::crate::HttpRequsetPool;
+use actix::web::HttpRequsetPool;
 use redis::aio::MultiplexedConnection;
 use actix_web::HttpRequest;
 
@@ -32,7 +32,9 @@ impl RedisUtil {
             .map_err(|_| ())
     }
 
-    pub async fn set(&self,key:String,value:String)  {
+    pub async fn set(&self,key:String,value:String,req:HttpRequest)  {
+
+
         let req:HttpRequest = HttpRequestPool::get_request().unwrap();
         let pool = req.app_data::<Pool<RedisManager>>().unwrap();
         let mut connection = pool.get().await.unwrap().clone();
@@ -43,4 +45,3 @@ impl RedisUtil {
     }
 
 }
-
