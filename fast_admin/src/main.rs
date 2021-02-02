@@ -21,29 +21,28 @@ mod service;
 use crate::controller::user_controller::UserController;
 use redis_tang::Pool;
 use redis_tang::RedisManager;
+
 fn init_logger() {
     let env = Env::default().filter_or("MY_LOG_LEVEL", "trace")
         .write_style_or("MY_LOG_STYLE", "always");
     Builder::from_env(env).filter_level(LevelFilter::Debug).format_level(true).format_timestamp_micros().init();
 }
 
-async fn init_redis(redis_url:String ) -> Pool<RedisManager>{
-    let pool = RedisUtil::build_pool(num_cpus::get(), redis_url).await.expect("fail to build pool");
-    return pool;
-}
-
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     std::env::set_var("RUST_LOG", "actix_web=debug");
-    let redis_url = std::env::var("REDIS_URL").unwrap_or_else(|_| String::from("redis://127.0.0.1"));
-    let redis = init_redis(redis_url).await;
+
+
+
     let db_url = std::env::var("db_url").unwrap_or_else(|_| String::from("mysql://root:root@localhost:3306/go"));
     RB.link_opt(db_url.as_str(), &InitDb::db_option()).await.unwrap();
     init_logger();
 
     HttpServer::new(move || {
-        App::new().data(redis.clone())
+        let redis_url = std::env::var("REDIS_URL").unwrap_or_else(|_| String::from("redis://127.0.0.1:6379"));
+         //redis_url.clone();
+        App::new().data_factory(move || RedisUtil::pool_builder(1, redis_url.clone().clone()))
             .wrap(actix_web::middleware::Logger::default())
             .wrap(middleware::auth::Auth)
             .service(get!("/", UserController::index))

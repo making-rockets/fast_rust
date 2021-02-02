@@ -6,6 +6,10 @@ use fast_common::models::domain::user::User;
 use fast_common::models::domain::user::UserRequest;
 use fast_common::utils::crypt_util::decrypt_string;
 use fast_common::utils::crypt_util::encrypt;
+use fast_common::utils::redis_util;
+use redis_tang::{Pool, RedisManager};
+use log::kv::Source;
+use fast_common::utils::redis_util::RedisUtil;
 
 pub struct UserController;
 
@@ -13,16 +17,15 @@ impl UserController {
     pub async fn index() -> HttpResponse {
         HttpResponse::Ok().body("hello,world")
     }
-    pub async fn new_user(arg: Json<UserRequest>) -> HttpResponse {
+    pub async fn new_user(arg: Json<UserRequest>,request:HttpRequest) -> HttpResponse {
         let result = UserService::add(arg.0).await;
+
         return ApiResult::from_result(&result).resp();
     }
-    pub async fn list(arg: Query<UserRequest>,req:HttpRequest) -> HttpResponse {
+    pub async fn list(arg: Query<UserRequest>, req: HttpRequest) -> HttpResponse {
+        let redis_result = RedisUtil::set("a".to_string(), "b".to_string()).await;
+        println!("{:?},这是redis返回的结果", redis_result.unwrap());
         let list = UserService::list(arg.0).await;
-        let stt = encrypt(&list.unwrap());
-        let result = decrypt_string(stt.unwrap().as_str());
-        //return ApiResult::from_result(&result).resp();
-        println!("执行了{:?}", &result);
-        return HttpResponse::Ok().body(result.unwrap());
+        return ApiResult::from_result(&list).resp();
     }
 }
