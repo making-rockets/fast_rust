@@ -7,7 +7,8 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-#fast_common = {path  = "../fast_common"}
-lazy_static = "1.4.0"
-async_once = "0.2.1"
-tokio = {version ="0.2"}
+reqwest = { version = "0.10", features = ["json"] }
+tokio = { version = "0.2", features = ["full"] }
+futures = "0.3"
+
+
