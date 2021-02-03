@@ -13,6 +13,7 @@ use actix_web::web::Data;
 use redis::aio::MultiplexedConnection;
 use actix_web::HttpRequest;
 use std::sync::Mutex;
+use futures::TryFutureExt;
 
 
 ///缓存服务
@@ -24,14 +25,15 @@ pub struct RedisWrapper(Pool<RedisManager>);
 
 
 lazy_static! {
-    pub static ref pool:AsyncOnce<Pool<RedisManager>> = AsyncOnce::new(async  {
-       RedisUtil::pool_builder(1,String::from("redis://localhost:6379")).await.unwrap()
-    });
+    /*pub static ref pool:AsyncOnce<Pool<RedisManager>> = AsyncOnce::new(async  {
+      return  RedisUtil::pool_builder(1,String::from("redis://localhost:6379")).await.unwrap();
+    });*/
+    pub static ref client:redis::Client = redis::Client::open(String::from("redis://localhost:6379")).unwrap();
 }
 
-impl RedisUtil {
 
-    pub async  fn pool_builder(num_cpus: usize, redis_url: impl redis::IntoConnectionInfo) -> Result<Pool<RedisManager>, RedisPoolError> {
+impl RedisUtil {
+    pub async fn pool_builder(num_cpus: usize, redis_url: impl redis::IntoConnectionInfo) -> Result<Pool<RedisManager>, RedisPoolError> {
         let mgr = RedisManager::new(redis_url);
         let build = Builder::new().always_check(false).idle_timeout(None).max_lifetime(None).min_idle(num_cpus * 2)
             .max_size(num_cpus * 2).build(mgr).await;
@@ -39,9 +41,8 @@ impl RedisUtil {
     }
 
     pub async fn set(key: String, value: String) -> RedisResult<String> {
-       let mut client = pool.get().await .get().await.unwrap().clone();
-        redis::cmd("SET").arg(key).arg(value)
-            .query_async::<MultiplexedConnection, String>(  &mut client)
-            .await
+        let mut multiplexed_connection = client.get_multiplexed_async_std_connection().await.unwrap();
+        let result = redis::cmd("SET").arg(key).arg(value).query_async::<_, String>(&mut multiplexed_connection).await;
+        return result;
     }
 }

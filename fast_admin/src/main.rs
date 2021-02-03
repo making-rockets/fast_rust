@@ -40,9 +40,8 @@ async fn main() -> std::io::Result<()> {
     init_logger();
 
     HttpServer::new(move || {
-        let redis_url = std::env::var("REDIS_URL").unwrap_or_else(|_| String::from("redis://127.0.0.1:6379"));
-         //redis_url.clone();
-        App::new().data_factory(move || RedisUtil::pool_builder(1, redis_url.clone().clone()))
+
+        App::new()
             .wrap(actix_web::middleware::Logger::default())
             .wrap(middleware::auth::Auth)
             .service(get!("/", UserController::index))
