@@ -13,6 +13,7 @@ pub struct User {
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct UserRequest {
+    pub id :Option<i64>,
     pub user_name: Option<String>,
     pub age: Option<u64>,
     pub page_num: Option<u64>,
