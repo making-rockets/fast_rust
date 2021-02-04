@@ -43,10 +43,10 @@ impl SqlIntercept for Intercept {
 
     fn do_intercept(
         &self,
-        rb: &Rbatis,
+        _rb: &Rbatis,
         sql: &mut String,
         args: &mut Vec<serde_json::Value>,
-        is_prepared_sql: bool,
+        _is_prepared_sql: bool,
     ) -> std::result::Result<(), Error> {
         println!("SQL Interceptor execute sql= {}, args= {:?}", &sql, &args);
         Ok(())

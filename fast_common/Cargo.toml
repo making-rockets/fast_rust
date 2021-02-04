@@ -40,3 +40,5 @@ redis = { version = "0.16.0", features = ["async-std-comp","tokio-rt-core"] ,def
 redis_tang = "0.1.0"
 short-crypt = "1.0.23"
 async_once = "0.2.1"
+#解析toml
+toml_edit = "0.2.0"

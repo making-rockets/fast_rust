@@ -15,7 +15,7 @@ impl HttpUtil {
     async fn post(
         url: &str,
         headers: &mut HeaderMap<HeaderValue>,
-        data: &mut HashMap<String, String, RandomState>,
+        _data: &mut HashMap<String, String, RandomState>,
     ) -> Result<Response, Error> {
         let violations = RefCell::new(Vec::new());
         let url = Url::options()

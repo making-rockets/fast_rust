@@ -3,5 +3,5 @@ use actix_web::HttpResponse;
 
 #[get("/")]
 pub async fn index() -> HttpResponse {
-    HttpResponse::Ok().body("hello,world")
+    HttpResponse::Ok().body("hello,actix-web")
 }
