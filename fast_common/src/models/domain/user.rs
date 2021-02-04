@@ -2,16 +2,20 @@ use crate::rbatis;
 use chrono::NaiveDateTime;
 use serde_derive::{Deserialize, Serialize};
 
+
 #[crud_enable]
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct User {
-    pub id: i64,
-    pub user_name: String,
-    pub age: u64,
-    pub create_time: NaiveDateTime,
+    pub id:Option<u64>,
+    pub user_name: Option<String>,
+    pub age: Option<u64>,
+    pub create_time:Option<NaiveDateTime>,
+    pub page_num:Option<u64>,
+    pub page_size:Option<u64>,
+
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+/*#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct UserRequest {
     pub id :Option<i64>,
     pub user_name: Option<String>,
@@ -26,4 +30,4 @@ pub struct UserResponse {
     pub user_name: String,
     pub age: u64,
     pub create_time: NaiveDateTime,
-}
+}*/

@@ -15,7 +15,7 @@ impl<T> ApiResult<T>
 where
     T: Serialize + DeserializeOwned + Clone,
 {
-    pub fn from_result(result: &Result<T, Error>) -> Self {
+    pub async fn from_result(result: &Result<T, Error>) -> Self {
         if result.is_ok() {
             Self {
                 code: Some(200),
@@ -31,13 +31,13 @@ where
         }
     }
 
-    pub fn resp(&self) -> Response {
+    pub async  fn resp(&self) -> Response {
         return HttpResponse::Ok()
             .content_type("application/json")
-            .body(self.to_string());
+            .body(self.to_string().await);
     }
 
-    pub fn to_string(&self) -> String {
+    pub async fn to_string(&self) -> String {
         return serde_json::to_string(self).unwrap();
     }
 }

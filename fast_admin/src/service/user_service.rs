@@ -1,6 +1,6 @@
 use fast_common::common::orm_config::RB;
 use fast_common::models::domain::user::User;
-use fast_common::models::domain::user::UserRequest;
+
 
 use chrono::NaiveDateTime;
 use rbatis::core::db::DBExecResult;
@@ -14,24 +14,19 @@ use rbatis::plugin::snowflake::async_snowflake_id;
 pub struct UserService {}
 
 impl UserService {
-    pub async fn add(arg: UserRequest) -> Result<DBExecResult> {
+    pub async fn add(mut arg: User) -> Result<DBExecResult> {
         let id = async_snowflake_id().await;
-        let user = User {
-            id,
-            user_name: arg.user_name.unwrap(),
-            age: arg.age.unwrap(),
-            create_time: NaiveDateTime::now(),
-        };
 
-        let result = RB.save("", &user).await?;
+        //arg.id.unwrap() = id as u64;
+        let result = RB.save("", &arg).await?;
         return Ok(result);
     }
 
-    pub async fn update(user: UserRequest) {
+    pub async fn update(user: User) {
         println!("{:?}", user);
     }
 
-    pub async fn list(arg: UserRequest) -> Result<Page<User>> {
+    pub async fn list(arg: User) -> Result<Page<User>> {
         let page_request = PageRequest::new(arg.page_num.unwrap(), arg.page_size.unwrap()); //分页请求，页码，条数
         let wrapper = RB.new_wrapper();
         let page: Result<Page<User>> = RB.fetch_page_by_wrapper("", &wrapper, &page_request).await;
