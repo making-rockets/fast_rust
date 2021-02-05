@@ -17,7 +17,7 @@ actix-http = "2.2.0"
 #时间
 chrono ="0.4.19"
 #orm
-rbatis = "1.8.65"
+rbatis =  { version = "1.8",features=["snowflake","debug_mode"]}
 #cpu_count
 num_cpus = "1.13.0"
 #redis

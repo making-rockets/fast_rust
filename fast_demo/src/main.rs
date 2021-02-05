@@ -1,20 +1,5 @@
-use taplo::parser::{parse, Parse};
-use std::path::Path;
-use taplo::dom::{NodeSyntax, RootNode};
+//use chrono::prelude::*;
 
-fn main() {
-    let file = std::fs::read_to_string(Path::new("Cargo.toml"));
+use std::fmt::Debug;
 
-
-    let parse_result:Parse = parse(file.unwrap().as_str());
-    let t = parse_result.into_dom().into_entries();
-
-    for (key,value) in t.iter() {
-        println!("{:?}", key.syntax().into_node().unwrap().text());
-        println!("{:?}", value.syntax().into_node().unwrap().text());
-    }
-
-    //KeyNode { syntax: Node(KEY@1..8), mask_left: 0, mask_right: 0, mask_visible: 1, idents: [IDENT@1..8 "package"], additional_keys: [] } = EntryNode { syntax: Node(TABLE_HEADER@0..9), key: KeyNode { syntax: Node(KEY@1..8), mask_left: 0, mask_right: 0, mask_visible: 1, idents: [IDENT@1..8 "package"], additional_keys: [] }, value: Table(TableNode { syntax: Node(TABLE_HEADER@0..9), key: Some(KeyNode { syntax: Node(KEY@1..8), mask_left: 0, mask_right: 0, mask_visible: 1, idents: [IDENT@1..8 "package"], additional_keys: [] }), array: false, inline: false, pseudo: false, end_offset: Some(201), entries: Entries({KeyNode { syntax: Node(KEY@10..15), mask_left: 0, mask_right: 0, mask_visible: 1, idents: [IDENT@10..14 "name"], additional_keys: [] }: EntryNode { syntax: Node(ENTRY@10..28), key: KeyNode { syntax: Node(KEY@10..15), mask_left: 0, mask_right: 0, mask_visible: 1, idents: [IDENT@10..14 "name"], additional_keys: [] }, value: String(StringNode { syntax: Token(STRING@17..28 "\"fast_demo\""), kind: Basic, content: "fast_demo" }) }, KeyNode { syntax: Node(KEY@29..37), mask_left: 0, mask_right: 0, mask_visible: 1, idents: [IDENT@29..36 "version"], additional_keys: [] }: EntryNode { syntax: Node(ENTRY@29..46), key: KeyNode { syntax: Node(KEY@29..37), mask_left: 0, mask_right: 0, mask_visible: 1, idents: [IDENT@29..36 "version"], additional_keys: [] }, value: String(StringNode { syntax: Token(STRING@39..46 "\"0.1.0\""), kind: Basic, content: "0.1.0" }) }, KeyNode { syntax: Node(KEY@47..55), mask_left: 0, mask_right: 0, mask_visible: 1, idents: [IDENT@47..54 "authors"], additional_keys: [] }: EntryNode { syntax: Node(ENTRY@47..84), key: KeyNode { syntax: Node(KEY@47..55), mask_left: 0, mask_right: 0, mask_visible: 1, idents: [IDENT@47..54 "authors"], additional_keys: [] }, value: Array(ArrayNode { syntax: Node(ARRAY@57..84), tables: false, items: [String(StringNode { syntax: Token(STRING@58..83 "\"baiyu <by965738071@1 ..."), kind: Basic, content: "baiyu <by965738071@163>" })] }) }, KeyNode { syntax: Node(KEY@85..93), mask_left: 0, mask_right: 0, mask_visible: 1, idents: [IDENT@85..92 "edition"], additional_keys: [] }: EntryNode { syntax: Node(ENTRY@85..101), key: KeyNode { syntax: Node(KEY@85..93), mask_left: 0, mask_right: 0, mask_visible: 1, idents: [IDENT@85..92 "edition"], additional_keys: [] }, value: String(StringNode { syntax: Token(STRING@95..101 "\"2018\""), kind: Basic, content: "2018" }) }}) }) }
-   // KeyNode { syntax: Node(KEY@202..214), mask_left: 0, mask_right: 0, mask_visible: 1, idents: [IDENT@202..214 "dependencies"], additional_keys: [] } = EntryNode { syntax: Node(TABLE_HEADER@201..215), key: KeyNode { syntax: Node(KEY@202..214), mask_left: 0, mask_right: 0, mask_visible: 1, idents: [IDENT@202..214 "dependencies"], additional_keys: [] }, value: Table(TableNode { syntax: Node(TABLE_HEADER@201..215), key: Some(KeyNode { syntax: Node(KEY@202..214), mask_left: 0, mask_right: 0, mask_visible: 1, idents: [IDENT@202..214 "dependencies"], additional_keys: [] }), array: false, inline: false, pseudo: false, end_offset: Some(232), entries: Entries({KeyNode { syntax: Node(KEY@217..223), mask_left: 0, mask_right: 0, mask_visible: 1, idents: [IDENT@217..222 "taplo"], additional_keys: [] }: EntryNode { syntax: Node(ENTRY@217..232), key: KeyNode { syntax: Node(KEY@217..223), mask_left: 0, mask_right: 0, mask_visible: 1, idents: [IDENT@217..222 "taplo"], additional_keys: [] }, value: String(StringNode { syntax: Token(STRING@225..232 "\"0.5.1\""), kind: Basic, content: "0.5.1" }) }}) }) }
-
-}
+fn main() {}

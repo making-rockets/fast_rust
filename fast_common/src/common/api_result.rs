@@ -31,7 +31,7 @@ where
         }
     }
 
-    pub async  fn resp(&self) -> Response {
+    pub async fn resp(&self) -> Response {
         return HttpResponse::Ok()
             .content_type("application/json")
             .body(self.to_string().await);

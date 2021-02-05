@@ -28,7 +28,7 @@ env_logger = "0.8"
 bigdecimal = "0.2"
 
 #rbatis支持
-rbatis =  { version = "1.8",features=["snowflake"]}
+rbatis =  { version = "1.8",features=["snowflake","debug_mode"]}
 #静态初始化
 lazy_static = "1.4.0"
 #异步

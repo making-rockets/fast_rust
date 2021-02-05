@@ -5,6 +5,7 @@ use fast_common::middleware;
 
 use fast_common::common::orm_config::InitDb;
 
+use actix_web::web::scope;
 use actix_web::{App, HttpServer};
 use env_logger::{Builder, Env};
 use log::LevelFilter;
@@ -42,6 +43,8 @@ async fn main() -> std::io::Result<()> {
             .service(controller::index_controller::index)
             .service(controller::user_controller::new_user)
             .service(controller::user_controller::list)
+            .service(controller::user_controller::update)
+            .service(controller::user_controller::delete)
     })
     //.workers(num_cpus::get())
     .bind("127.0.0.1:8000")?
