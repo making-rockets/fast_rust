@@ -41,12 +41,9 @@ async fn main() -> std::io::Result<()> {
             .wrap(actix_web::middleware::Logger::default())
             .wrap(middleware::auth::Auth)
             .service(controller::index_controller::index)
-            .service(controller::user_controller::new_user)
-            .service(controller::user_controller::list)
-            .service(controller::user_controller::update)
-            .service(controller::user_controller::delete)
+            .service(routers::user_route::user_routes())
+            .service(routers::menu_route::menu_routes())
     })
-    //.workers(num_cpus::get())
     .bind("127.0.0.1:8000")?
     .run()
     .await
