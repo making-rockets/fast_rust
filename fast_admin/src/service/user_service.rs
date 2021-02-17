@@ -1,7 +1,7 @@
-use fast_common::common::orm_config::RB;
-use fast_common::models::user::{User, UserVo};
-
 use chrono::NaiveDateTime;
+use fast_common::common::orm_config::RB;
+use fast_common::models::user::{User, UserLoginVo, UserVo};
+use fast_common::utils::crypt_util;
 use rbatis::core::db::DBExecResult;
 use rbatis::core::Result;
 use rbatis::crud::CRUD;
@@ -9,6 +9,12 @@ use rbatis::plugin::page::{Page, PageRequest};
 use rbatis::plugin::snowflake::async_snowflake_id;
 
 use rbatis::core::value::DateTimeNow;
+use rbatis::wrapper::Wrapper;
+use rbatis::Error;
+use fast_common::utils::redis_util::RedisUtil;
+use std::rc::Rc;
+use std::ops::Deref;
+use std::borrow::Borrow;
 
 pub struct UserService {}
 
@@ -48,7 +54,26 @@ impl UserService {
 
         let page_request = PageRequest::new(arg.page_num.unwrap(), arg.page_size.unwrap());
         let page = RB.fetch_page_by_wrapper("", &wrapper, &page_request).await;
-
         return page;
+    }
+
+    pub async fn login(user: UserLoginVo) -> Result<UserLoginVo> {
+        let mut wrapper = RB.new_wrapper();
+        wrapper = wrapper.eq("user_name", user.user_name.unwrap());
+        let x = RB.fetch_by_wrapper::<User>("", &wrapper).await;
+
+        return if x.is_ok() {
+
+            RedisUtil::get_conn().await.set_json(format!("user_id:{}",x.unwrap().id.unwrap()).as_str(),&x.unwrap());
+
+            Ok(UserLoginVo {
+                token: Some(crypt_util::get_uuid()),
+                user_name: None,
+                user_id: None,
+                password: None,
+            })
+        } else {
+            Err(Error::from("用户名或密码错误"))
+        };
     }
 }

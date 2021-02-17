@@ -5,7 +5,6 @@ use fast_common::middleware;
 
 use fast_common::common::orm_config::InitDb;
 
-
 use actix_web::{App, HttpServer};
 use env_logger::{Builder, Env};
 use log::LevelFilter;
@@ -13,6 +12,7 @@ use log::LevelFilter;
 mod controller;
 mod routers;
 mod service;
+
 
 fn init_logger() {
     let env = Env::default()
@@ -40,7 +40,7 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .wrap(actix_web::middleware::Logger::default())
             .wrap(middleware::auth::Auth)
-            .service(controller::index_controller::index)
+            .service(routers::index_route::index_routers())
             .service(routers::user_route::user_routes())
             .service(routers::menu_route::menu_routes())
     })
