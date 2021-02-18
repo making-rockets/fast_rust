@@ -1,5 +1,6 @@
 use serde::Serialize;
 use short_crypt::ShortCrypt;
+use uuid::Uuid;
 
 const KEY_PR: &'static str = "abcdefjhigklmnopqrstuvwxyz"; // key, 32位长度
 
@@ -11,9 +12,6 @@ pub fn encrypt<T: Serialize>(obj: &T) -> Result<String, &'static str> {
     };
     let sc = ShortCrypt::new(KEY_PR);
     let encrypt_string = sc.encrypt_to_url_component(&value);
-    /*let json_data = SwapData {
-        data: encrypt_string,
-    };*/
     Ok(encrypt_string)
 }
 
@@ -26,4 +24,9 @@ pub fn decrypt_string(encrypt_string: &str) -> Result<String, &'static str> {
         },
         Err(_) => Err("反解密字符串时出错"),
     }
+}
+
+pub fn get_uuid() -> Uuid {
+    let uuid = Uuid::new_v4();
+    return uuid;
 }

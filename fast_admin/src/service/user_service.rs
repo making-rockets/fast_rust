@@ -8,13 +8,14 @@ use rbatis::crud::CRUD;
 use rbatis::plugin::page::{Page, PageRequest};
 use rbatis::plugin::snowflake::async_snowflake_id;
 
+use fast_common::utils::redis_util::RedisUtil;
 use rbatis::core::value::DateTimeNow;
 use rbatis::wrapper::Wrapper;
 use rbatis::Error;
-use fast_common::utils::redis_util::RedisUtil;
-use std::rc::Rc;
-use std::ops::Deref;
 use std::borrow::Borrow;
+use std::cell::Ref;
+use std::ops::Deref;
+use std::rc::Rc;
 
 pub struct UserService {}
 
@@ -63,15 +64,19 @@ impl UserService {
         let x = RB.fetch_by_wrapper::<User>("", &wrapper).await;
 
         return if x.is_ok() {
+            let user = Rc::new((x.unwrap()));
+            RedisUtil::get_conn().await.set_json(
+                format!("user_id:{}", x.unwrap().id.unwrap()).as_str(),
+                &x.clone(),
+            );
 
-            RedisUtil::get_conn().await.set_json(format!("user_id:{}",x.unwrap().id.unwrap()).as_str(),&x.unwrap());
-
-            Ok(UserLoginVo {
+            let user_login_vo = UserLoginVo {
                 token: Some(crypt_util::get_uuid()),
                 user_name: None,
                 user_id: None,
                 password: None,
-            })
+            };
+            Ok(user_login_vo)
         } else {
             Err(Error::from("用户名或密码错误"))
         };

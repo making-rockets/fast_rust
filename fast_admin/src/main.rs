@@ -13,7 +13,6 @@ mod controller;
 mod routers;
 mod service;
 
-
 fn init_logger() {
     let env = Env::default()
         .filter_or("MY_LOG_LEVEL", "trace")

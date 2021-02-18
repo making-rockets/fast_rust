@@ -1,32 +1,15 @@
-use chrono::format::StrftimeItems;
-use chrono::{NaiveDate, NaiveDateTime, Local};
+fn main() {
+    let name = String::from("kobe");
+    let kobe = f_closure { name: name };
+    println!("name {}", kobe.fn_call());
+}
+
 #[derive(Debug)]
-struct BaseModel {
-    id: u64,
+struct f_closure {
     name: String,
 }
-
-#[derive(Debug)]
-struct Person {
-    age: u32,
-    school: String,
-    baseModel: BaseModel,
-}
-
-impl Person {
-
-    fn new(age:u32,school:String,baseModel:BaseModel) ->Self{
-        Self{
-            age,
-            school,
-            baseModel
-        }
+impl f_closure {
+    fn fn_call(self) -> String {
+        self.name
     }
-
-}
-
-
-fn main() {
-    let person = Person::new(1, "1".to_string(), BaseModel { id: 0, name: "".to_string() });
-    println!("{:?}", person);
 }

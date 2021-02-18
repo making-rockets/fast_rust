@@ -5,7 +5,7 @@ use serde_derive::{Deserialize, Serialize};
 #[crud_enable]
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct Menu {
-    pub menu_id: Option<u64>,
+    pub id: Option<u64>,
     pub menu_name: Option<String>,
     pub parent_id: Option<u64>,
     pub path: Option<String>,
@@ -18,7 +18,7 @@ pub struct Menu {
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct MenuVo {
-    pub menu_id: Option<u64>,
+    pub id: Option<u64>,
     pub menu_name: Option<String>,
     pub parent_id: Option<u64>,
     pub path: Option<String>,
