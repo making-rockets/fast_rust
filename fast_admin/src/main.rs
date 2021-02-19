@@ -29,7 +29,7 @@ async fn main() -> std::io::Result<()> {
     std::env::set_var("RUST_LOG", "actix_web=debug");
 
     let db_url = std::env::var("db_url")
-        .unwrap_or_else(|_| String::from("mysql://root:root@39.97.225.5:3306/go"));
+        .unwrap_or_else(|_| String::from("mysql://root:root@localhost:3306/go"));
     RB.link_opt(db_url.as_str(), &InitDb::db_option())
         .await
         .unwrap();
