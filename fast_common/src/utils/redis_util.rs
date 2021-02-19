@@ -23,7 +23,7 @@ impl RedisUtil {
         // return multiplexed_connection;
     }
 
-    pub async fn set_json<T>(&self, k: &str, v: &T) -> Result<String, &str>
+    pub async fn set_json<T>(&self, k: &String, v: &T) -> Result<String, &str>
     where
         T: Serialize,
     {
@@ -32,7 +32,7 @@ impl RedisUtil {
             return Err("序列化格式错误");
         }
 
-        let data = self.set_string(k, data.unwrap().as_str()).await?;
+        let data = self.set_string(&k, data.unwrap().as_str()).await?;
         Ok(data)
     }
     pub async fn get_json<T>(&self, k: &str) -> Result<T, &str>
@@ -47,7 +47,7 @@ impl RedisUtil {
         Ok(data.unwrap())
     }
 
-    pub async fn set_string(&self, k: &str, v: &str) -> Result<String, &str> {
+    pub async fn set_string(&self, k: &String, v: &str) -> Result<String, &str> {
         let mut conn = Self::get_conn().await.multiplexed_onnection;
         let r: String = redis::cmd("SET")
             .arg(&[k, v])
