@@ -1,4 +1,4 @@
-use chrono::NaiveDateTime;
+use chrono::{Local, NaiveDateTime};
 use fast_common::common::orm_config::RB;
 use fast_common::models::user::{User, UserLoginVo, UserVo};
 use fast_common::utils::crypt_util;
@@ -23,7 +23,7 @@ impl UserService {
     pub async fn add(mut user: User) -> Result<DBExecResult> {
         let id = async_snowflake_id().await as u64;
         user.id = Some(id);
-        user.create_time = Some(NaiveDateTime::now());
+        user.create_time = Some(Local::now().naive_local());
         let result = RB.save("", &user).await?;
         return Ok(result);
     }
@@ -64,8 +64,8 @@ impl UserService {
         let x = RB.fetch_by_wrapper::<User>("", &wrapper).await;
 
         return if x.is_ok() {
-            let user_key = format!("user_id:{}",x.clone().unwrap().id.unwrap());
-            RedisUtil::get_conn().await.set_json(&user_key,&x.clone().unwrap());
+            let user_key = format!("user_id:{}", x.clone().unwrap().id.unwrap());
+            RedisUtil::get_conn().await.set_json(&user_key, &x.clone().unwrap()).await;
             let user_login_vo = UserLoginVo {
                 token: Some(crypt_util::get_uuid()),
                 user_name: x.clone().unwrap().user_name,

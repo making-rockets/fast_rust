@@ -1,11 +1,11 @@
 use redis::aio::MultiplexedConnection;
-use redis::{AsyncCommands, Cmd, Pipeline, RedisFuture, RedisResult, ToRedisArgs, Value};
+
 use serde::de::DeserializeOwned;
-use serde::{de::Deserialize, Serialize};
+use serde::Serialize;
 
 ///缓存服务
 pub struct RedisUtil {
-    pub multiplexed_onnection: MultiplexedConnection,
+    pub multiplexed_connection: MultiplexedConnection,
 }
 
 lazy_static! {
@@ -15,10 +15,10 @@ lazy_static! {
 
 impl RedisUtil {
     pub async fn get_conn() -> RedisUtil {
-        let mut multiplexed_onnection =
-            CLIETN.get_multiplexed_async_std_connection().await.unwrap();
+
+        let mut multiplexed_connection = CLIETN.get_multiplexed_async_std_connection().await.unwrap();
         RedisUtil {
-            multiplexed_onnection,
+            multiplexed_connection,
         }
         // return multiplexed_connection;
     }
@@ -35,7 +35,7 @@ impl RedisUtil {
         let data = self.set_string(&k, data.unwrap().as_str()).await?;
         Ok(data)
     }
-    pub async fn get_json<T>(&self, k: &str) -> Result<T, &str>
+    pub async fn get_json<T>(&self, k: &String) -> Result<T, &str>
     where
         T: DeserializeOwned,
     {
@@ -48,7 +48,7 @@ impl RedisUtil {
     }
 
     pub async fn set_string(&self, k: &String, v: &str) -> Result<String, &str> {
-        let mut conn = Self::get_conn().await.multiplexed_onnection;
+        let mut conn = Self::get_conn().await.multiplexed_connection;
         let r: String = redis::cmd("SET")
             .arg(&[k, v])
             .query_async(&mut conn)
@@ -58,7 +58,7 @@ impl RedisUtil {
     }
 
     pub async fn get_string(&self, k: &str) -> Result<String, &str> {
-        let mut conn = Self::get_conn().await.multiplexed_onnection;
+        let mut conn = Self::get_conn().await.multiplexed_connection;
         let r: String = redis::cmd("GET")
             .arg(&[k])
             .query_async(&mut conn)

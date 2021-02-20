@@ -5,9 +5,15 @@ use actix_web::HttpResponse;
 use actix_web::{get, post, HttpRequest};
 use fast_common::common::api_result::ApiResult;
 use fast_common::models::user::UserLoginVo;
+use std::ops::DerefMut;
 
 #[get("/")]
-pub async fn index() -> HttpResponse {
+pub async fn index(request: HttpRequest) -> HttpResponse {
+    let mut extensions = request.extensions_mut();
+    let x = extensions.deref_mut();
+    let option = x.get_mut::<String>();
+    println!("{:?}", option);
+
     HttpResponse::Ok().body("hello,actix-web")
 }
 

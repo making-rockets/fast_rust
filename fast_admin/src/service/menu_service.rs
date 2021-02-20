@@ -29,7 +29,7 @@ impl MenuService {
     pub async fn delete(menu: Menu) -> Result<u64> {
         let x = RB.remove_by_id::<Menu>("", &menu.id.unwrap()).await;
         //let result  = RB.remove_by_id::<Menu>("", &menu.id.unwrap()).await;
-        return Ok(2);
+        return x;
     }
 
     pub async fn list(arg: MenuVo) -> Result<Page<Menu>> {

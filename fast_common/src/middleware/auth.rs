@@ -6,10 +6,24 @@ use std::task::{Context, Poll};
 use actix_web::body::MessageBody;
 use actix_web::dev::{Service, ServiceRequest, ServiceResponse, Transform};
 use actix_web::http::HeaderValue;
-use actix_web::{error, Error};
+use actix_web::{error, Error, HttpMessage};
 use futures::future::{ok, Future, Ready};
 
-// custom request auth middleware
+use crate::models::user::User;
+use crate::utils::redis_util::RedisUtil;
+use std::ops::Deref;
+
+async fn get_user_from_redis<'a>(token: &'a String) -> Result<User, &str> {
+    let redisUtil = RedisUtil::get_conn().await;
+    let t = &redisUtil.get_json::<User>(token).await;
+    return Ok(User {
+        id: None,
+        user_name: None,
+        age: None,
+        create_time: None,
+    });
+}
+
 pub struct Auth;
 
 impl<S, B> Transform<S> for Auth
@@ -56,11 +70,27 @@ where
 
         Box::pin(async move {
             let value = HeaderValue::from_str("access_token").unwrap();
-            let token = req.headers().get("access_token").unwrap_or(&value);
-            if token.len() > 0 || req.path().to_string() == "/login" {
-                Ok(svc.call(req).await?)
-            } else {
+            let token = req.headers().get("access_token");
+            if token.clone().is_none() {
                 Err(error::ErrorUnauthorized("无效token"))
+            }else {
+                 let token = token.unwrap();
+                if req.path() != "/amin/index/login" {
+                    if token.len() > 0 {
+                        let x = token.as_bytes();
+
+                        let result = String::from_utf8(Vec::from(x)).unwrap();
+                        let redis = get_user_from_redis(&result)
+                            .await
+                            .expect("this is a user object");
+                        req.extensions_mut().insert(redis);
+                        Ok(svc.call(req).await?)
+                    } else {
+                        Err(error::ErrorUnauthorized("无效token"))
+                    }
+                } else {
+                    Ok(svc.call(req).await?)
+                }
             }
         })
     }
