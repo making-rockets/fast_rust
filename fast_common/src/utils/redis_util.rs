@@ -1,26 +1,35 @@
-use redis::aio::MultiplexedConnection;
-
+use redis::AsyncCommands;
+use redis_async_pool::{RedisConnectionManager, RedisPool, RedisConnection};
 use serde::de::DeserializeOwned;
 use serde::Serialize;
+use redis_async_pool::deadpool::managed::Pool;
+use std::ops::Deref;
 
 ///缓存服务
 pub struct RedisUtil {
-    pub multiplexed_connection: MultiplexedConnection,
+    //pub pool:Pool<RedisConnection,RedisError>
 }
 
-lazy_static! {
+/*lazy_static! {
     pub static ref CLIETN: redis::Client =
         redis::Client::open(String::from("redis://root:root@localhost:6379")).unwrap();
-}
+}*/
+
+
+// Create a pool of maximum 5 connections, checked on reuse without ttl.
+
+
 
 impl RedisUtil {
-    pub async fn get_conn() -> RedisUtil {
+    pub async fn get_conn() -> ! {
+        let client = redis::Client::open("redis://127.0.0.1:6379").unwrap();
+        let pool = RedisPool::new(
+            RedisConnectionManager::new(client,true,None),
+            5,
+        );
+        let x = pool.get().await?;
 
-        let mut multiplexed_connection = CLIETN.get_multiplexed_async_std_connection().await.unwrap();
-        RedisUtil {
-            multiplexed_connection,
-        }
-        // return multiplexed_connection;
+
     }
 
     pub async fn set_json<T>(&self, k: &String, v: &T) -> Result<String, &str>
@@ -46,6 +55,7 @@ impl RedisUtil {
         }
         Ok(data.unwrap())
     }
+//TODO 改造redis 工具类
 
     pub async fn set_string(&self, k: &String, v: &str) -> Result<String, &str> {
         let mut conn = Self::get_conn().await.multiplexed_connection;

@@ -15,7 +15,7 @@ use std::ops::Deref;
 
 async fn get_user_from_redis<'a>(token: &'a String) -> Result<User, &str> {
     let redisUtil = RedisUtil::get_conn().await;
-    let t = &redisUtil.get_json::<User>(token).await;
+    let t = redisUtil.get_json::<User>(token).await;
     return Ok(User {
         id: None,
         user_name: None,

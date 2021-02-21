@@ -21,4 +21,4 @@ rbatis =  { version = "1.8",features=["snowflake","debug_mode"]}
 #cpu_count
 num_cpus = "1.13.0"
 #redis
-redis = { version = "0.19.0", features = ["async-std-comp"] }
+#redis = { version = "0.17.0", features = ["async-std-comp"] }
