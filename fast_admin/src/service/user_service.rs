@@ -65,7 +65,10 @@ impl UserService {
 
         return if x.is_ok() {
             let user_key = format!("user_id:{}", x.clone().unwrap().id.unwrap());
-            RedisUtil::get_conn().await.set_json(&user_key, &x.clone().unwrap()).await;
+            RedisUtil::get_conn()
+                .await
+                .set_json(&user_key, &x.clone().unwrap())
+                .await;
             let user_login_vo = UserLoginVo {
                 token: Some(crypt_util::get_uuid()),
                 user_name: x.clone().unwrap().user_name,

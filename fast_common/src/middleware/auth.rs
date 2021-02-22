@@ -73,8 +73,8 @@ where
             let token = req.headers().get("access_token");
             if token.clone().is_none() {
                 Err(error::ErrorUnauthorized("无效token"))
-            }else {
-                 let token = token.unwrap();
+            } else {
+                let token = token.unwrap();
                 if req.path() != "/amin/index/login" {
                     if token.len() > 0 {
                         let x = token.as_bytes();
