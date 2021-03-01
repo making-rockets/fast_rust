@@ -5,7 +5,7 @@ use serde_derive::{Deserialize, Serialize};
 #[crud_enable]
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct Role {
-    pub role_id: Option<u64>,
+    pub id: Option<u64>,
     pub role_name: Option<String>,
     pub index_no: Option<i32>,
     pub remark: Option<String>,

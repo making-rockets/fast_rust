@@ -65,7 +65,7 @@ impl UserService {
 
         return if x.is_ok() {
             let user_key = format!("user_id:{}", x.clone().unwrap().id.unwrap());
-            RedisUtil::get_conn()
+            RedisUtil::get_redis_util()
                 .await
                 .set_json(&user_key, &x.clone().unwrap())
                 .await;

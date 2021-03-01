@@ -14,8 +14,7 @@ use crate::utils::redis_util::RedisUtil;
 use std::ops::Deref;
 
 async fn get_user_from_redis<'a>(token: &'a String) -> Result<User, &str> {
-    let redisUtil = RedisUtil::get_conn().await;
-    let t = redisUtil.get_json::<User>(token).await;
+    let result = RedisUtil::get_redis_util().await.get_json::<User>(token).await;
     return Ok(User {
         id: None,
         user_name: None,
@@ -27,10 +26,10 @@ async fn get_user_from_redis<'a>(token: &'a String) -> Result<User, &str> {
 pub struct Auth;
 
 impl<S, B> Transform<S> for Auth
-where
-    S: Service<Request = ServiceRequest, Response = ServiceResponse<B>, Error = Error> + 'static,
-    S::Future: 'static,
-    B: MessageBody + 'static,
+    where
+        S: Service<Request=ServiceRequest, Response=ServiceResponse<B>, Error=Error> + 'static,
+        S::Future: 'static,
+        B: MessageBody + 'static,
 {
     type Request = ServiceRequest;
     type Response = ServiceResponse<B>;
@@ -51,15 +50,15 @@ pub struct AuthMiddleware<S> {
 }
 
 impl<S, B> Service for AuthMiddleware<S>
-where
-    S: Service<Request = ServiceRequest, Response = ServiceResponse<B>, Error = Error> + 'static,
-    S::Future: 'static,
-    B: MessageBody + 'static,
+    where
+        S: Service<Request=ServiceRequest, Response=ServiceResponse<B>, Error=Error> + 'static,
+        S::Future: 'static,
+        B: MessageBody + 'static,
 {
     type Request = ServiceRequest;
     type Response = ServiceResponse<B>;
     type Error = Error;
-    type Future = Pin<Box<dyn Future<Output = Result<Self::Response, Self::Error>>>>;
+    type Future = Pin<Box<dyn Future<Output=Result<Self::Response, Self::Error>>>>;
 
     fn poll_ready(&mut self, cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
         self.service.poll_ready(cx)
