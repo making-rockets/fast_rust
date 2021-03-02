@@ -64,11 +64,11 @@ impl UserService {
         let x = RB.fetch_by_wrapper::<User>("", &wrapper).await;
 
         return if x.is_ok() {
-            let user_key = format!("user_id:{}", x.clone().unwrap().id.unwrap());
+           /* let user_key = format!("user_id:{}", x.clone().unwrap().id.unwrap());
             RedisUtil::get_redis_util()
                 .await
                 .set_json(&user_key, &x.clone().unwrap())
-                .await;
+                .await;*/
             let user_login_vo = UserLoginVo {
                 token: Some(crypt_util::get_uuid()),
                 user_name: x.clone().unwrap().user_name,
