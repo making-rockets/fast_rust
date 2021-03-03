@@ -68,27 +68,22 @@ impl<S, B> Service for AuthMiddleware<S>
         let mut svc = self.service.clone();
 
         Box::pin(async move {
-            let value = HeaderValue::from_str("access_token").unwrap();
             let token = req.headers().get("access_token");
-            if token.clone().is_none() {
-                Err(error::ErrorUnauthorized("无效token"))
-            } else {
-                let token = token.unwrap();
-                if req.path() != "/amin/index/login" {
-                    if token.len() > 0 {
-                        let x = token.as_bytes();
-
-                        let result = String::from_utf8(Vec::from(x)).unwrap();
-                        let redis = get_user_from_redis(&result)
-                            .await
-                            .expect("this is a user object");
-                        req.extensions_mut().insert(redis);
-                        Ok(svc.call(req).await?)
-                    } else {
-                        Err(error::ErrorUnauthorized("无效token"))
+            match token {
+                None => {
+                    match req.path() {
+                        "/admin/index/login" => {
+                            svc.call(req).await
+                        }
+                        _ => { Err(error::ErrorUnauthorized("please transmit a access_token header")) }
                     }
-                } else {
-                    Ok(svc.call(req).await?)
+                }
+                Some(access_token) => {
+                    let result = access_token.to_str().unwrap();
+                    //let user = get_user_from_redis(&result.to_string()).await.or_else(|_| Err(error::ErrorUnauthorized("找不到user")));
+                    req.extensions_mut().insert("user");
+                    svc.call(req).await
+                    //Ok(svc.call(req).await?)
                 }
             }
         })

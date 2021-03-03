@@ -1,9 +1,12 @@
-use redis::{AsyncCommands, RedisError, RedisResult};
+use redis::{AsyncCommands, RedisError, RedisResult, Value};
 use redis_async_pool::deadpool::managed::{Object, Pool};
 use redis_async_pool::{RedisConnection, RedisConnectionManager, RedisPool};
 use serde::de::DeserializeOwned;
 use serde::Serialize;
 use std::ops::Deref;
+use std::string::String;
+use std::fmt::Write;
+use futures::future::ok;
 
 ///缓存服务
 pub struct RedisUtil {
@@ -43,16 +46,22 @@ impl RedisUtil {
         let data = self.set_string(&k, &data.unwrap()).await.unwrap();
         Ok(data)
     }
-    pub async fn get_json<T>(&self, k: &String) -> Result<T, &str>
-        where
-            T: DeserializeOwned,
-    {
-        let r = self.get_string(k).await.unwrap();
-        let data: serde_json::Result<T> = serde_json::from_str(r.as_str());
-        if data.is_err() {
-            return Err("反序列化错误");
+    pub async fn get_json<T>(&self, k: &String) -> Result<T, &str> where T: DeserializeOwned, {
+        let value = self.get_string(k).await.unwrap();
+        match value {
+            Value::Data(data) => {
+                let result: serde_json::Result<T> = serde_json::from_slice::<T>(&data);
+                if result.is_err() {
+                   return  Err("反序列化错误");
+                }
+                Ok(result.unwrap())
+            }
+            // Value::Bulk(bluk) => { println!("bluk -> {:?}");return Ok(bluk) }
+            _ => {
+                println!("{:?}", value);
+                Err("没有找到数据")
+            }
         }
-        Ok(data.unwrap())
     }
     //TODO 改造redis 工具类
 
@@ -62,9 +71,9 @@ impl RedisUtil {
         return result;
     }
 
-    pub async fn get_string(&self, k: &str) -> RedisResult<String> {
+
+    pub async fn get_string(&self, k: &str) -> RedisResult<Value> {
         let mut conn = Self::get_conn().await;
-        let pin: RedisResult<String> = conn.get(k).await;
-        return pin;
+        conn.get(k).await
     }
 }
