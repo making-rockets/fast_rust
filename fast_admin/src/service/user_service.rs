@@ -64,7 +64,7 @@ impl UserService {
         wrapper = wrapper.eq("user_name", string);
         let x = RB.fetch_by_wrapper::<User>("", &wrapper).await;
 
-        if x.is_ok() {
+        return if x.is_ok() {
             let access_token = crypt_util::get_uuid();
             let redisutil = RedisUtil::get_redis_util().await;
             redisutil.set_json(&access_token.to_string(), &x.clone().expect("expect this is a user object")).await;
@@ -74,9 +74,9 @@ impl UserService {
                 user_id: None,
                 password: None,
             };
-           return  Ok(user_login_vo);
+            Ok(user_login_vo)
         } else {
-          return   Err(Error::from("用户名或密码错误"));
+            Err(Error::from("用户名或密码错误"))
         };
     }
 }
