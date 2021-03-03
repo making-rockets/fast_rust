@@ -13,7 +13,7 @@ use crate::models::user::User;
 use crate::utils::redis_util::RedisUtil;
 use std::ops::Deref;
 
-async fn get_user_from_redis<'a>(token: &'a String) -> Result<User, &str> {
+async fn get_user_from_redis(token: &String) -> Result<User, &str> {
     let result = RedisUtil::get_redis_util().await.get_json::<User>(token).await;
     return Ok(User {
         id: None,

@@ -60,24 +60,23 @@ impl UserService {
 
     pub async fn login(user: UserLoginVo) -> Result<UserLoginVo> {
         let mut wrapper = RB.new_wrapper();
-        wrapper = wrapper.eq("user_name", user.user_name.unwrap());
+        let string = user.user_name.expect("not found user_name ");
+        wrapper = wrapper.eq("user_name", string);
         let x = RB.fetch_by_wrapper::<User>("", &wrapper).await;
 
-        return if x.is_ok() {
-           /* let user_key = format!("user_id:{}", x.clone().unwrap().id.unwrap());
-            RedisUtil::get_redis_util()
-                .await
-                .set_json(&user_key, &x.clone().unwrap())
-                .await;*/
+        if x.is_ok() {
+            let access_token = crypt_util::get_uuid();
+            let redisutil = RedisUtil::get_redis_util().await;
+            redisutil.set_json(&access_token.to_string(), &x.clone().expect("expect this is a user object")).await;
             let user_login_vo = UserLoginVo {
                 token: Some(crypt_util::get_uuid()),
                 user_name: x.clone().unwrap().user_name,
                 user_id: None,
                 password: None,
             };
-            Ok(user_login_vo)
+           return  Ok(user_login_vo);
         } else {
-            Err(Error::from("用户名或密码错误"))
+          return   Err(Error::from("用户名或密码错误"));
         };
     }
 }
