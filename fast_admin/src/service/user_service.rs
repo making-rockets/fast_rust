@@ -53,7 +53,7 @@ impl UserService {
             wrapper = wrapper.gt("create_time", arg.create_time);
         }
 
-        let page_request = PageRequest::new(arg.page_num.unwrap(), arg.page_size.unwrap());
+        let page_request = PageRequest::new(arg.page_num.unwrap_or_else(||1), arg.page_size.unwrap_or_else(||10));
         let page = RB.fetch_page_by_wrapper("", &wrapper, &page_request).await;
         return page;
     }
