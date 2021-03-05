@@ -12,6 +12,7 @@ use futures::future::{ok, Future, Ready};
 use crate::models::user::User;
 use crate::utils::redis_util::RedisUtil;
 use std::ops::Deref;
+use actix_http::http::header::ToStrError;
 
 async fn get_user_from_redis(token: &String) -> Result<User, &str> {
     let result = RedisUtil::get_redis_util().await.get_json::<User>(token).await;
@@ -79,11 +80,13 @@ impl<S, B> Service for AuthMiddleware<S>
                     }
                 }
                 Some(access_token) => {
-                    let result = access_token.to_str().unwrap();
-                    //let user = get_user_from_redis(&result.to_string()).await.or_else(|_| Err(error::ErrorUnauthorized("找不到user")));
-                    req.extensions_mut().insert("user");
-                    svc.call(req).await
-                    //Ok(svc.call(req).await?)
+                    match access_token.to_str() {
+
+                        Ok(access_token ) => {
+                            svc.call(req).await
+                        }
+                        Err(e ) => {Err(error::ErrorUnauthorized(e.to_string()))}
+                    }
                 }
             }
         })

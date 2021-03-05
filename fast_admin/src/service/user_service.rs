@@ -53,7 +53,7 @@ impl UserService {
             wrapper = wrapper.gt("create_time", arg.create_time);
         }
 
-        let page_request = PageRequest::new(arg.page_num.unwrap_or_else(||1), arg.page_size.unwrap_or_else(||10));
+        let page_request = PageRequest::new(arg.page_num.unwrap_or_else(|| 1), arg.page_size.unwrap_or_else(|| 10));
         let page = RB.fetch_page_by_wrapper("", &wrapper, &page_request).await;
         return page;
     }
@@ -66,10 +66,10 @@ impl UserService {
 
         return if x.is_ok() {
             let access_token = crypt_util::get_uuid();
-            let redisutil = RedisUtil::get_redis_util().await;
-            redisutil.set_json(&access_token.to_string(), &x.clone().expect("expect this is a user object")).await;
+            let redis = RedisUtil::get_redis_util().await;
+            redis.set_json(&access_token.to_string(), &x.clone().expect("expect this is a user object")).await;
             let user_login_vo = UserLoginVo {
-                token: Some(crypt_util::get_uuid()),
+                token: Some(access_token),
                 user_name: x.clone().unwrap().user_name,
                 user_id: None,
                 password: None,
