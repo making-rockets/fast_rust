@@ -28,7 +28,7 @@ env_logger = "0.8"
 bigdecimal = "0.2"
 
 #rbatis支持
-rbatis =  { version = "1.8",features=["snowflake","debug_mode"]}
+rbatis =  { version = "1.8.71",features=["snowflake","debug_mode"]}
 #静态初始化
 lazy_static = "1.4.0"
 #异步
@@ -47,3 +47,4 @@ toml_edit = "0.2.0"
 validator ="0.12.0"
 validator_derive ="0.12.0"
 uuid ="0.8.2"
+mime = "0.3.16"

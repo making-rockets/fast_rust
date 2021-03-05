@@ -6,6 +6,8 @@ use rbatis::plugin::log::LogPlugin;
 use rbatis::rbatis::Rbatis;
 
 use std::time::Duration;
+use serde_json::Value;
+
 
 lazy_static! {
     pub static ref RB: Rbatis = InitDb::new();
@@ -36,19 +38,14 @@ impl InitDb {
 #[derive(Debug)]
 pub struct Intercept {}
 
+
 impl SqlIntercept for Intercept {
     fn name(&self) -> &str {
         std::any::type_name::<Self>()
     }
 
-    fn do_intercept(
-        &self,
-        _rb: &Rbatis,
-        sql: &mut String,
-        args: &mut Vec<serde_json::Value>,
-        _is_prepared_sql: bool,
-    ) -> std::result::Result<(), Error> {
-        println!("SQL Interceptor execute sql= {}, args= {:?}", &sql, &args);
+    fn do_intercept(&self, rb: &Rbatis, context_id: &str, sql: &mut String, args: &mut Vec<Value>, is_prepared_sql: bool) -> Result<(), Error> {
+        println!("sql interceptor = {}", sql);
         Ok(())
     }
 }
@@ -61,23 +58,23 @@ impl LogPlugin for RbatisLog {
         &LevelFilter::Trace
     }
 
-    fn error(&self, data: &str) {
-        error!("sql log error = {}", data);
+    fn error(&self, context_id: &str, data: &str) {
+        error!("sql log error: context_id={}, data = {}", context_id, data);
     }
 
-    fn warn(&self, data: &str) {
-        warn!("sql log warn = {}", data);
+    fn warn(&self, context_id: &str, data: &str) {
+        warn!("sql log warn: context_id={}, data={}", context_id, data);
     }
 
-    fn info(&self, data: &str) {
-        info!("sql log info = {}", data);
+    fn info(&self, context_id: &str, data: &str) {
+        info!("sql log info: context_id={}, data={}", context_id, data);
     }
 
-    fn debug(&self, data: &str) {
-        debug!("sql log debug = {}", data);
+    fn debug(&self, context_id: &str, data: &str) {
+        debug!("sql log debug: context_id={}, data={}", context_id, data);
     }
 
-    fn trace(&self, data: &str) {
-        trace!("sql log trace = {}", data);
+    fn trace(&self, context_id: &str, data: &str) {
+        trace!("sql log trace: context_id={}, data={}", context_id, data);
     }
 }

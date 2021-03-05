@@ -28,17 +28,15 @@ fn init_logger() {
 async fn main() -> std::io::Result<()> {
     std::env::set_var("RUST_LOG", "actix_web=debug");
 
-    let db_url = std::env::var("db_url")
-        .unwrap_or_else(|_| String::from("mysql://root:root@localhost:3306/go"));
-    RB.link_opt(db_url.as_str(), &InitDb::db_option())
-        .await
-        .unwrap();
+    let db_url = std::env::var("db_url").unwrap_or_else(|_| String::from("mysql://root:root@localhost:3306/go"));
+    RB.link_opt(db_url.as_str(), &InitDb::db_option()).await.unwrap();
     init_logger();
 
     HttpServer::new(move || {
         App::new()
             .wrap(actix_web::middleware::Logger::default())
             .wrap(middleware::auth::Auth)
+            .wrap(middleware::handle_method::HandleMethod)
             .service(routers::index_route::index_routers())
             .service(routers::user_route::user_routes())
             .service(routers::menu_route::menu_routes())
