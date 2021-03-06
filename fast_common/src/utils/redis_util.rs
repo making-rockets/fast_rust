@@ -1,12 +1,10 @@
 use redis::{AsyncCommands, RedisError, RedisResult, Value};
-use redis_async_pool::deadpool::managed::{Object, Pool};
+use redis_async_pool::deadpool::managed::{Object};
 use redis_async_pool::{RedisConnection, RedisConnectionManager, RedisPool};
 use serde::de::DeserializeOwned;
 use serde::Serialize;
-use std::ops::Deref;
 use std::string::String;
-use std::fmt::Write;
-use futures::future::ok;
+
 
 ///缓存服务
 #[derive(Debug)]

@@ -1,8 +1,8 @@
 use actix_web::dev::{Transform, Service, ServiceRequest, ServiceResponse};
 use std::future::Future;
-use actix_web::{HttpRequest, error, Error, HttpMessage};
+use actix_web::{error, Error, HttpMessage};
 use actix_web::body::MessageBody;
-use std::cell::{Ref, RefCell};
+use std::cell::{ RefCell};
 use std::rc::Rc;
 use futures::future::{Ready, ok};
 use std::task::{Context, Poll};
@@ -10,9 +10,6 @@ use std::pin::Pin;
 use actix_http::http::Method;
 
 pub struct HandleMethod;
-
-use mime::{self, Mime};
-
 pub struct HandleMethodMiddleAware<S> {
     service: Rc<RefCell<S>>
 }
@@ -27,7 +24,7 @@ impl<S, B> Transform<S> for HandleMethod where S: Service<Request=ServiceRequest
     type Future = Ready<Result<Self::Transform, Self::InitError>>;
 
     fn new_transform(&self, service: S) -> Self::Future {
-        ok(HandleMethodMiddleAware { service: Rc::new(RefCell::new((service))) })
+        ok(HandleMethodMiddleAware { service: Rc::new(RefCell::new(service)) })
     }
 }
 

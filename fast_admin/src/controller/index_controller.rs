@@ -1,4 +1,3 @@
-use crate::service::user_service;
 use crate::service::user_service::UserService;
 use actix_web::web::Form;
 use actix_web::HttpResponse;
@@ -20,9 +19,9 @@ pub async fn index(request: HttpRequest) -> HttpResponse {
 #[get("/send_reg_code")]
 pub async fn push_reg_code(
     user_name: String,
-    password: String,
-    code: String,
-    request: HttpRequest,
+    _password: String,
+    _code: String,
+    _request: HttpRequest,
 ) -> HttpResponse {
     println!("{}", user_name);
     return HttpResponse::Ok().body("hello,world");

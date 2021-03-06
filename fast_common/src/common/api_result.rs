@@ -11,10 +11,7 @@ pub struct ApiResult<T> {
     pub data: Option<T>,
 }
 
-impl<T> ApiResult<T>
-where
-    T: Serialize + DeserializeOwned + Clone,
-{
+impl<T> ApiResult<T> where T: Serialize + DeserializeOwned + Clone {
     pub async fn from_result(result: &Result<T, Error>) -> Self {
         if result.is_ok() {
             Self {
@@ -23,18 +20,27 @@ where
                 data: result.clone().ok(),
             }
         } else {
-            Self {
-                code: Some(400),
-                msg: Some(result.clone().err().unwrap().to_string()),
-                data: None,
+            match result.clone().err() {
+                None => {
+                    Self {
+                        code: Some(500),
+                        msg: Some("服务器内部错误，请联系管理员".to_string()),
+                        data: None,
+                    }
+                }
+                Some(e) => {
+                    Self {
+                        code: Some(400),
+                        msg: Some(e.to_string()),
+                        data: None,
+                    }
+                }
             }
         }
     }
 
     pub async fn resp(&self) -> Response {
-        return HttpResponse::Ok()
-            .content_type("application/json")
-            .body(self.to_string().await);
+        return HttpResponse::Ok().content_type("application/json").body(self.to_string().await);
     }
 
     pub async fn to_string(&self) -> String {

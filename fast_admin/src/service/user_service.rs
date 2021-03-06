@@ -1,4 +1,4 @@
-use chrono::{Local, NaiveDateTime};
+use chrono::{Local};
 use fast_common::common::orm_config::RB;
 use fast_common::models::user::{User, UserLoginVo, UserVo};
 use fast_common::utils::crypt_util;
@@ -9,13 +9,9 @@ use rbatis::plugin::page::{Page, PageRequest};
 use rbatis::plugin::snowflake::async_snowflake_id;
 
 use fast_common::utils::redis_util::RedisUtil;
-use rbatis::core::value::DateTimeNow;
-use rbatis::wrapper::Wrapper;
+
+
 use rbatis::Error;
-use std::borrow::Borrow;
-use std::cell::Ref;
-use std::ops::Deref;
-use std::rc::Rc;
 
 pub struct UserService {}
 
@@ -65,7 +61,9 @@ impl UserService {
         let x = RB.fetch_by_wrapper::<User>("", &wrapper).await;
 
         return if x.is_ok() {
-            let access_token = crypt_util::get_uuid();
+            let claims = crypt_util::Claims::new(x.clone().unwrap().id.unwrap().to_string().as_str(), "", 0);
+            let access_token = claims.default_jwt_token().unwrap();
+
             let redis = RedisUtil::get_redis_util().await;
             redis.set_json(&access_token.to_string(), &x.clone().expect("expect this is a user object")).await;
             let user_login_vo = UserLoginVo {

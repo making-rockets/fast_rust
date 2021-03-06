@@ -3,26 +3,10 @@ use std::pin::Pin;
 use std::rc::Rc;
 use std::task::{Context, Poll};
 
+use actix_web::{error, Error};
 use actix_web::body::MessageBody;
 use actix_web::dev::{Service, ServiceRequest, ServiceResponse, Transform};
-use actix_web::http::HeaderValue;
-use actix_web::{error, Error, HttpMessage};
-use futures::future::{ok, Future, Ready};
-
-use crate::models::user::User;
-use crate::utils::redis_util::RedisUtil;
-use std::ops::Deref;
-use actix_http::http::header::ToStrError;
-
-async fn get_user_from_redis(token: &String) -> Result<User, &str> {
-    let result = RedisUtil::get_redis_util().await.get_json::<User>(token).await;
-    return Ok(User {
-        id: None,
-        user_name: None,
-        age: None,
-        create_time: None,
-    });
-}
+use futures::future::{Future, ok, Ready};
 
 pub struct Auth;
 
@@ -76,16 +60,16 @@ impl<S, B> Service for AuthMiddleware<S>
                         "/admin/index/login" => {
                             svc.call(req).await
                         }
-                        _ => { Err(error::ErrorUnauthorized("please transmit a access_token header")) }
+                        _ => { Err(error::ErrorUnauthorized(" required a auth header")) }
                     }
                 }
                 Some(access_token) => {
                     match access_token.to_str() {
-
-                        Ok(access_token ) => {
+                        Ok(access_token) => {
+                            //TODO
                             svc.call(req).await
                         }
-                        Err(e ) => {Err(error::ErrorUnauthorized(e.to_string()))}
+                        Err(e) => { Err(error::ErrorUnauthorized(e.to_string())) }
                     }
                 }
             }

@@ -1,7 +1,6 @@
 use crate::rbatis;
 use chrono::NaiveDateTime;
 use serde_derive::{Deserialize, Serialize};
-use uuid::Uuid;
 
 #[crud_enable]
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
@@ -24,7 +23,7 @@ pub struct UserVo {
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct UserLoginVo {
-    pub token: Option<Uuid>,
+    pub token: Option<String>,
     pub user_name: Option<String>,
     pub user_id: Option<u64>,
     pub password: Option<String>,

@@ -5,7 +5,6 @@ use actix_web::{HttpRequest, HttpResponse};
 use fast_common::common::api_result::ApiResult;
 use fast_common::models::user::{User, UserVo};
 use std::ops::DerefMut;
-use fast_common::utils::redis_util::RedisUtil;
 
 #[post("/new")]
 pub async fn new_user(arg: Form<User>, _request: HttpRequest) -> HttpResponse {
