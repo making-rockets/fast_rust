@@ -70,7 +70,7 @@ impl Claims {
         let result = jsonwebtoken::decode::<Claims>(&token, &DecodingKey::from_secret(SECRET_KEY), &Validation::new(Algorithm::HS512));
         match result {
             Ok(tokenData) => { Ok(tokenData.claims) }
-            Err(err) => { Err(err_str.to_string()) }
+            Err(err) => { Err(err.to_string()) }
         }
     }
     pub fn default_jwt_token(&self) -> Result<String, String> {
