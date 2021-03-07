@@ -1,16 +1,20 @@
 use serde::Serialize;
 use serde::Deserialize;
 use short_crypt::ShortCrypt;
-
+use chrono::{Local, Timelike};
 use jsonwebtoken::{Header, Algorithm, EncodingKey, DecodingKey, Validation};
 use std::string::String;
 
-const KEY_PR: &'static str = "abcdefjhigklmnopqrstuvwxyz1234567890"; // key, 32位长度
+const KEY_PR: &'static str = "abcdefjhigklmnopqrstuvwxyz1234567890";
+const SIGN_KEY: &str = "abcdefghigklmnopqrstuvwxyz1234567890";
+// key, 32位长度
+const SECRET_KEY: &[u8; 13] = b"a.and.b.and.c";
+
 
 pub struct Crypt;
 
 impl Crypt {
-    pub fn encrypt<T: Serialize>(obj: &T) -> Result<String, &'static str> {
+    pub fn encrypt<T: Serialize + ?Sized>(obj: &T) -> Result<String, &'static str> {
         let value = if let Ok(v) = serde_json::to_string(obj) {
             v
         } else {
@@ -20,7 +24,6 @@ impl Crypt {
         let encrypt_string = sc.encrypt_to_url_component(&value);
         Ok(encrypt_string)
     }
-
     pub fn decrypt_string(encrypt_string: &str) -> Result<String, &'static str> {
         let sc = ShortCrypt::new(KEY_PR);
         match sc.decrypt_url_component(encrypt_string) {
@@ -45,6 +48,13 @@ impl Claims {
     pub fn new(sub: &str, company: &str, exp: usize) -> Self {
         Claims { sub: sub.to_string(), company: company.to_owned(), exp }
     }
+    pub fn new_default(sub: &str) -> Self {
+        Claims {
+            sub: sub.to_owned(),
+            company: "bxb".to_string(),
+            exp: (Local::now().timestamp() + 3600) as usize,
+        }
+    }
 
     pub fn encode(&self, sign: &str) -> Result<String, String> {
         let mut header = Header::default();
@@ -56,20 +66,24 @@ impl Claims {
         }
     }
 
-    pub fn decode(&self, token: &String) -> Result<Self, String> {
+    pub fn decode(token: &String) -> Result<Self, String> {
         let result = jsonwebtoken::decode::<Claims>(&token, &DecodingKey::from_secret(SECRET_KEY), &Validation::new(Algorithm::HS512));
         match result {
             Ok(tokenData) => { Ok(tokenData.claims) }
-            Err(err) => {
-                let err_str = err.to_string();
-                println!("{}", &err_str);
-                Err(err_str)
-            }
+            Err(err) => { Err(err_str.to_string()) }
         }
     }
     pub fn default_jwt_token(&self) -> Result<String, String> {
         let result = self.encode(&SIGN_KEY);
         return result;
+    }
+
+    pub fn validation_token(token: &String) -> Result<(), String> {
+        let result = Self::decode(token);
+        match result {
+            Ok(claims) => { Ok(()) }
+            Err(err) => { Err(err) }
+        }
     }
 }
 
@@ -80,12 +94,9 @@ impl Default for Claims {
     }
 }
 
-const SECRET_KEY: &[u8; 13] = b"a.and.b.and.c";
-const SIGN_KEY: &str = "abcdefghigklmnopqrstuvwxyz1234567890";
-
 
 #[test]
 fn test() {
-    let claims = Claims::default();
-    claims.decode(&"a".to_string());
+    let i = Local::now().timestamp();
+    println!("{}", i as usize)
 }

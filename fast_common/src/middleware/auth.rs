@@ -7,6 +7,7 @@ use actix_web::{error, Error};
 use actix_web::body::MessageBody;
 use actix_web::dev::{Service, ServiceRequest, ServiceResponse, Transform};
 use futures::future::{Future, ok, Ready};
+use crate::utils::crypt_util::Claims;
 
 pub struct Auth;
 
@@ -66,8 +67,11 @@ impl<S, B> Service for AuthMiddleware<S>
                 Some(access_token) => {
                     match access_token.to_str() {
                         Ok(access_token) => {
-                            //TODO
-                            svc.call(req).await
+                            let result = Claims::validation_token(&access_token.to_string());
+                            match result {
+                                Ok(_) => { svc.call(req).await }
+                                Err(e) => { Err(error::ErrorUnauthorized("认证过期或其他问题")) }
+                            }
                         }
                         Err(e) => { Err(error::ErrorUnauthorized(e.to_string())) }
                     }

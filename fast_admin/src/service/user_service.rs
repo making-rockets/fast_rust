@@ -12,6 +12,7 @@ use fast_common::utils::redis_util::RedisUtil;
 
 
 use rbatis::Error;
+use fast_common::utils::crypt_util::Crypt;
 
 pub struct UserService {}
 
@@ -54,27 +55,53 @@ impl UserService {
         return page;
     }
 
-    pub async fn login(user: UserLoginVo) -> Result<UserLoginVo> {
+    pub async fn login(userLoginVo: UserLoginVo) -> Result<UserLoginVo> {
         let mut wrapper = RB.new_wrapper();
-        let string = user.user_name.expect("not found user_name ");
-        wrapper = wrapper.eq("user_name", string);
-        let x = RB.fetch_by_wrapper::<User>("", &wrapper).await;
-
-        return if x.is_ok() {
-            let claims = crypt_util::Claims::new(x.clone().unwrap().id.unwrap().to_string().as_str(), "", 0);
-            let access_token = claims.default_jwt_token().unwrap();
-
-            let redis = RedisUtil::get_redis_util().await;
-            redis.set_json(&access_token.to_string(), &x.clone().expect("expect this is a user object")).await;
-            let user_login_vo = UserLoginVo {
-                token: Some(access_token),
-                user_name: x.clone().unwrap().user_name,
-                user_id: None,
-                password: None,
-            };
-            Ok(user_login_vo)
+        if userLoginVo.user_name.is_none() || userLoginVo.password.is_none() {
+            Err(Error::from("could not found user_name or password"))
         } else {
-            Err(Error::from("用户名或密码错误"))
-        };
+            let user_name = userLoginVo.user_name.unwrap();
+            let user_password = userLoginVo.password.unwrap();
+
+            wrapper = wrapper.eq("user_name", user_name);
+            let user_result = RB.fetch_by_wrapper::<User>("", &wrapper).await;
+            match user_result {
+                Ok(user) => {
+                    let password = user.clone().password.unwrap();
+                    let password_encrypt_result = Crypt::decrypt_string(&password);
+
+                    match password_encrypt_result {
+                        Ok(decrypt) => {
+                            let string = format!("{}{}{}", "\"", user_password, "\"");
+                            if string == decrypt {
+                                //TODO 登录逻辑
+                                let claims = crypt_util::Claims::new_default(user.clone().id.unwrap().to_string().as_str());
+                                let access_token = claims.default_jwt_token().unwrap();
+
+                                let redis = RedisUtil::get_redis_util().await;
+                                redis.set_json(&access_token.to_string(), &user.clone()).await;
+                                Ok(UserLoginVo {
+                                    token: Some(access_token),
+                                    user_name: user.clone().user_name,
+                                    user_id: None,
+                                    password: None,
+                                })
+                            } else {
+                                Err(Error::from("密码错误"))
+                            }
+                        }
+                        Err(err) => { Err(Error::from("密码解密失败")) }
+                    }
+                }
+                Err(err) => { Err(Error::from(err.to_string().as_str())) }
+            }
+        }
     }
+}
+
+#[test]
+fn test() {
+    let t = String::from("abc");
+    let x = "abc".to_string();
+    assert_eq!(t, x);
 }

@@ -9,6 +9,7 @@ pub struct User {
     pub user_name: Option<String>,
     pub age: Option<u64>,
     pub create_time: Option<NaiveDateTime>,
+    pub password: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]

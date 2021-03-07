@@ -2,14 +2,16 @@ use actix_web::dev::{Transform, Service, ServiceRequest, ServiceResponse};
 use std::future::Future;
 use actix_web::{error, Error, HttpMessage};
 use actix_web::body::MessageBody;
-use std::cell::{ RefCell};
+use std::cell::{RefCell};
 use std::rc::Rc;
 use futures::future::{Ready, ok};
 use std::task::{Context, Poll};
 use std::pin::Pin;
 use actix_http::http::Method;
+use actix_web::error::ReadlinesError::ContentTypeError;
 
 pub struct HandleMethod;
+
 pub struct HandleMethodMiddleAware<S> {
     service: Rc<RefCell<S>>
 }
@@ -43,7 +45,6 @@ impl<S, B> Service for HandleMethodMiddleAware<S> where S: Service<Request=Servi
     fn call(&mut self, req: Self::Request) -> Self::Future {
         let mut svc = self.service.clone();
         Box::pin(async move {
-            println!("获取请求{:?}", &req);
             let method = req.method();
 
             match method {
@@ -51,21 +52,30 @@ impl<S, B> Service for HandleMethodMiddleAware<S> where S: Service<Request=Servi
                     svc.call(req).await
                 }
                 &Method::POST => {
+
                     let result = req.mime_type();
+                    print!("result = {:?}", &result);
                     match result {
                         Ok(option) => {
                             match option {
-                                None => { svc.call(req).await }
-                                Some(_) => { svc.call(req).await }
+                                None => {
+
+                                    svc.call(req).await
+                                }
+                                Some(mime) => {
+                                    println!("请求类型:-->{}", mime);
+                                    svc.call(req).await
+                                }
                             }
                         }
 
-                        Err(_) => {
-                            Err(error::ErrorUnsupportedMediaType("没有请求类型哦"))
+                        Err(e) => {
+                            Err(error::ErrorUnsupportedMediaType("不支持的媒体类型迷宫"))
                         }
                     }
                 }
                 &_ => {
+
                     svc.call(req).await
                 }
             }
