@@ -22,6 +22,9 @@ impl UserService {
         user.id = Some(id);
         let format = "%Y-%m-%d %H:%M:%S";
         user.create_time = Some(NaiveDateTime::parse_from_str(&Local::now().format(format).to_string(), format).unwrap());
+        let string = user.password.unwrap_or_else(|| "111111".to_string());
+        let result1 = Crypt::encrypt(&string);
+        user.password = Some(result1.unwrap());
         let result = RB.save("", &user).await?;
         return Ok(result);
     }
@@ -56,13 +59,13 @@ impl UserService {
         return page;
     }
 
-    pub async fn login(userLoginVo: UserLoginVo) -> Result<UserLoginVo> {
+    pub async fn login(user_login_vo: UserLoginVo) -> Result<UserLoginVo> {
         let mut wrapper = RB.new_wrapper();
-        if userLoginVo.user_name.is_none() || userLoginVo.password.is_none() {
+        if user_login_vo.user_name.is_none() || user_login_vo.password.is_none() {
             Err(Error::from("could not found user_name or password"))
         } else {
-            let user_name = userLoginVo.user_name.unwrap();
-            let user_password = userLoginVo.password.unwrap();
+            let user_name = user_login_vo.user_name.unwrap();
+            let user_password = user_login_vo.password.unwrap();
 
             wrapper = wrapper.eq("user_name", user_name);
             let user_result = RB.fetch_by_wrapper::<User>("", &wrapper).await;
@@ -78,9 +81,8 @@ impl UserService {
                                 //TODO 登录逻辑
                                 let claims = crypt_util::Claims::new_default(user.clone().id.unwrap().to_string().as_str());
                                 let access_token = claims.default_jwt_token().unwrap();
-
-                                let redis = RedisUtil::get_redis_util().await;
-                                redis.set_json(&access_token.to_string(), &user.clone()).await;
+                                //let redis = RedisUtil::get_redis_util().await;
+                                //redis.set_json(&access_token.to_string(), &user.clone()).await;
                                 Ok(UserLoginVo {
                                     token: Some(access_token),
                                     user_name: user.clone().user_name,
@@ -91,7 +93,7 @@ impl UserService {
                                 Err(Error::from("密码错误"))
                             }
                         }
-                        Err(err) => { Err(Error::from("密码解密失败")) }
+                        Err(err) => { Err(Error::from(format!("解密失败错误:{}", err))) }
                     }
                 }
                 Err(err) => { Err(Error::from(err.to_string().as_str())) }

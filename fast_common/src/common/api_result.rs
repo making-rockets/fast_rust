@@ -1,17 +1,17 @@
 use actix_http::Response;
-use actix_web::HttpResponse;
+use actix_web::{HttpResponse, Responder};
 use rbatis::core::Error;
 use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Serialize, Deserialize)]
-pub struct ApiResult<T> {
+#[derive(Debug, Serialize)]
+pub struct ApiResult<'a,T> {
     pub code: Option<u32>,
     pub msg: Option<String>,
     pub data: Option<T>,
 }
 
-impl<T> ApiResult<T> where T: Serialize + DeserializeOwned + Clone {
+impl<'a ,T> ApiResult<'a,T> where T: Serialize+Deserialize<'a> + Clone {
     pub async fn from_result(result: &Result<T, Error>) -> Self {
         if result.is_ok() {
             Self {
@@ -39,8 +39,16 @@ impl<T> ApiResult<T> where T: Serialize + DeserializeOwned + Clone {
         }
     }
 
+
     pub async fn resp(&self) -> Response {
-        return HttpResponse::Ok().content_type("application/json").body(self.to_string().await);
+        return  HttpResponse::Ok().content_type("application/json").body(self.to_string().await);
+    }
+
+    pub async fn resp_to_img(&self) ->Response {
+        return  HttpResponse::Ok().content_type("image/png").body(self.to_string().await);
+    }
+    pub async fn resp_to_text(&self) -> Response {
+        return  HttpResponse::Ok().content_type("text/plain").body(self.to_string().await);
     }
 
     pub async fn to_string(&self) -> String {
