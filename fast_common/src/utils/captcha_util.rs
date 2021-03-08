@@ -38,8 +38,9 @@ impl BarCode {
                     .content_type(mime::IMAGE_PNG.to_string()).body(p)
             }
             None => {
-
-                let api_result:ApiResult<&str> = ApiResult::from_result(&Error::from("hello,world")).await;
+                let e = Error::from("abc");
+                println!("{}",e);
+                let api_result = ApiResult::<String>::from_error(&e).await;
                 HttpResponse::BadRequest().body(api_result.to_string().await)
             }
         }
