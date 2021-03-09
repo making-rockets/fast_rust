@@ -58,7 +58,7 @@ impl<S, B> Service for AuthMiddleware<S>
             match token {
                 None => {
                     match req.path() {
-                        "/admin/index/login" => {
+                        "/admin/index/login" | "/admin/index/send_reg_code" => {
                             svc.call(req).await
                         }
                         _ => { Err(error::ErrorUnauthorized(" required a auth header")) }

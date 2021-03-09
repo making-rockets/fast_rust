@@ -1,8 +1,41 @@
-use actix_http::Response;
+use actix_http::{Response, ResponseBuilder};
 use actix_web::{HttpResponse, Responder};
 use rbatis::core::Error;
 use serde::de::DeserializeOwned;
 use serde::{Serialize};
+use actix_web::http::StatusCode;
+use actix_web::dev::HttpResponseBuilder;
+
+
+pub struct Api<T, E> {
+    pub code: Option<StatusCode>,
+    pub msg: Option<E>,
+    pub data: Option<T>,
+}
+
+
+impl<T, E> Api<T, E> where T: Serialize + DeserializeOwned + Clone, E: std::error::Error {
+    pub async fn from(result: Result<T, E>) -> Api<T, E> {
+        match result {
+            Ok(t) => {
+                Api { code: Some(StatusCode::OK), msg: None, data: T, }
+            }
+            Err(e) => {
+                Api { code: Some(StatusCode::BAD_REQUEST), msg: Some(e.to_string()), data: None, }
+            }
+        }
+    }
+
+
+    pub async fn to_response(&self) -> Response {
+        HttpResponse::build(self.code.unwrap()).body("").await?
+    }
+
+    pub async fn to_json(&self) -> impl Responder {
+        "".to_string()
+    }
+}
+
 
 #[derive(Debug, Serialize)]
 pub struct ApiResult<T> {
@@ -23,7 +56,7 @@ impl<T> ApiResult<T> where T: Serialize + DeserializeOwned + Clone {
         }
     }
 
-    pub async   fn from_error(e: &Error) -> ApiResult<()> {
+    pub async fn from_error(e: &Error) -> ApiResult<()> {
         let result = ApiResult {
             code: Some(400),
             msg: Some(e.to_string()),
@@ -32,7 +65,9 @@ impl<T> ApiResult<T> where T: Serialize + DeserializeOwned + Clone {
         return result;
     }
 
+
     pub async fn resp(&self) -> Response {
+        let response = HttpResponse::Ok().content_type("application/json").body("");
         return HttpResponse::Ok().content_type("application/json").body(self.to_string().await);
     }
 
