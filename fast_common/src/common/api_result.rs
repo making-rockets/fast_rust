@@ -2,38 +2,65 @@ use actix_http::{Response, ResponseBuilder};
 use actix_web::{HttpResponse, Responder};
 use rbatis::core::Error;
 use serde::de::DeserializeOwned;
-use serde::{Serialize};
+use serde::{Serialize, Serializer};
 use actix_web::http::StatusCode;
 use actix_web::dev::HttpResponseBuilder;
+use actix_http::http::HeaderValue;
+use actix_http::http::header::{CONTENT_TYPE, CONTENT_DISPOSITION};
+use std::fs::File;
 
 
+#[derive(Debug, Serialize, Clone)]
 pub struct Api<T, E> {
-    pub code: Option<StatusCode>,
+    pub code: Option<u16>,
     pub msg: Option<E>,
     pub data: Option<T>,
 }
 
 
-impl<T, E> Api<T, E> where T: Serialize + DeserializeOwned + Clone, E: std::error::Error {
+impl<T, E> Api<T, E> where T: Serialize + DeserializeOwned + Clone, E: std::error::Error + Serialize {
     pub async fn from(result: Result<T, E>) -> Api<T, E> {
         match result {
             Ok(t) => {
-                Api { code: Some(StatusCode::OK), msg: None, data: T, }
+                Api { code: Some(StatusCode::OK.as_u16()), msg: None, data: Some(t) }
             }
             Err(e) => {
-                Api { code: Some(StatusCode::BAD_REQUEST), msg: Some(e.to_string()), data: None, }
+                Api { code: Some(StatusCode::BAD_REQUEST.as_u16()), msg: Some(e), data: None }
             }
         }
     }
 
 
-    pub async fn to_response(&self) -> Response {
-        HttpResponse::build(self.code.unwrap()).body("").await?
+    pub async fn to_response(&mut self) -> Response {
+        let mut builder = HttpResponseBuilder::new(StatusCode::from_u16(self.code.unwrap()).unwrap());
+        return builder.body(self.to_string().await);
+    }
+    pub async fn to_response_of_text(&mut self) -> Response {
+        let mut builder = HttpResponseBuilder::new(StatusCode::from_u16(self.code.unwrap()).unwrap());
+        return builder.set_header(CONTENT_TYPE, mime::TEXT_PLAIN_UTF_8).body(self.to_string().await);
+    }
+    pub async fn to_response_of_html(&mut self) -> Response {
+        let mut builder = HttpResponseBuilder::new(StatusCode::from_u16(self.code.unwrap()).unwrap());
+        return builder.set_header(CONTENT_TYPE, mime::TEXT_HTML_UTF_8).body(self.to_string().await);
+    }
+    pub async fn to_response_of_img(&mut self) -> Response {
+        let mut builder = HttpResponseBuilder::new(StatusCode::from_u16(self.code.unwrap()).unwrap());
+        return builder.set_header(CONTENT_TYPE, mime::IMAGE_STAR).body(self.to_string().await);
     }
 
-    pub async fn to_json(&self) -> impl Responder {
-        "".to_string()
+    pub async fn to_response_of_stream(&mut self) -> Response {
+        let mut builder = HttpResponseBuilder::new(StatusCode::from_u16(self.code.unwrap()).unwrap());
+        return builder.set_header(CONTENT_TYPE, mime::stream).body(self.to_string().await);
     }
+
+    pub async fn to_string(&self) -> String {
+        return serde_json::to_string(self).unwrap();
+    }
+}
+
+#[test]
+fn test() {
+    println!("{}", StatusCode::OK.as_u16());
 }
 
 
@@ -83,5 +110,4 @@ impl<T> ApiResult<T> where T: Serialize + DeserializeOwned + Clone {
     }
 }
 
-#[test]
-fn test() {}
+
