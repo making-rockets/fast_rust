@@ -2,7 +2,7 @@ use crate::service::user_service::UserService;
 use actix_web::web::Form;
 use actix_web::{delete, get, post, put, web::Query};
 use actix_web::{HttpRequest, HttpResponse};
-use fast_common::common::api_result::ApiResult;
+use fast_common::common::api_result::{ApiResult, Api};
 use fast_common::models::user::{User, UserVo};
 use std::ops::DerefMut;
 
@@ -14,13 +14,9 @@ pub async fn new_user(arg: Form<User>, _request: HttpRequest) -> HttpResponse {
 
 #[get("/list")]
 pub async fn list(arg: Query<UserVo>, request: HttpRequest) -> HttpResponse {
-    let mut extensions = request.extensions_mut();
-    let x = extensions.deref_mut();
-    let option = x.get_mut::<String>();
-    println!("{:?}", option);
 
     let list = UserService::list(arg.0).await;
-    return ApiResult::from_result(&list).await.resp().await;
+    return Api::from(list).await.to_response_of_json().await;
 }
 
 #[put("/update")]

@@ -20,6 +20,8 @@ pub struct UserVo {
     pub page_num: Option<u64>,
     pub page_size: Option<u64>,
     pub create_time: Option<NaiveDateTime>,
+    pub start_time: Option<NaiveDateTime>,
+    pub end_time: Option<NaiveDateTime>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
