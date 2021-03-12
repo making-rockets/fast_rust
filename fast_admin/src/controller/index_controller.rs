@@ -2,11 +2,11 @@ use crate::service::user_service::UserService;
 use actix_web::web::Form;
 use actix_web::{HttpResponse, Responder};
 use actix_web::{get, post, HttpRequest};
-use fast_common::common::api_result::ApiResult;
 use fast_common::models::user::UserLoginVo;
 use fast_common::utils::captcha_util;
 use std::ops::DerefMut;
 use actix_http::Response;
+use fast_common::common::api_result::Api;
 
 #[get("/")]
 pub async fn index(request: HttpRequest) -> HttpResponse {
@@ -27,5 +27,7 @@ pub async fn push_reg_code(user_name: String, _password: String, _code: String, 
 #[post("/login")]
 pub async fn login(user: Form<UserLoginVo>) -> Response {
     let result = UserService::login(user.0).await;
-    return ApiResult::from_result(&result).await.resp().await;
+    let mut api = Api::from(result).await;
+    let response = api.to_response_of_json().await;
+    return response;
 }

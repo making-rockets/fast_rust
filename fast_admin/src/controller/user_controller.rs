@@ -5,7 +5,7 @@ use actix_web::{HttpRequest, HttpResponse};
 use fast_common::common::api_result::{ApiResult, Api};
 use fast_common::models::user::{User, UserVo};
 use std::ops::DerefMut;
-
+/*
 #[post("/new")]
 pub async fn new_user(arg: Form<User>, _request: HttpRequest) -> HttpResponse {
     let result = UserService::add(arg.0).await;
@@ -29,4 +29,4 @@ pub async fn update(arg: Form<User>, _request: HttpRequest) -> HttpResponse {
 pub async fn delete(arg: Form<User>) -> HttpResponse {
     let result = UserService::delete(arg.0).await;
     return ApiResult::from_result(&result).await.resp().await;
-}
+}*/

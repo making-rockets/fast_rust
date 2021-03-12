@@ -8,8 +8,10 @@ use image::{ColorType, ImageEncoder, Luma, codecs::{self, png}};
 use qrcode::QrCode;
 use captcha::Captcha;
 use crate::utils::redis_util::RedisUtil;
-use crate::common::api_result::ApiResult;
+
 use rbatis::Error;
+use crate::common::api_result::Api;
+use std::io::ErrorKind;
 
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -30,7 +32,6 @@ impl BarCode {
             .view(220, 120)
             .apply_filter(Dots::new(0));
         let mut png = captcha.as_png();
-        png= None;
         match png {
             Some(p) => {
                 HttpResponse::Ok().set_header(ACCESS_CONTROL_ALLOW_ORIGIN, "")
@@ -38,11 +39,10 @@ impl BarCode {
                     .content_type(mime::IMAGE_PNG.to_string()).body(p)
             }
             None => {
-                let e = Error::from("abc");
-                println!("{}",e);
-               // HttpResponse::Ok().content_type("application/json").body(self.to_string().await
-                let api_result = ApiResult::<String>::from_error(&e).await;
-                HttpResponse::BadRequest().body(api_result.to_string().await)
+                let error1 = Error::from("cccdsadf");
+                let mut api = Api::from( Err(String::from("sdf"))).await;
+                let res =  api.to_response_of_json().await;
+                return res;
             }
         }
     }
