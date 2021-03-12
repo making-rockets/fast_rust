@@ -41,7 +41,7 @@ impl UserService {
 
     pub async fn list(arg: UserVo) -> Result<Page<User>> {
         let mut wrapper = RB.new_wrapper();
-        wrapper
+        wrapper = wrapper
             .do_if(true, |wrapper| wrapper.eq("id", &arg.id))
             .do_if(true, |wrapper| wrapper.like_left("user_name", &arg.user_name))
             .do_if(true, |wrapper| wrapper.eq("age", &arg.age))

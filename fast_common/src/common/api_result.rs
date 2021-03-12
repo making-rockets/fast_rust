@@ -1,6 +1,6 @@
 use actix_http::{Response, ResponseBuilder};
 use actix_web::{HttpResponse, Responder};
-use rbatis::core::Error;
+
 use serde::de::DeserializeOwned;
 use serde::{Serialize, Serializer};
 use actix_web::http::StatusCode;
@@ -8,6 +8,7 @@ use actix_web::dev::HttpResponseBuilder;
 use actix_http::http::HeaderValue;
 use actix_http::http::header::{CONTENT_TYPE, CONTENT_DISPOSITION, ContentType};
 use std::fs::File;
+use actix_http::error::ResponseError;
 
 
 #[derive(Debug, Serialize, Clone)]
@@ -18,7 +19,7 @@ pub struct Api<T, E> {
 }
 
 
-impl<T, E> Api<T, E> where T: Serialize + DeserializeOwned + Clone, E: std::error::Error + Serialize {
+impl<T, E> Api<T, E> where T: Serialize + DeserializeOwned + Clone, E: ResponseError + std::error::Error + Serialize {
     pub async fn from(result: Result<T, E>) -> Api<T, E> {
         match result {
             Ok(t) => {
@@ -33,7 +34,7 @@ impl<T, E> Api<T, E> where T: Serialize + DeserializeOwned + Clone, E: std::erro
 
     pub async fn to_response_of_json(&mut self) -> Response {
         let mut builder = HttpResponseBuilder::new(StatusCode::from_u16(self.code.unwrap()).unwrap());
-        builder.set_header(CONTENT_TYPE,mime::APPLICATION_JSON);
+        builder.set_header(CONTENT_TYPE, mime::APPLICATION_JSON);
         return builder.body(self.to_string().await);
     }
     pub async fn to_response_of_text(&mut self) -> Response {
@@ -49,10 +50,6 @@ impl<T, E> Api<T, E> where T: Serialize + DeserializeOwned + Clone, E: std::erro
         return builder.set_header(CONTENT_TYPE, mime::IMAGE_STAR).body(self.to_string().await);
     }
 
-    /*pub async fn to_response_of_stream(&mut self) -> Response {
-        let mut builder = HttpResponseBuilder::new(StatusCode::from_u16(self.code.unwrap()).unwrap());
-        return builder.set_header(CONTENT_TYPE, mime::stream).body(self.to_string().await);
-    }*/
 
     pub async fn to_string(&self) -> String {
         return serde_json::to_string(self).unwrap();
@@ -64,7 +61,7 @@ fn test() {
     println!("{}", StatusCode::OK.as_u16());
 }
 
-
+/*
 #[derive(Debug, Serialize)]
 pub struct ApiResult<T> {
     pub code: Option<u32>,
@@ -108,7 +105,7 @@ impl<T> ApiResult<T> where T: Serialize + DeserializeOwned + Clone {
 
     pub async fn to_string(&self) -> String {
         return serde_json::to_string(self).unwrap();
-    }
-}
+    }*/
+
 
 
