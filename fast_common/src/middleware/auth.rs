@@ -3,11 +3,14 @@ use std::pin::Pin;
 use std::rc::Rc;
 use std::task::{Context, Poll};
 
-use actix_web::{error, Error};
+use actix_web::{error, Error, HttpRequest, HttpResponse};
 use actix_web::body::MessageBody;
 use actix_web::dev::{Service, ServiceRequest, ServiceResponse, Transform};
 use futures::future::{Future, ok, Ready};
 use crate::utils::crypt_util::Claims;
+use crate::common::api_result::{Api, GlobalError};
+use std::borrow::{Borrow, BorrowMut};
+use actix_web::test::ok_service;
 
 pub struct Auth;
 
@@ -54,14 +57,25 @@ impl<S, B> Service for AuthMiddleware<S>
         let mut svc = self.service.clone();
 
         Box::pin(async move {
-            let token = req.headers().get("access_token");
+            let token = req.headers().get("Authorization");
             match token {
                 None => {
                     match req.path() {
                         "/admin/index/login" | "/admin/index/send_reg_code" => {
-                            svc.call(req).await
+                            let x = svc.call(req);
+                            let x1 = x.await;
+                            return x1;
+
                         }
-                        _ => { Err(error::ErrorUnauthorized(" required a auth header")) }
+                        _ => {
+                            let error1 = error::ErrorInternalServerError("required a Authorization token");
+                            let response = Api::<()>::from(Err(GlobalError("error1".to_string()))).await.to_response_of_json().await;
+                            let response1 = HttpResponse::from(response);
+                            let response2 = req.into_response(response1);
+                            let abed = response2.into();
+                            Ok(response2)
+                            //Ok(req.into_response(response1)).into_service()
+                        }
                     }
                 }
                 Some(access_token) => {
@@ -70,7 +84,7 @@ impl<S, B> Service for AuthMiddleware<S>
                             let result = Claims::validation_token(&access_token.to_string());
                             match result {
                                 Ok(_) => { svc.call(req).await }
-                                Err(e) => { Err(error::ErrorUnauthorized("认证过期或其他问题")) }
+                                Err(e) => { Err(error::ErrorUnauthorized(e)) }
                             }
                         }
                         Err(e) => { Err(error::ErrorUnauthorized(e.to_string())) }

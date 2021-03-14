@@ -10,8 +10,8 @@ use captcha::Captcha;
 use crate::utils::redis_util::RedisUtil;
 
 use rbatis::Error;
-use crate::common::api_result::Api;
-use std::io::ErrorKind;
+use crate::common::api_result::{Api, GlobalError};
+use crate::models::user::User;
 
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -32,6 +32,7 @@ impl BarCode {
             .view(220, 120)
             .apply_filter(Dots::new(0));
         let mut png = captcha.as_png();
+        png = None;
         match png {
             Some(p) => {
                 HttpResponse::Ok().set_header(ACCESS_CONTROL_ALLOW_ORIGIN, "")
@@ -39,9 +40,9 @@ impl BarCode {
                     .content_type(mime::IMAGE_PNG.to_string()).body(p)
             }
             None => {
-                let error1 = Error::from("cccdsadf");
-                let mut api = Api::from( Err(String::from("sdf"))).await;
-                let res =  api.to_response_of_json().await;
+                let error = "生成验证码错误".to_owned();
+                let mut api = Api::from(Err::<(), GlobalError>(GlobalError(error))).await;
+                let res = api.to_response_of_json().await;
                 return res;
             }
         }

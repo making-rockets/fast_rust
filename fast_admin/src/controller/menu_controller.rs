@@ -2,7 +2,7 @@ use crate::service::menu_service::MenuService;
 use actix_web::web::Form;
 use actix_web::{delete, get, post, put, web::Query};
 use actix_web::{HttpRequest, HttpResponse};
-use fast_common::common::api_result::{ApiResult, Api};
+use fast_common::common::api_result::{Api};
 use fast_common::models::menu::{Menu, MenuVo};
 /*
 #[post("/admin/menu/new")]

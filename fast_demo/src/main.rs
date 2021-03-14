@@ -1,25 +1,53 @@
-extern crate hound;
+use std::error::Error;
+use std::fmt::{Display, Formatter, Debug, Pointer};
+use std::num::ParseIntError;
+use std::str::Utf8Error;
 
-use std::f32::consts::PI;
-use hound::{SampleFormat, WavSpec, WavWriter};
+#[derive(Debug)]
+enum CustomError {
+    ParseIntError(std::num::ParseIntError),
+    Utf8Error(std::str::Utf8Error),
+    IoError(std::io::Error),
+}
 
-fn generate_sine(filename: &str, frequency: f32, duration: u32) {
-    let header = WavSpec {
-        channels: 1,
-        sample_rate: 44100,
-        bits_per_sample: 16,
-        sample_format: SampleFormat::Int,
-    };
-    let mut writer = WavWriter::create(filename, header).expect("Failed to created WAV writer");
-    let num_samples = duration * header.sample_rate;
-    let signal_amplitude = 16384f32;
-    for n in 0..num_samples {
-        let t: f32 = n as f32 / header.sample_rate as f32;
-        let x = signal_amplitude * (t * frequency * 2.0 * PI).sin();
-        writer.write_sample(x as i16).unwrap();
+impl Display for CustomError {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match &self {
+            CustomError::ParseIntError(e) => { Pointer::fmt( &e,f) }
+            CustomError::Utf8Error(   e) => {Pointer::fmt(&e,f) }
+            CustomError::IoError(   e) => { Pointer::fmt(&e,f) }
+        }
     }
 }
 
-fn main() {
-    generate_sine("test.wav", 1000f32, 5);
+
+impl Error for CustomError {
+    fn source(&self) -> Option<&(dyn Error + 'static)> {
+        match &self {
+            CustomError::ParseIntError(ref e) => { Some(e) }
+            CustomError::Utf8Error(e) => { Some(e) }
+            CustomError::IoError(e) => { Some(e) }
+        }
+    }
 }
+
+impl From<ParseIntError> for CustomError {
+    fn from(parse: ParseIntError) -> Self {
+        CustomError::ParseIntError(parse)
+    }
+}
+
+impl From<std::io::Error> for CustomError {
+    fn from(stdError: std::io::Error) -> Self {
+        CustomError::IoError(stdError)
+    }
+}
+
+impl From<Utf8Error> for CustomError {
+    fn from(utf8Error: Utf8Error) -> Self {
+        CustomError::Utf8Error(utf8Error)
+    }
+}
+
+
+fn main() {}
