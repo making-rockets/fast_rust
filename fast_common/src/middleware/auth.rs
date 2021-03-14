@@ -11,6 +11,7 @@ use crate::utils::crypt_util::Claims;
 use crate::common::api_result::{Api, GlobalError};
 use std::borrow::{Borrow, BorrowMut};
 use actix_web::test::ok_service;
+use actix_http::Response;
 
 pub struct Auth;
 
@@ -62,18 +63,13 @@ impl<S, B> Service for AuthMiddleware<S>
                 None => {
                     match req.path() {
                         "/admin/index/login" | "/admin/index/send_reg_code" => {
-                            let x = svc.call(req);
-                            let x1 = x.await;
-                            return x1;
-
+                            return svc.call(req).await;
                         }
                         _ => {
                             let error1 = error::ErrorInternalServerError("required a Authorization token");
-                            let response = Api::<()>::from(Err(GlobalError("error1".to_string()))).await.to_response_of_json().await;
-                            let response1 = HttpResponse::from(response);
-                            let response2 = req.into_response(response1);
-                            let abed = response2.into();
-                            Ok(response2)
+                            let response:Response = Api::<()>::from(Err(GlobalError("error1".to_string()))).await.to_response_of_json().await;
+
+                            return Ok(req.into_response(response));
                             //Ok(req.into_response(response1)).into_service()
                         }
                     }
