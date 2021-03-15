@@ -4,28 +4,27 @@ use actix_web::{delete, get, post, put, web::Query};
 use actix_web::{HttpRequest, HttpResponse};
 use fast_common::common::api_result::{Api};
 use fast_common::models::menu::{Menu, MenuVo};
-/*
-#[post("/admin/menu/new")]
+
+#[post("/new")]
 pub async fn new_user(arg: Form<Menu>, _request: HttpRequest) -> HttpResponse {
-    let result = MenuService::add(arg.0).await;
-
+    let result = MenuService::add(arg.into_inner()).await;
+    return Api::from_rbatis_result(&result).await.to_response_of_json().await;
 }
 
-#[get("/admin/menu/list")]
+#[get("/list")]
 pub async fn list(arg: Query<MenuVo>, _req: HttpRequest) -> HttpResponse {
-    let list = MenuService::list(arg.0).await;
-
+    let result = MenuService::list(arg.into_inner()).await;
+    return Api::from_rbatis_result(&result).await.to_response_of_json().await;
 }
 
-#[put("/admin/menu/update")]
+#[put("/update")]
 pub async fn update(arg: Form<Menu>, _request: HttpRequest) -> HttpResponse {
-    let result = MenuService::update(arg.0).await;
-
+    let result = MenuService::update(arg.into_inner()).await;
+    return Api::from_rbatis_result(&result).await.to_response_of_json().await;
 }
 
-#[delete("/admin/menu/delete")]
+#[delete("/delete")]
 pub async fn delete(arg: Form<Menu>) -> HttpResponse {
-    let result = MenuService::delete(arg.0).await;
-
+    let result = MenuService::delete(arg.into_inner()).await;
+    return Api::from_rbatis_result(&result).await.to_response_of_json().await;
 }
-*/

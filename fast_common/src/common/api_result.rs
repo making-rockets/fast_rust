@@ -71,10 +71,10 @@ impl<T> Api<T> where T: Serialize + DeserializeOwned + Clone {
         }
     }
 
-    pub async fn from_rbatis_result(result: rbatis::Result<T>) -> Self {
+    pub async fn from_rbatis_result(result: &rbatis::Result<T>) -> Self {
         match result {
             Ok(t) => {
-                Api { code: Some(StatusCode::OK.as_u16()), msg: None, data: Some(t) }
+                Api { code: Some(StatusCode::OK.as_u16()), msg: None, data: Some(t.clone()) }
             }
             Err(e) => {
                 Api { code: Some(StatusCode::INTERNAL_SERVER_ERROR.as_u16()), msg: Some(GlobalError(e.to_string())), data: None }

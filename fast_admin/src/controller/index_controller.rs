@@ -10,11 +10,6 @@ use fast_common::common::api_result::{Api, GlobalError};
 
 #[get("/")]
 pub async fn index(request: HttpRequest) -> HttpResponse {
-    let mut extensions = request.extensions_mut();
-    let x = extensions.deref_mut();
-    let option = x.get_mut::<String>();
-    println!("{:?}", option);
-
     HttpResponse::Ok().body("hello,actix-web")
 }
 
@@ -27,5 +22,5 @@ pub async fn push_reg_code(user_name: String, _password: String, _code: String, 
 #[post("/login")]
 pub async fn login(user: Form<UserLoginVo>) -> Response {
     let result = UserService::login(user.into_inner()).await;
-    Api::from_rbatis_result(result).await.to_response_of_json().await
+    Api::from_rbatis_result(&result).await.to_response_of_json().await
 }
