@@ -4,25 +4,22 @@ use std::rc::Rc;
 use std::task::{Context, Poll};
 
 use actix_web::{error, Error, HttpRequest, HttpResponse};
-use actix_web::body::MessageBody;
+
 use actix_web::dev::{Service, ServiceRequest, ServiceResponse, Transform};
 use futures::future::{Future, ok, Ready};
 use crate::utils::crypt_util::Claims;
 use crate::common::api_result::{Api, GlobalError};
 use std::borrow::{Borrow, BorrowMut};
 use actix_web::test::ok_service;
-use actix_http::Response;
+use actix_http::{Response, ResponseBuilder, body::Body};
+use reqwest::StatusCode;
+
 
 pub struct Auth;
 
-impl<S, B> Transform<S> for Auth
-    where
-        S: Service<Request=ServiceRequest, Response=ServiceResponse<B>, Error=Error> + 'static,
-        S::Future: 'static,
-        B: MessageBody + 'static,
-{
+impl<S> Transform<S> for Auth where S: Service<Request=ServiceRequest, Response=ServiceResponse<Body>, Error=Error> + 'static, S::Future: 'static {
     type Request = ServiceRequest;
-    type Response = ServiceResponse<B>;
+    type Response = ServiceResponse<Body>;
     type Error = Error;
     type Transform = AuthMiddleware<S>;
     type InitError = ();
@@ -39,14 +36,9 @@ pub struct AuthMiddleware<S> {
     service: Rc<RefCell<S>>,
 }
 
-impl<S, B> Service for AuthMiddleware<S>
-    where
-        S: Service<Request=ServiceRequest, Response=ServiceResponse<B>, Error=Error> + 'static,
-        S::Future: 'static,
-        B: MessageBody + 'static,
-{
+impl<S> Service for AuthMiddleware<S> where S: Service<Request=ServiceRequest, Response=ServiceResponse<Body>, Error=Error> + 'static, S::Future: 'static, {
     type Request = ServiceRequest;
-    type Response = ServiceResponse<B>;
+    type Response = ServiceResponse<Body>;
     type Error = Error;
     type Future = Pin<Box<dyn Future<Output=Result<Self::Response, Self::Error>>>>;
 
@@ -66,11 +58,9 @@ impl<S, B> Service for AuthMiddleware<S>
                             return svc.call(req).await;
                         }
                         _ => {
-                            let error1 = error::ErrorInternalServerError("required a Authorization token");
-                            let response:Response = Api::<()>::from(Err(GlobalError("error1".to_string()))).await.to_response_of_json().await;
-
-                            return Ok(req.into_response(response));
-                            //Ok(req.into_response(response1)).into_service()
+                            let error = error::ErrorUnauthorized("required a Authorization token");
+                            let mut api = Api::from(error);
+                            return Ok(req.into_response(api.to_response_of_json().await));
                         }
                     }
                 }
@@ -80,10 +70,18 @@ impl<S, B> Service for AuthMiddleware<S>
                             let result = Claims::validation_token(&access_token.to_string());
                             match result {
                                 Ok(_) => { svc.call(req).await }
-                                Err(e) => { Err(error::ErrorUnauthorized(e)) }
+                                Err(e) => {
+                                    let error = error::ErrorUnauthorized(e.to_string());
+                                    let mut api = Api::from(error);
+                                    Ok(req.into_response(api.to_response_of_json().await))
+                                }
                             }
                         }
-                        Err(e) => { Err(error::ErrorUnauthorized(e.to_string())) }
+                        Err(e) => {
+                            let error = error::ErrorInternalServerError(e.to_string());
+                            let mut api = Api::from(error);
+                            Ok(req.into_response(api.to_response_of_json().await))
+                        }
                     }
                 }
             }

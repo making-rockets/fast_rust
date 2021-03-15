@@ -11,3 +11,5 @@ pub mod middleware;
 //这个工具类还不行
 pub mod models;
 pub mod utils;
+mod config;
+

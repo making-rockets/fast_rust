@@ -41,7 +41,7 @@ impl BarCode {
             }
             None => {
                 let error = "生成验证码错误".to_owned();
-                let mut api = Api::from(Err::<(), GlobalError>(GlobalError(error))).await;
+                let mut api = Api::from_result(Err::<(), GlobalError>(GlobalError(error))).await;
                 let res = api.to_response_of_json().await;
                 return res;
             }

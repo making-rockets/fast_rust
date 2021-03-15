@@ -52,7 +52,7 @@ impl Claims {
         Claims {
             sub: sub.to_owned(),
             company: "bxb".to_string(),
-            exp: (Local::now().timestamp() + 3600) as usize,
+            exp: (Local::now().timestamp() + 120) as usize,
         }
     }
 

@@ -1,53 +1,48 @@
-use std::error::Error;
-use std::fmt::{Display, Formatter, Debug, Pointer};
-use std::num::ParseIntError;
-use std::str::Utf8Error;
+use std::ops::{Deref, DerefMut};
 
-#[derive(Debug)]
-enum CustomError {
-    ParseIntError(std::num::ParseIntError),
-    Utf8Error(std::str::Utf8Error),
-    IoError(std::io::Error),
+struct Person {
+    name: String
 }
 
-impl Display for CustomError {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        match &self {
-            CustomError::ParseIntError(e) => { Pointer::fmt( &e,f) }
-            CustomError::Utf8Error(   e) => {Pointer::fmt(&e,f) }
-            CustomError::IoError(   e) => { Pointer::fmt(&e,f) }
-        }
+impl Person {
+    fn set_name(&mut self, name: String) {
+        self.name = name;
+    }
+    fn say(&self) {
+        println!("我是一个人，我叫{}", self.name);
     }
 }
 
+struct Student {
+    p: Person,
+    role: String,
+}
 
-impl Error for CustomError {
-    fn source(&self) -> Option<&(dyn Error + 'static)> {
-        match &self {
-            CustomError::ParseIntError(ref e) => { Some(e) }
-            CustomError::Utf8Error(e) => { Some(e) }
-            CustomError::IoError(e) => { Some(e) }
-        }
+impl Student {
+    fn new() ->Student{
+        Student{ p: Person { name: "person".to_string() }, role: "11".to_string() }
+    }
+    fn set_role(&mut self ,role:&str){
+        self.role = role.to_string();
     }
 }
 
-impl From<ParseIntError> for CustomError {
-    fn from(parse: ParseIntError) -> Self {
-        CustomError::ParseIntError(parse)
+impl Deref for Student{
+    type Target = Person;
+
+    fn deref(&self) -> &Self::Target {
+        &self.p
     }
 }
 
-impl From<std::io::Error> for CustomError {
-    fn from(stdError: std::io::Error) -> Self {
-        CustomError::IoError(stdError)
+impl DerefMut for Student {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.p
     }
 }
 
-impl From<Utf8Error> for CustomError {
-    fn from(utf8Error: Utf8Error) -> Self {
-        CustomError::Utf8Error(utf8Error)
-    }
+fn main() {
+    let mut student = Student::new();
+    student.set_role("办证");
+    student.say()
 }
-
-
-fn main() {}
