@@ -42,10 +42,10 @@ impl UserService {
     pub async fn list(arg: UserVo) -> Result<Page<User>> {
         let mut wrapper = RB.new_wrapper();
         wrapper = wrapper
-            .do_if(true, |wrapper| wrapper.eq("id", &arg.id))
-            .do_if(true, |wrapper| wrapper.like_left("user_name", &arg.user_name))
-            .do_if(true, |wrapper| wrapper.eq("age", &arg.age))
-            .do_if(true, |wrapper| wrapper.gt("create_time", &arg.start_time).and().le("create_time", &arg.end_time));
+            .do_if(false, |wrapper| wrapper.eq("id", &arg.id))
+            .do_if(false, |wrapper| wrapper.like_left("user_name", &arg.user_name))
+            .do_if(false, |wrapper| wrapper.eq("age", &arg.age))
+            .do_if(false, |wrapper| wrapper.gt("create_time", &arg.start_time).and().le("create_time", &arg.end_time));
 
 
         let page_request = PageRequest::new(arg.page_num.unwrap_or_else(|| 1), arg.page_size.unwrap_or_else(|| 10));

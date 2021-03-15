@@ -22,7 +22,7 @@ pub struct BarCode {
 
 
 impl BarCode {
-    pub async fn captcha() -> impl Responder {
+    pub async fn captcha() -> HttpResponse {
         let mut captcha = Captcha::new();
         captcha
             .add_chars(4)
@@ -32,7 +32,6 @@ impl BarCode {
             .view(220, 120)
             .apply_filter(Dots::new(0));
         let mut png = captcha.as_png();
-        png = None;
         match png {
             Some(p) => {
                 HttpResponse::Ok().set_header(ACCESS_CONTROL_ALLOW_ORIGIN, "")

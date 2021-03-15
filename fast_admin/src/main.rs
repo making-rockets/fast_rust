@@ -40,8 +40,8 @@ async fn main() -> std::io::Result<()> {
 
             //.wrap(middleware::handle_method::HandleMethod)
             .service(routers::index_route::index_routers())
-        //.service(routers::user_route::user_routes())
-        //.service(routers::menu_route::menu_routes())
+        .service(routers::user_route::user_routes())
+        .service(routers::menu_route::menu_routes())
     })
         .bind("127.0.0.1:8000")?
         .run()

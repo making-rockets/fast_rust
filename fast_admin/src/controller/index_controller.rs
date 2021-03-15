@@ -1,11 +1,11 @@
 use crate::service::user_service::UserService;
-use actix_web::web::Form;
+use actix_web::web::{Form, Query};
 use actix_web::{HttpResponse, Responder};
 use actix_web::{get, post, HttpRequest};
 use fast_common::models::user::UserLoginVo;
 use fast_common::utils::captcha_util;
 use std::ops::DerefMut;
-use actix_http::Response;
+use actix_http::{Response, Error};
 use fast_common::common::api_result::{Api, GlobalError};
 
 #[get("/")]
@@ -14,8 +14,16 @@ pub async fn index(request: HttpRequest) -> HttpResponse {
 }
 
 #[get("/send_reg_code")]
-pub async fn push_reg_code(user_name: String, _password: String, _code: String, _request: HttpRequest) -> impl Responder {
-    captcha_util::BarCode::captcha().await
+pub async fn push_reg_code(user_name: Query<UserLoginVo>, _request: HttpRequest) -> HttpResponse {
+    match user_name.into_inner().user_name {
+        Some(user_name) => {
+            captcha_util::BarCode::captcha().await
+        }
+        None => {
+
+            Api::<()>::from_result(Err(GlobalError::from("user_name is none ".to_string()))).await.to_response_of_json().await
+        }
+    }
 }
 
 

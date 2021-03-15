@@ -11,8 +11,9 @@ use crate::utils::crypt_util::Claims;
 use crate::common::api_result::{Api, GlobalError};
 use std::borrow::{Borrow, BorrowMut};
 use actix_web::test::ok_service;
-use actix_http::{Response, ResponseBuilder, body::Body};
+use actix_http::{Response, ResponseBuilder, body::Body, HttpMessage};
 use reqwest::StatusCode;
+use validator::HasLen;
 
 
 pub struct Auth;
@@ -48,7 +49,8 @@ impl<S> Service for AuthMiddleware<S> where S: Service<Request=ServiceRequest, R
 
     fn call(&mut self, req: ServiceRequest) -> Self::Future {
         let mut svc = self.service.clone();
-
+        let x = req.content_type();
+        println!("这是头{:?}",x);
         Box::pin(async move {
             let token = req.headers().get("Authorization");
             match token {
