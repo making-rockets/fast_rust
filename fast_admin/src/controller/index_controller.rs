@@ -2,7 +2,7 @@ use crate::service::user_service::UserService;
 use actix_web::web::{Form, Query};
 use actix_web::{HttpResponse, Responder};
 use actix_web::{get, post, HttpRequest};
-use fast_common::models::user::UserLoginVo;
+use fast_common::models::user::{UserLoginVo, UserRoleMenuVo};
 use fast_common::utils::captcha_util;
 use std::ops::DerefMut;
 use actix_http::{Response, Error};

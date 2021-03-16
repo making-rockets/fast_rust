@@ -6,7 +6,7 @@ use serde::{Serialize, Serializer};
 use actix_web::http::StatusCode;
 use actix_web::dev::HttpResponseBuilder;
 use actix_http::http::HeaderValue;
-use actix_http::http::header::{CONTENT_TYPE, CONTENT_DISPOSITION, ContentType, ACCESS_CONTROL_ALLOW_ORIGIN, CACHE_CONTROL};
+use actix_http::http::header::{CONTENT_TYPE, CONTENT_DISPOSITION, ACCESS_CONTROL_ALLOW_ORIGIN, CACHE_CONTROL};
 use std::fs::File;
 
 

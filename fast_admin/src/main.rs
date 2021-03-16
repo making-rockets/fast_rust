@@ -12,6 +12,7 @@ use log::LevelFilter;
 mod controller;
 mod routers;
 mod service;
+mod storage;
 
 fn init_logger() {
     let env = Env::default()

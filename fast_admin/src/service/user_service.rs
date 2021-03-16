@@ -1,6 +1,6 @@
 use chrono::{Local, NaiveDateTime};
 use fast_common::common::orm_config::RB;
-use fast_common::models::user::{User, UserLoginVo, UserVo};
+use fast_common::models::user::{User, UserLoginVo, UserVo, UserRoleMenuVo};
 use fast_common::utils::crypt_util;
 use rbatis::core::db::DBExecResult;
 use rbatis::core::Result;
@@ -53,7 +53,7 @@ impl UserService {
         return page;
     }
 
-    pub async fn login(user_login_vo: UserLoginVo) -> Result<UserLoginVo> {
+    pub async fn login(user_login_vo: UserLoginVo ) -> Result<UserRoleMenuVo> {
         let mut wrapper = RB.new_wrapper();
         if user_login_vo.user_name.is_none() || user_login_vo.password.is_none() {
             Err(Error::from("could not found user_name or password"))
@@ -75,13 +75,13 @@ impl UserService {
                                 //TODO 登录逻辑
                                 let claims = crypt_util::Claims::new_default(user.clone().id.unwrap().to_string().as_str());
                                 let access_token = claims.default_jwt_token().unwrap();
-                                //let redis = RedisUtil::get_redis_util().await;
-                                //redis.set_json(&access_token.to_string(), &user.clone()).await;
-                                Ok(UserLoginVo {
-                                    token: Some(access_token),
-                                    user_name: user.clone().user_name,
+
+                                Ok( UserRoleMenuVo{
                                     user_id: None,
-                                    password: None,
+                                    user_name: None,
+                                    role_id: None,
+                                    role_name: None,
+                                    menus: None
                                 })
                             } else {
                                 Err(Error::from("密码错误"))

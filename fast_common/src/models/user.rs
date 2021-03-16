@@ -1,6 +1,8 @@
 use crate::rbatis;
 use chrono::NaiveDateTime;
 use serde_derive::{Deserialize, Serialize};
+use crate::models::user_role::UserRole;
+use crate::models::menu::MenuVo;
 
 #[crud_enable]
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
@@ -30,4 +32,13 @@ pub struct UserLoginVo {
     pub user_name: Option<String>,
     pub user_id: Option<u64>,
     pub password: Option<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+pub struct UserRoleMenuVo{
+    pub user_id:Option<u64>,
+    pub user_name:Option<String>,
+    pub role_id:Option<u64>,
+    pub role_name:Option<String>,
+    pub menus: Option<Vec<MenuVo>>
 }
