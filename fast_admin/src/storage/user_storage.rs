@@ -4,9 +4,7 @@ pub struct UserStorage {}
 
 impl BaseStorage for UserStorage {
     fn cache_entity<T>(&self, key: &String, t: T) {
-         async{
-             let x = self.redis_util().await;
-         }
+          unimplemented!()
     }
 
     fn get_entity<T>(&self, key: &String) -> T {
