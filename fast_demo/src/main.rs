@@ -41,8 +41,26 @@ impl DerefMut for Student {
     }
 }
 
+
+struct A {
+    data: i32
+}
+
+struct B {
+    a: A
+}
+
+impl B {
+    fn set_data(&mut self, data: i32) {
+        unsafe {
+            (self.a).data = data
+        };
+    }
+}
+
+
 fn main() {
-    let mut student = Student::new();
-    student.set_role("办证");
-    student.say()
+    //let mut student = Student::new();
+    //student.set_role("办证");
+    //student.say()
 }

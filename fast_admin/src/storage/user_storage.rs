@@ -1,13 +1,12 @@
 use fast_common::base::base_storage::BaseStorage;
+use async_trait::async_trait;
+
 
 pub struct UserStorage {}
 
+#[async_trait]
 impl BaseStorage for UserStorage {
-    fn cache_entity<T>(&self, key: &String, t: T) {
-          unimplemented!()
-    }
+    async fn cache_entity<T>(&self, t: T) where  T:Send+Sync {}
 
-    fn get_entity<T>(&self, key: &String) -> T {
-        unimplemented!()
-    }
+    async fn get_entity<T>(&self, key: &String) where T:Send+Sync {}
 }
