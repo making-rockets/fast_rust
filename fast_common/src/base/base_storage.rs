@@ -1,9 +1,10 @@
 use crate::utils::redis_util::RedisUtil;
 use std::future::Future;
 use async_trait::async_trait;
+use serde::Serialize;
 
 #[async_trait]
-pub trait BaseStorage {
+pub trait BaseStorage: Sync + Send {
     // const PREFIX_KEY: &'static str = "fast:rust:";
 
     async fn redis_util(&self) -> RedisUtil {
@@ -11,6 +12,6 @@ pub trait BaseStorage {
         return util;
     }
 
-    async fn cache_entity<T>(&self, t: T) where T: Send + Sync;
-    async fn get_entity<T>(&self, key: &String) where T: Send + Sync;
+    async fn cache_entity<'a, T>(&self, key: &'a String, t: &'a T) -> Result<String, &'a str> where &'a T: Send + Serialize + Sync;
+    async fn get_entity<T>(&self, key: &String) where T: Send + Serialize+Sync;
 }

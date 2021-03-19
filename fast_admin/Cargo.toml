@@ -23,3 +23,4 @@ num_cpus = "1.13.0"
 async-trait = "0.1.48"
 #redis
 #redis = { version = "0.17.0", features = ["async-std-comp"] }
+serde = { version = "1.0", features = ["derive"] }

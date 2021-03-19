@@ -1150,6 +1150,7 @@ dependencies = [
  "log",
  "num_cpus",
  "rbatis",
+ "serde",
 ]
 
 [[package]]
