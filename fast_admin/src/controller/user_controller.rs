@@ -4,7 +4,7 @@ use actix_web::{delete, get, post, put, web::Query};
 use actix_web::{HttpRequest, HttpResponse};
 use fast_common::common::api_result::{Api};
 use fast_common::models::user::{User, UserVo};
-use std::ops::DerefMut;
+
 
 #[post("new")]
 pub async fn new_user(arg: Form<User>, _request: HttpRequest) -> HttpResponse {

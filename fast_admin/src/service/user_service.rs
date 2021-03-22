@@ -8,9 +8,6 @@ use rbatis::crud::CRUD;
 use rbatis::plugin::page::{Page, PageRequest};
 use rbatis::plugin::snowflake::async_snowflake_id;
 
-use fast_common::utils::redis_util::RedisUtil;
-
-
 use rbatis::Error;
 use fast_common::utils::crypt_util::Crypt;
 

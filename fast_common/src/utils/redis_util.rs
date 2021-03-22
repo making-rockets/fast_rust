@@ -4,7 +4,8 @@ use redis_async_pool::{RedisConnection, RedisConnectionManager, RedisPool};
 use serde::de::DeserializeOwned;
 use serde::Serialize;
 use std::string::String;
-
+use std::time::Duration;
+use redis::cmd;
 
 ///缓存服务
 #[derive(Debug)]
@@ -57,6 +58,11 @@ impl RedisUtil {
         let mut conn = Self::get_conn().await;
         let result = conn.set(k, v).await;
         return result;
+    }
+    pub async fn set_string_expire(&self, k: &String, v: &String, time: usize) -> RedisResult<Value> {
+        let mut conn = Self::get_conn().await;
+
+     conn.set_ex(k.to_owned(), v.to_owned(), time).await
     }
 
 
