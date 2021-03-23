@@ -1,5 +1,5 @@
 use chrono::{Local, NaiveDateTime};
-use fast_common::common::orm_config::RB;
+use fast_common::{common::orm_config::RB, utils::redis_util::{self, RedisUtil}};
 use fast_common::models::user::{User, UserLoginVo, UserVo, UserRoleMenuVo};
 use fast_common::utils::crypt_util;
 use rbatis::core::db::DBExecResult;
@@ -10,6 +10,7 @@ use rbatis::plugin::snowflake::async_snowflake_id;
 
 use rbatis::Error;
 use fast_common::utils::crypt_util::Crypt;
+
 
 pub struct UserService {}
 
@@ -52,11 +53,13 @@ impl UserService {
 
     pub async fn login(user_login_vo: UserLoginVo ) -> Result<UserRoleMenuVo> {
         let mut wrapper = RB.new_wrapper();
-        if user_login_vo.user_name.is_none() || user_login_vo.password.is_none() {
-            Err(Error::from("could not found user_name or password"))
+        if user_login_vo.user_name.is_none() || user_login_vo.password.is_none() || user_login_vo.bar_code.is_none() {
+            Err(Error::from("required user_name or password or bar_code"))
         } else {
             let user_name = user_login_vo.user_name.unwrap();
             let user_password = user_login_vo.password.unwrap();
+            let bar_code =user_login_vo.bar_code.unwrap();
+
 
             wrapper = wrapper.eq("user_name", user_name);
             let user_result = RB.fetch_by_wrapper::<User>("", &wrapper).await;
@@ -90,6 +93,17 @@ impl UserService {
                 Err(err) => { Err(Error::from(err.to_string().as_str())) }
             }
         }
+    }
+
+   async  fn verify_bar_code(user_name:&String,bar_code:String){
+         let redisUtil = RedisUtil::get_redis_util().await;
+         let redis_bar_code = redisUtil.get_string(&user_name).await.unwrap();
+         match redis_bar_code {
+             Value: => {},
+         }
+         assert_eq!(bar_code,redis_bar_code);
+         
+        
     }
 }
 

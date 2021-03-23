@@ -32,6 +32,7 @@ pub struct UserLoginVo {
     pub user_name: Option<String>,
     pub user_id: Option<u64>,
     pub password: Option<String>,
+    pub bar_code:Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]

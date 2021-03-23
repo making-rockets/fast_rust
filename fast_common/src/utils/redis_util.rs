@@ -1,11 +1,10 @@
 use redis::{AsyncCommands, RedisError, RedisResult, Value};
-use redis_async_pool::deadpool::managed::{Object};
+use redis_async_pool::deadpool::managed::Object;
 use redis_async_pool::{RedisConnection, RedisConnectionManager, RedisPool};
 use serde::de::DeserializeOwned;
 use serde::Serialize;
 use std::string::String;
-use std::time::Duration;
-use redis::cmd;
+use std::error::Error;
 
 ///缓存服务
 #[derive(Debug)]
@@ -18,7 +17,11 @@ impl RedisUtil {
 
     pub async fn get_conn() -> Object<RedisConnection, RedisError> {
         let pool = RedisPool::new(
-            RedisConnectionManager::new(redis::Client::open("redis://localhost:6379").expect("cloud not find redis server"), true, None),
+            RedisConnectionManager::new(
+                redis::Client::open("redis://localhost:6379").expect("cloud not find redis server"),
+                true,
+                None,
+            ),
             5,
         );
         println!("装货1111");
@@ -27,7 +30,10 @@ impl RedisUtil {
         return x;
     }
 
-    pub async fn set_json<T>(&self, k: &String, v: &T) -> Result<String, &str> where T: Serialize, {
+    pub async fn set_json<T>(&self, k: &String, v: &T) -> Result<String, &str>
+    where
+        T: Serialize,
+    {
         let data = serde_json::to_string(v);
         if data.is_err() {
             return Err("序列化格式错误");
@@ -35,22 +41,14 @@ impl RedisUtil {
         let data = self.set_string(&k, &data.unwrap()).await.unwrap();
         Ok(data)
     }
-    pub async fn get_json<T>(&self, k: &String) -> Result<T, &str> where T: DeserializeOwned, {
+    pub async fn get_json<T>(&self, k: &String) -> Result<T, &String> where T: DeserializeOwned{
         let value = self.get_string(k).await.unwrap();
-        match value {
-            Value::Data(data) => {
-                let result: serde_json::Result<T> = serde_json::from_slice::<T>(&data);
-                if result.is_err() {
-                    return Err("反序列化错误");
-                }
-                Ok(result.unwrap())
-            }
-            // Value::Bulk(bluk) => { println!("bluk -> {:?}");return Ok(bluk) }
-            _ => {
-                println!("{:?}", value);
-                Err("没有找到数据")
-            }
-        }
+        let result:serde_json::Result<T> =serde_json::from_value((&value).parse().unwrap());
+         match result{
+             Ok(ret) => {Ok(ret)}
+             Err(err) => {Err(&err.to_string())}
+         }
+
     }
     //TODO 改造redis 工具类
 
@@ -59,15 +57,29 @@ impl RedisUtil {
         let result = conn.set(k, v).await;
         return result;
     }
-    pub async fn set_string_expire(&self, k: &String, v: &String, time: usize) -> RedisResult<Value> {
+    pub async fn set_string_expire(
+        &self,
+        k: &String,
+        v: &String,
+        time: usize,
+    ) -> RedisResult<Value> {
         let mut conn = Self::get_conn().await;
 
-     conn.set_ex(k.to_owned(), v.to_owned(), time).await
+        conn.set_ex(k.to_owned(), v.to_owned(), time).await
     }
 
-
-    pub async fn get_string(&self, k: &str) -> RedisResult<Value> {
+    pub async fn get_string(&self, k: &str) -> Result<String, &str> {
         let mut conn = Self::get_conn().await;
-        conn.get(k).await
+        let x = conn.get(k).await;
+        match x {
+            Value::Data(data) => {
+                let result = String::from_utf8(data);
+                match result {
+                    Ok(string) => Ok(string),
+                    Err(err) => Err(err.description()),
+                }
+            }
+            _ => Err("get redis value is failed"),
+        }
     }
 }
