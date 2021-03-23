@@ -22,7 +22,11 @@ pub struct BarCode {
 
 
 impl BarCode {
-    pub async fn captcha() -> HttpResponse {
+    pub async fn new(user_name: Option<String>, url: Option<String>) -> BarCode {
+        return BarCode { user_name, url };
+    }
+
+    pub async fn captcha(&self) -> Option<(Vec<u8>, Vec<char>)> {
         let mut captcha = Captcha::new();
         captcha
             .add_chars(4)
@@ -31,20 +35,17 @@ impl BarCode {
             .apply_filter(Wave::new(2.0, 20.0).vertical())
             .view(220, 120)
             .apply_filter(Dots::new(0));
-        let mut png = captcha.as_png();
-        match png {
-            Some(p) => {
-                HttpResponse::Ok().set_header(ACCESS_CONTROL_ALLOW_ORIGIN, "")
-                    .set_header(CACHE_CONTROL, "no-cache")
-                    .content_type(mime::IMAGE_PNG.to_string()).body(p)
-            }
-            None => {
-                let error = "生成验证码错误".to_owned();
-                let mut api = Api::from_result(Err::<(), GlobalError>(GlobalError(error))).await;
-                let res = api.to_response_of_json().await;
-                return res;
-            }
-        }
+
+        let code = captcha.chars();
+        let png = captcha.as_png().unwrap();
+        return Some((png, code));
+    }
+
+
+    pub async fn to_response(&self, base64: Vec<u8>) -> HttpResponse {
+        HttpResponse::Ok().set_header(ACCESS_CONTROL_ALLOW_ORIGIN, "*")
+            .set_header(CACHE_CONTROL, "no-cache")
+            .content_type(mime::IMAGE_PNG.to_string()).body(base64)
     }
 
 
@@ -64,5 +65,4 @@ impl BarCode {
 
     pub async fn validate_captcha() {}
 }
-
 

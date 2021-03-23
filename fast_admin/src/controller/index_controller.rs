@@ -7,6 +7,8 @@ use fast_common::utils::captcha_util;
 use actix_http::{Response};
 use fast_common::common::api_result::{Api, GlobalError};
 use fast_common::utils::redis_util::RedisUtil;
+use fast_common::utils::captcha_util::BarCode;
+
 
 #[get("/")]
 pub async fn index(request: HttpRequest) -> HttpResponse {
@@ -17,11 +19,20 @@ pub async fn index(request: HttpRequest) -> HttpResponse {
 pub async fn push_reg_code(user_name: Query<UserLoginVo>, _request: HttpRequest) -> HttpResponse {
     match user_name.into_inner().user_name {
         Some(user_name) => {
-            RedisUtil::get_redis_util().await.set_string_expire(&user_name,&"s".to_string(),200);
-            captcha_util::BarCode::captcha().await
+            let barCode = BarCode::new(Some(user_name.clone()), None).await;
+            let result = barCode.captcha().await;
+            match result {
+                Some(png_code) => {
+
+                    RedisUtil::get_redis_util().await.set_string_expire(&user_name,  &png_code.1.iter().collect(), 60).await;
+                    barCode.to_response(png_code.0).await
+                }
+                None => {
+                    Api::<()>::from_result(Err(GlobalError::from("生成验证码错误".to_owned()))).await.to_response_of_json().await
+                }
+            }
         }
         None => {
-
             Api::<()>::from_result(Err(GlobalError::from("user_name is none ".to_string()))).await.to_response_of_json().await
         }
     }
