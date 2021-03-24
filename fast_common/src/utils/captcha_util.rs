@@ -4,14 +4,11 @@ use serde::{Serialize, Deserialize};
 
 use captcha::filters::{Dots, Noise, Wave};
 
-use image::{ColorType, ImageEncoder, Luma, codecs::{self, png}};
+use image::{ColorType, ImageEncoder, Luma, codecs::{png}};
 use qrcode::QrCode;
 use captcha::Captcha;
-use crate::utils::redis_util::RedisUtil;
-
-use rbatis::Error;
-use crate::common::api_result::{Api, GlobalError};
-use crate::models::user::User;
+ 
+ 
 
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
