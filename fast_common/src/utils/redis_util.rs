@@ -4,8 +4,7 @@ use redis_async_pool::{RedisConnection, RedisConnectionManager, RedisPool};
 use serde::de::DeserializeOwned;
 use serde::Serialize;
 use std::string::String;
-use std::error::Error;
-use serde_json::json;
+
 
 ///缓存服务
 #[derive(Debug)]
@@ -81,5 +80,5 @@ impl RedisUtil {
         println!("我是谁");
         let result1 = from_redis_value(&pin.expect("this is a Value value"));
         return result1;
-    }
+  }
 }
