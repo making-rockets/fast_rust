@@ -10,6 +10,8 @@ use rbatis::plugin::snowflake::async_snowflake_id;
 
 use rbatis::Error;
 use fast_common::utils::crypt_util::Crypt;
+use actix_web::HttpResponse;
+use fast_common::common::api_result::{Api, GlobalError};
 
 
 pub struct UserService {}
@@ -51,14 +53,18 @@ impl UserService {
         return page;
     }
 
-    pub async fn login(user_login_vo: UserLoginVo ) -> Result<UserRoleMenuVo> {
+    pub async fn login(user_login_vo: UserLoginVo) -> Result<UserRoleMenuVo> {
         let mut wrapper = RB.new_wrapper();
         if user_login_vo.user_name.is_none() || user_login_vo.password.is_none() || user_login_vo.bar_code.is_none() {
             Err(Error::from("required user_name or password or bar_code"))
         } else {
             let user_name = user_login_vo.user_name.unwrap();
             let user_password = user_login_vo.password.unwrap();
-            let bar_code =user_login_vo.bar_code.unwrap();
+            let bar_code = user_login_vo.bar_code.unwrap();
+            let result = Self::verify_bar_code(&user_name, bar_code).await;
+            if result.is_err() {
+                return Err(Error::from(Err(result).to_string()));
+            }
 
 
             wrapper = wrapper.eq("user_name", user_name);
@@ -76,12 +82,12 @@ impl UserService {
                                 let claims = crypt_util::Claims::new_default(user.clone().id.unwrap().to_string().as_str());
                                 let access_token = claims.default_jwt_token().unwrap();
 
-                                Ok( UserRoleMenuVo{
+                                Ok(UserRoleMenuVo {
                                     user_id: None,
                                     user_name: None,
                                     role_id: None,
                                     role_name: None,
-                                    menus: None
+                                    menus: None,
                                 })
                             } else {
                                 Err(Error::from("密码错误"))
@@ -95,15 +101,13 @@ impl UserService {
         }
     }
 
-   async  fn verify_bar_code(user_name:&String,bar_code:String){
-         let redisUtil = RedisUtil::get_redis_util().await;
-         let redis_bar_code = redisUtil.get_string(&user_name).await.unwrap();
-         match redis_bar_code {
-             Value: => {},
-         }
-         assert_eq!(bar_code,redis_bar_code);
-         
-        
+    async fn verify_bar_code(user_name: &String, bar_code: String) -> std::result::Result<String, String> {
+        let redisUtil = RedisUtil::get_redis_util().await;
+        let redis_result = redisUtil.get_string(&user_name).await;
+        match redis_result {
+            Ok(ret) => { Ok(ret) }
+            Err(err) => { Err(err.to_string()) }
+        }
     }
 }
 
