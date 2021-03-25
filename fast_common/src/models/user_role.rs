@@ -1,7 +1,8 @@
-use serde::de::DeserializeOwned;
-use serde::Serialize;
 
-#[derive(Debug, DeserializeOwned, Serialize)]
+
+use serde_derive::Deserialize;
+use serde_derive::Serialize;
+#[derive(Debug, Deserialize, Serialize)]
 pub struct UserRole {
     id: Option<u64>,
     user_name: Option<String>,
