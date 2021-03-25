@@ -12,7 +12,9 @@ use rbatis::Error;
 use fast_common::utils::crypt_util::Crypt;
 use actix_web::HttpResponse;
 use fast_common::common::api_result::{Api, GlobalError};
-
+use crate::service::menu_service::MenuService;
+use crate::service::role_service;
+use crate::service::role_service::RoleService;
 
 pub struct UserService {}
 
@@ -67,10 +69,7 @@ impl UserService {
                     Some(e) => {return Err(Error::from(e))},
                     None => {},
                 }
-                 
             }
-
-
 
             wrapper = wrapper.eq("user_name", user_name);
             let user_result = RB.fetch_by_wrapper::<User>("", &wrapper).await;
@@ -86,14 +85,17 @@ impl UserService {
                                 //TODO 登录逻辑
                                 let claims = crypt_util::Claims::new_default(user.clone().id.unwrap().to_string().as_str());
                                 let access_token = claims.default_jwt_token().unwrap();
-
+                                let roles = RoleService::find_role_by_user(user.clone()).await;
+                                let menus = MenuService::find_menus_by_role(roles.clone()).await;
 
                                 Ok(UserRoleMenuVo {
                                     user_id: None,
                                     user_name: None,
+                                    access_token:Some(access_token),
                                     role_id: None,
                                     role_name: None,
-                                    menus: None,
+                                    menus: Some(menus),
+
                                 })
                             } else {
                                 Err(Error::from("密码错误"))
@@ -118,12 +120,12 @@ impl UserService {
                 println!("{:?},{:?}",&ret,&bar_code);
                  if bar_code !=(ret) {
                      
-                    Err(Error::from("bar code is failed").to_string())
+                    Err(Error::from("验证码无效").to_string())
                  }else {
                      Ok("".to_string())
                  }
                 }
-            Err(err) => { Err(err.to_string()) }
+            Err(err) => { Err("验证码错误".to_string()) }
         }
     }
 }

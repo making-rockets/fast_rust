@@ -32,14 +32,15 @@ pub struct UserLoginVo {
     pub user_name: Option<String>,
     pub user_id: Option<u64>,
     pub password: Option<String>,
-    pub bar_code:Option<String>,
+    pub bar_code: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
-pub struct UserRoleMenuVo{
-    pub user_id:Option<u64>,
-    pub user_name:Option<String>,
-    pub role_id:Option<u64>,
-    pub role_name:Option<String>,
-    pub menus: Option<Vec<MenuVo>>
+pub struct UserRoleMenuVo {
+    pub user_id: Option<u64>,
+    pub user_name: Option<String>,
+    pub access_token: Option<String>,
+    pub role_id: Option<u64>,
+    pub role_name: Option<String>,
+    pub menus: Option<Vec<MenuVo>>,
 }

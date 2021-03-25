@@ -9,6 +9,8 @@ use rbatis::plugin::page::{Page, PageRequest};
 use rbatis::plugin::snowflake::async_snowflake_id;
 
 use rbatis::core::value::DateTimeNow;
+use fast_common::models::user::User;
+use fast_common::models::role::RoleVo;
 
 pub struct MenuService {}
 
@@ -50,5 +52,9 @@ impl MenuService {
         let page_request = PageRequest::new(arg.page_num.unwrap(), arg.page_size.unwrap());
         let page = RB.fetch_page_by_wrapper("", &wrapper, &page_request).await;
         return page;
+    }
+
+    pub async fn find_menus_by_role(role:RoleVo)->Vec<MenuVo> {
+
     }
 }
