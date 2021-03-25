@@ -63,8 +63,13 @@ impl UserService {
             let bar_code = user_login_vo.bar_code.unwrap();
             let result = Self::verify_bar_code(&user_name, bar_code).await;
             if result.is_err() {
-                return Err(Error::from(Err(result).to_string()));
+                match result.err() {
+                    Some(e) => {return Err(Error::from(e))},
+                    None => {},
+                }
+                 
             }
+
 
 
             wrapper = wrapper.eq("user_name", user_name);
@@ -81,6 +86,7 @@ impl UserService {
                                 //TODO 登录逻辑
                                 let claims = crypt_util::Claims::new_default(user.clone().id.unwrap().to_string().as_str());
                                 let access_token = claims.default_jwt_token().unwrap();
+
 
                                 Ok(UserRoleMenuVo {
                                     user_id: None,
@@ -102,10 +108,21 @@ impl UserService {
     }
 
     async fn verify_bar_code(user_name: &String, bar_code: String) -> std::result::Result<String, String> {
-        let redisUtil = RedisUtil::get_redis_util().await;
-        let redis_result = redisUtil.get_string(&user_name).await;
+        let redis_util = RedisUtil::get_redis_util().await;
+        let redis_result = redis_util.get_string(&user_name).await;
+        println!("{:?}",redis_result);
+
         match redis_result {
-            Ok(ret) => { Ok(ret) }
+            
+            Ok(ret) => {
+                println!("{:?},{:?}",&ret,&bar_code);
+                 if bar_code !=(ret) {
+                     
+                    Err(Error::from("bar code is failed").to_string())
+                 }else {
+                     Ok("".to_string())
+                 }
+                }
             Err(err) => { Err(err.to_string()) }
         }
     }
