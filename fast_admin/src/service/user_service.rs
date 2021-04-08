@@ -66,8 +66,8 @@ impl UserService {
             let result = Self::verify_bar_code(&user_name, bar_code).await;
             if result.is_err() {
                 match result.err() {
-                    Some(e) => {return Err(Error::from(e))},
-                    None => {},
+                    Some(e) => { return Err(Error::from(e)); }
+                    None => {}
                 }
             }
 
@@ -85,17 +85,18 @@ impl UserService {
                                 //TODO 登录逻辑
                                 let claims = crypt_util::Claims::new_default(user.clone().id.unwrap().to_string().as_str());
                                 let access_token = claims.default_jwt_token().unwrap();
-                                let roles = RoleService::find_role_by_user(user.clone()).await;
-                                let menus = MenuService::find_menus_by_role(roles.clone()).await;
+                                //TODO
+                                //let roles = RoleService::find_role_by_user(user.clone()).await;
+                                //let menus = MenuService::find_menus_by_role(roles.clone()).await;
 
                                 Ok(UserRoleMenuVo {
                                     user_id: None,
                                     user_name: None,
-                                    access_token:Some(access_token),
+                                    access_token: Some(access_token),
                                     role_id: None,
                                     role_name: None,
-                                    menus: Some(menus),
-
+                                    // menus: Some(menus),
+                                    menus: None,
                                 })
                             } else {
                                 Err(Error::from("密码错误"))
@@ -112,19 +113,17 @@ impl UserService {
     async fn verify_bar_code(user_name: &String, bar_code: String) -> std::result::Result<String, String> {
         let redis_util = RedisUtil::get_redis_util().await;
         let redis_result = redis_util.get_string(&user_name).await;
-        println!("{:?}",redis_result);
+        println!("{:?}", redis_result);
 
         match redis_result {
-            
             Ok(ret) => {
-                println!("{:?},{:?}",&ret,&bar_code);
-                 if bar_code !=(ret) {
-                     
+                println!("{:?},{:?}", &ret, &bar_code);
+                if bar_code != (ret) {
                     Err(Error::from("验证码无效").to_string())
-                 }else {
-                     Ok("".to_string())
-                 }
+                } else {
+                    Ok("".to_string())
                 }
+            }
             Err(err) => { Err("验证码错误".to_string()) }
         }
     }
