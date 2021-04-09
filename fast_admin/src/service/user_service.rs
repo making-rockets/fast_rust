@@ -15,6 +15,7 @@ use fast_common::common::api_result::{Api, GlobalError};
 use crate::service::menu_service::MenuService;
 use crate::service::role_service;
 use crate::service::role_service::RoleService;
+use fast_common::models::role::Role;
 
 pub struct UserService {}
 
@@ -86,7 +87,12 @@ impl UserService {
                                 let claims = crypt_util::Claims::new_default(user.clone().id.unwrap().to_string().as_str());
                                 let access_token = claims.default_jwt_token().unwrap();
                                 //TODO
-                                //let roles = RoleService::find_role_by_user(user.clone()).await;
+                                let user_id = user.clone().id.unwrap();
+                                let roles = RoleService::find_role_by_user(user_id).await;
+                                if roles.is_err() {
+                                    Err(Error::from(roles.expect_err("此用户没有角色")))
+                                }
+
                                 //let menus = MenuService::find_menus_by_role(roles.clone()).await;
 
                                 Ok(UserRoleMenuVo {
