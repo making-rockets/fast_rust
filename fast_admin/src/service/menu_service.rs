@@ -54,7 +54,10 @@ impl MenuService {
         return page;
     }
 
-    /*pub async fn find_menus_by_role(role:RoleVo)->Vec<MenuVo> {
+    pub async fn find_menus_by_role(role_id: i64) -> Vec<Menu> {
+        let mut wrapper = RB.new_wrapper();
+        wrapper = wrapper.do_if(false, |wrapper| wrapper.eq("role_id", role_id));
+        let x = RB.fetch_list_by_wrapper::<Menu>("", &wrapper).await;
 
-    }*/
+    }
 }

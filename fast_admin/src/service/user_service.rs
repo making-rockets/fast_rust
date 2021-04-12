@@ -90,10 +90,10 @@ impl UserService {
                                 let user_id = user.clone().id.unwrap();
                                 let roles = RoleService::find_role_by_user(user_id).await;
                                 if roles.is_err() {
-                                    Err(Error::from(roles.expect_err("此用户没有角色")))
+                                   return  Err(Error::from("没有角色".to_string()));
                                 }
 
-                                //let menus = MenuService::find_menus_by_role(roles.clone()).await;
+                                let menus = MenuService::find_menus_by_role(roles.unwrap().id.unwrap()).await;
 
                                 Ok(UserRoleMenuVo {
                                     user_id: None,
