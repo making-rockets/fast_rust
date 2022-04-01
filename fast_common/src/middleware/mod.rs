@@ -1,2 +1,2 @@
 pub mod auth;
-pub mod handle_method;
+//pub mod handle_method;

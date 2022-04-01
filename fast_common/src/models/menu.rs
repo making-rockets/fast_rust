@@ -1,8 +1,8 @@
-use crate::rbatis;
+use crate::rbatis::crud_table;
 use chrono::NaiveDateTime;
 use serde_derive::{Deserialize, Serialize};
 
-#[crud_enable]
+#[crud_table]
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
 pub struct Menu {
     pub id: Option<u64>,

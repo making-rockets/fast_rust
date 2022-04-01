@@ -1,13 +1,11 @@
-use log::{debug, error, info, trace, warn, LevelFilter};
+use log::LevelFilter;
 use rbatis::core::db::DBPoolOptions;
-use rbatis::core::Error;
+
 use rbatis::plugin::intercept::SqlIntercept;
 use rbatis::plugin::log::LogPlugin;
 use rbatis::rbatis::Rbatis;
 
 use std::time::Duration;
-use serde_json::Value;
-
 
 lazy_static! {
     pub static ref RB: Rbatis = InitDb::new();
@@ -38,15 +36,19 @@ impl InitDb {
 #[derive(Debug)]
 pub struct Intercept {}
 
-
 impl SqlIntercept for Intercept {
     fn name(&self) -> &str {
         std::any::type_name::<Self>()
     }
 
-    fn do_intercept(&self, rb: &Rbatis, context_id: &str, sql: &mut String, args: &mut Vec<Value>, is_prepared_sql: bool) -> Result<(), Error> {
-        println!("sql interceptor = {}", sql);
-        Ok(())
+    fn do_intercept(
+        &self,
+        rb: &Rbatis,
+        sql: &mut String,
+        args: &mut Vec<rbson::Bson>,
+        is_prepared_sql: bool,
+    ) -> Result<(), rbatis::core::Error> {
+        todo!()
     }
 }
 
@@ -55,26 +57,6 @@ pub struct RbatisLog {}
 
 impl LogPlugin for RbatisLog {
     fn get_level_filter(&self) -> &LevelFilter {
-        &LevelFilter::Trace
-    }
-
-    fn error(&self, context_id: &str, data: &str) {
-        error!("sql log error: context_id={}, data = {}", context_id, data);
-    }
-
-    fn warn(&self, context_id: &str, data: &str) {
-        warn!("sql log warn: context_id={}, data={}", context_id, data);
-    }
-
-    fn info(&self, context_id: &str, data: &str) {
-        info!("sql log info: context_id={}, data={}", context_id, data);
-    }
-
-    fn debug(&self, context_id: &str, data: &str) {
-        debug!("sql log debug: context_id={}, data={}", context_id, data);
-    }
-
-    fn trace(&self, context_id: &str, data: &str) {
-        trace!("sql log trace: context_id={}, data={}", context_id, data);
+        &LevelFilter::Debug
     }
 }

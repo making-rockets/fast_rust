@@ -2,8 +2,8 @@ use crate::rbatis;
 use chrono::NaiveDateTime;
 use serde_derive::Serialize;
 use serde_derive::Deserialize;
-#[crud_enable]
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+
+#[derive(Debug, CRUDTable, Serialize, Deserialize, Clone, PartialEq)]
 pub struct Role {
     pub id: Option<u64>,
     pub role_name: Option<String>,

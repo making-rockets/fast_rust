@@ -4,8 +4,8 @@ use serde_derive::{Deserialize, Serialize};
 use crate::models::user_role::UserRole;
 use crate::models::menu::MenuVo;
 
-#[crud_enable]
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+
+#[derive(Debug, CRUDTable, Serialize, Deserialize, Clone, PartialEq)]
 pub struct User {
     pub id: Option<u64>,
     pub user_name: Option<String>,

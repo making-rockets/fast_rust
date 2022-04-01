@@ -2,14 +2,16 @@
 name = "fast_common"
 version = "0.1.0"
 authors = ["by965738071@163.com <by965738071@163.com>"]
-edition = "2018"
+edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 
-actix-web = "3.3.2"
-actix-http = "2.2.0"
+actix-web = { version = "4.0.1" }
+actix-http = { version = "3.0.4" }
+anyhow = { version = "1.0.56" }
+
 
 #json支持(必须)
 serde = { version = "1.0", features = ["derive"] }
@@ -22,13 +24,14 @@ chrono = { version = "0.4", features = ["serde"] }
 #log日志支持(必须)
 log = "0.4"
 fast_log = "1.2.9"
-env_logger = "0.8"
+env_logger = "0.9.0"
 
 #BigDecimal支持(可选)
-bigdecimal = "0.2"
+bigdecimal = "0.3.0"
 
 #rbatis支持
-rbatis = { version = "1.8.71", features = ["snowflake", "debug_mode"] }
+rbatis = { version = "3.1.6", features = ["debug_mode"] }
+rbson = { version = "*" }
 #静态初始化
 lazy_static = "1.4.0"
 #异步
@@ -36,20 +39,20 @@ futures = "0.3.10"
 
 #网络请求
 reqwest = "0.11.0"
-redis = { version = "0.17.0", features = ["async-std-comp", "tokio-rt-core"], default-features = false }
-redis-async-pool = "0.2.4"
+deadpool-redis = { version = "0.10" }
+redis = { version = "0.21", default-features = false, features = [] }
 
 short-crypt = "1.0.23"
 async_once = "0.2.1"
 #解析toml
-toml_edit = "0.2.0"
+toml_edit = "0.14.2"
 
-validator = "0.12.0"
-validator_derive = "0.12.0"
+validator = "0.14.0"
+validator_derive = "0.14.0"
 uuid = "0.8.2"
 mime = "0.3.16"
-jsonwebtoken = "7.2.0"
+jsonwebtoken = "8.0.1"
 captcha = "0.0.8"
 qrcode = "0.12"
-image = "0.23"
-async-trait = "0.1.48"
+image = "0.24.1"
+async-trait = "0.1.53"
