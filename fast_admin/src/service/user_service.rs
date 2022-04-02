@@ -6,7 +6,7 @@ use rbatis::core::db::DBExecResult;
 use rbatis::core::Result;
 use rbatis::crud::CRUD;
 use rbatis::plugin::page::{Page, PageRequest};
-use rbatis::plugin::snowflake::async_snowflake_id;
+
 
 use rbatis::Error;
 use fast_common::utils::crypt_util::Crypt;
@@ -21,24 +21,27 @@ pub struct UserService {}
 
 impl UserService {
     pub async fn add(mut user: User) -> Result<DBExecResult> {
-        let id = async_snowflake_id().await as u64;
+        let id = 1 as u64;
         user.id = Some(id);
         let format = "%Y-%m-%d %H:%M:%S";
         user.create_time = Some(NaiveDateTime::parse_from_str(&Local::now().format(format).to_string(), format).unwrap());
         let string = user.password.unwrap_or_else(|| "111111".to_string());
         let result1 = Crypt::encrypt(&string);
         user.password = Some(result1.unwrap());
-        let result = RB.save("", &user).await?;
+        let mut wrapper = RB.new_wrapper();
+        let result = RB.save(&user, &[]).await?;
         return Ok(result);
     }
 
     pub async fn update(mut user: User) -> Result<u64> {
-        let result = RB.update_by_id("", &mut user).await;
+        let mut wrapper = RB.new_wrapper();
+        let result = RB.update_by_wrapper(&user, wrapper,&[]).await;
         return result;
     }
 
     pub async fn delete(user: User) -> Result<u64> {
-        let result = RB.remove_by_id::<User>("", &user.id.unwrap()).await;
+        let mut  wrapper = RB.new_wrapper();
+        let result = RB.remove_by_wrapper::<User>( wrapper).await;
         return result;
     }
 
@@ -52,7 +55,7 @@ impl UserService {
 
 
         let page_request = PageRequest::new(arg.page_num.unwrap_or_else(|| 1), arg.page_size.unwrap_or_else(|| 10));
-        let page = RB.fetch_page_by_wrapper("", &wrapper, &page_request).await;
+        let page = RB.fetch_page_by_wrapper(wrapper, &page_request).await;
         return page;
     }
 
@@ -73,7 +76,7 @@ impl UserService {
             }
 
             wrapper = wrapper.eq("user_name", user_name);
-            let user_result = RB.fetch_by_wrapper::<User>("", &wrapper).await;
+            let user_result = RB.fetch_by_wrapper::<User>(wrapper).await;
             match user_result {
                 Ok(user) => {
                     let password = user.clone().password.unwrap();
@@ -87,10 +90,10 @@ impl UserService {
                                 let claims = crypt_util::Claims::new_default(user.clone().id.unwrap().to_string().as_str());
                                 let access_token = claims.default_jwt_token().unwrap();
                                 //TODO
-                                let user_id = user.clone().id.unwrap();
+                                let user_id = user.clone().id.unwrap() as i64;
                                 let roles = RoleService::find_role_by_user(user_id).await;
                                 if roles.is_err() {
-                                   return  Err(Error::from("没有角色".to_string()));
+                                    return Err(Error::from("没有角色".to_string()));
                                 }
 
                                 let menus = MenuService::find_menus_by_role(roles.unwrap().id.unwrap()).await;
@@ -117,7 +120,7 @@ impl UserService {
     }
 
     async fn verify_bar_code(user_name: &String, bar_code: String) -> std::result::Result<String, String> {
-        let redis_util = RedisUtil::get_redis_util().await;
+        let redis_util = RedisUtil::get_instance().await;
         let redis_result = redis_util.get_string(&user_name).await;
         println!("{:?}", redis_result);
 

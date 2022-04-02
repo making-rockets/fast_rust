@@ -1,5 +1,5 @@
 use chrono::NaiveDateTime;
-use crate::models::menu::{Menu, MenuVo};
+use crate::models::menu::{ MenuVo};
 
 pub struct RoleMenu {
     pub role_id: Option<u64>,

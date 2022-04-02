@@ -2,12 +2,12 @@ use std::cell::RefCell;
 use std::pin::Pin;
 use std::rc::Rc;
 use std::task::{Context, Poll};
-use actix_http::HttpMessage;
 
-use actix_web::{error, Error};
+
+use actix_web::{ Error};
 
 //use crate::common::api_result::Api;
-use crate::utils::crypt_util::Claims;
+
 
 use actix_web::dev::{Service, ServiceRequest, ServiceResponse, Transform};
 
@@ -53,9 +53,13 @@ impl<S, B> Service<ServiceRequest> for AuthMiddleware<S>
     }
 
     fn call(&self, req: ServiceRequest) -> Self::Future {
-        let mut svc = self.service.clone();
+       // let mut svc = self.service.clone();
+        let    svc = self.service.call(req);
         Box::pin(async move {
-            let token = req.headers().get("Authorization");
+           // println!("actix-web middleware ------header = {:?}", req.head());
+            Ok(svc.await?)
+            
+            // let token = req.headers().get("Authorization");
             // match token {
             //     None => match req.path() {
             //         "/admin/index/login" | "/admin/index/send_reg_code" => {

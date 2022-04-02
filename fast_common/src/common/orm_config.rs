@@ -6,18 +6,22 @@ use rbatis::plugin::log::LogPlugin;
 use rbatis::rbatis::Rbatis;
 
 use std::time::Duration;
+use futures::executor::block_on;
+use tokio::runtime::Runtime;
 
 lazy_static! {
-    pub static ref RB: Rbatis = InitDb::new();
+       pub static ref RB :Rbatis =tokio::runtime::Runtime::new().unwrap().block_on(InitDb::new("mysql://root:root@39.101.69.31:3306/test"));
 }
 
-pub struct InitDb {}
+
+pub struct InitDb;
 
 impl InitDb {
-    pub fn new() -> Rbatis {
+    pub async fn new(url: &str) -> Rbatis {
         let mut rbatis: Rbatis = Rbatis::new();
         rbatis.add_sql_intercept(Intercept {});
         rbatis.set_log_plugin(RbatisLog {});
+        rbatis.link_opt(url, Self::db_option()).await.expect("connect database is error ");
         println!("rbatis init success");
         return rbatis;
     }
@@ -43,12 +47,13 @@ impl SqlIntercept for Intercept {
 
     fn do_intercept(
         &self,
-        rb: &Rbatis,
+        _rb: &Rbatis,
         sql: &mut String,
         args: &mut Vec<rbson::Bson>,
-        is_prepared_sql: bool,
+        _is_prepared_sql: bool,
     ) -> Result<(), rbatis::core::Error> {
-        todo!()
+        println!("执行sql: {:?} \n 参数：{:?}", sql, args);
+        Ok(())
     }
 }
 

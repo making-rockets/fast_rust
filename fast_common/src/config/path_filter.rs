@@ -1,5 +1,4 @@
-use std::ops::{DerefMut, Deref};
-
+ 
 #[derive(Debug, Clone)]
 pub struct PathFilter {
     pub paths: Vec<String>

@@ -10,14 +10,14 @@ edition = "2021"
 fast_common  ={path = "../fast_common"}
 #log日志支持(必须)
 log = "0.4"
-fast_log="1.2.9"
-env_logger = "0.8"
+
 actix-web = "4.0.1"
 actix-http = "2.2.0"
 #时间
 chrono ="0.4.19"
 #orm
-rbatis =  { version = "1.8",features=["snowflake","debug_mode"]}
+rbatis = { version = "3.1.6", features = ["debug_mode"] }
+rbson = { version = "*" }
 #cpu_count
 num_cpus = "1.13.0"
 async-trait = "0.1.48"

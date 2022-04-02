@@ -11,13 +11,12 @@ use std::fmt::{Display, Formatter, write};
 pub struct GlobalError(pub String);
 
 
-
-
 impl Display for GlobalError {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f ,"{}",self)?
+        write!(f, "{}", self)
     }
 }
+
 
 
 impl From<String> for GlobalError {
@@ -25,7 +24,6 @@ impl From<String> for GlobalError {
         GlobalError(s)
     }
 }
-
 
 
 impl From<rbatis::core::Error> for GlobalError {
@@ -37,8 +35,6 @@ impl From<rbatis::core::Error> for GlobalError {
 impl std::error::Error for GlobalError {}
 
 impl ResponseError for GlobalError {}
-
-
 
 
 impl From<actix_web::error::Error> for Api<()> {
@@ -59,8 +55,8 @@ pub struct Api<T> {
 }
 
 impl<T> Api<T>
-where
-    T: Serialize + DeserializeOwned + Clone,
+    where
+        T: Serialize + DeserializeOwned + Clone,
 {
     pub async fn from_result(result: Result<T, GlobalError>) -> Self {
         match result {

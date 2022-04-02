@@ -1,7 +1,7 @@
 use serde::Serialize;
 use serde::Deserialize;
 use short_crypt::ShortCrypt;
-use chrono::{Local, Timelike};
+use chrono::{Local};
 use jsonwebtoken::{Header, Algorithm, EncodingKey, DecodingKey, Validation};
 use std::string::String;
 
@@ -56,7 +56,7 @@ impl Claims {
         }
     }
 
-    pub fn encode(&self, sign: &str) -> Result<String, String> {
+    pub fn encode(&self, _sign: &str) -> Result<String, String> {
         let mut header = Header::default();
         header.kid = Some(SIGN_KEY.to_owned());
         header.alg = Algorithm::HS512;
@@ -81,7 +81,7 @@ impl Claims {
     pub fn validation_token(token: &String) -> Result<(), String> {
         let result = Self::decode(token);
         match result {
-            Ok(claims) => { Ok(()) }
+            Ok(_claims) => { Ok(()) }
             Err(err) => { Err(err) }
         }
     }

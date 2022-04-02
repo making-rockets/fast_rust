@@ -6,9 +6,10 @@ use rbatis::core::db::DBExecResult;
 use rbatis::core::Result;
 use rbatis::crud::CRUD;
 use rbatis::plugin::page::{Page, PageRequest};
-use rbatis::plugin::snowflake::async_snowflake_id;
+
 
 use rbatis::core::value::DateTimeNow;
+use rbatis::wrapper::Wrapper;
 use fast_common::models::user::User;
 use fast_common::models::role::RoleVo;
 
@@ -16,20 +17,22 @@ pub struct MenuService {}
 
 impl MenuService {
     pub async fn add(mut menu: Menu) -> Result<DBExecResult> {
-        let id = async_snowflake_id().await as u64;
+        let id = 1 as u64;
         menu.id = Some(id);
         menu.create_time = Some(NaiveDateTime::now());
-        let result = RB.save("", &menu).await?;
+        let result = RB.save(&menu, &[]).await?;
         return Ok(result);
     }
 
     pub async fn update(mut menu: Menu) -> Result<u64> {
-        let result = RB.update_by_id("", &mut menu).await;
+        let mut wrapper = RB.new_wrapper();
+        let result = RB.update_by_wrapper(&mut menu, wrapper, &[]).await;
         return result;
     }
 
     pub async fn delete(menu: Menu) -> Result<u64> {
-        let x = RB.remove_by_id::<Menu>("", &menu.id.unwrap()).await;
+        let mut wrapper = RB.new_wrapper();
+        let x = RB.remove_by_wrapper::<Menu>(wrapper).await;
         //let result  = RB.remove_by_id::<Menu>("", &menu.id.unwrap()).await;
         return x;
     }
@@ -50,14 +53,14 @@ impl MenuService {
         }
 
         let page_request = PageRequest::new(arg.page_num.unwrap(), arg.page_size.unwrap());
-        let page = RB.fetch_page_by_wrapper("", &wrapper, &page_request).await;
+        let page = RB.fetch_page_by_wrapper(wrapper, &page_request).await;
         return page;
     }
 
     pub async fn find_menus_by_role(role_id: u64) -> Result<Vec<Menu>> {
         let mut wrapper = RB.new_wrapper();
         wrapper = wrapper.do_if(false, |wrapper| wrapper.eq("role_id", role_id));
-        let x = RB.fetch_list_by_wrapper::<Menu>("", &wrapper).await;
+        let x = RB.fetch_list_by_wrapper::<Menu>(wrapper).await;
         return x;
     }
 }

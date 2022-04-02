@@ -3,7 +3,6 @@ use actix_web::web::{Form, Query};
 use actix_web::{HttpResponse};
 use actix_web::{get, post, HttpRequest};
 use fast_common::models::user::{UserLoginVo};
-use fast_common::utils::captcha_util;
 use actix_http::{Response};
 use fast_common::common::api_result::{Api, GlobalError};
 use fast_common::utils::redis_util::RedisUtil;
@@ -23,8 +22,8 @@ pub async fn push_reg_code(user_name: Query<UserLoginVo>, _request: HttpRequest)
             let result = bar_code.captcha().await;
             match result {
                 Some(png_code) => {
-
-                    RedisUtil::get_redis_util().await.set_string_expire(&user_name,  &png_code.1.iter().collect(), 60).await;
+                  let code_vec =  String::from(png_code.1.iter().collect::<String>());
+                    RedisUtil::get_instance().await.set_string(&user_name,code_vec ).await;
                     bar_code.to_response(png_code.0).await
                 }
                 None => {
@@ -40,7 +39,7 @@ pub async fn push_reg_code(user_name: Query<UserLoginVo>, _request: HttpRequest)
 
 
 #[post("/login")]
-pub async fn login(user: Form<UserLoginVo>) -> Response {
+pub async fn login(user: Form<UserLoginVo>) -> HttpResponse {
     let result = UserService::login(user.into_inner()).await;
     Api::from_rbatis_result(&result).await.to_response_of_json().await
 }
