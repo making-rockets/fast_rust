@@ -2,6 +2,7 @@
 extern crate lazy_static;
 #[macro_use]
 extern crate rbatis;
+extern crate core;
 
 
 pub mod common;

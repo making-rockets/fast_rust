@@ -16,6 +16,7 @@ use crate::service::menu_service::MenuService;
 use crate::service::role_service;
 use crate::service::role_service::RoleService;
 use fast_common::models::role::Role;
+use fast_common::utils::redis_util::REDIS_UTIL;
 
 pub struct UserService {}
 
@@ -35,13 +36,13 @@ impl UserService {
 
     pub async fn update(mut user: User) -> Result<u64> {
         let mut wrapper = RB.new_wrapper();
-        let result = RB.update_by_wrapper(&user, wrapper,&[]).await;
+        let result = RB.update_by_wrapper(&user, wrapper, &[]).await;
         return result;
     }
 
     pub async fn delete(user: User) -> Result<u64> {
-        let mut  wrapper = RB.new_wrapper();
-        let result = RB.remove_by_wrapper::<User>( wrapper).await;
+        let mut wrapper = RB.new_wrapper();
+        let result = RB.remove_by_wrapper::<User>(wrapper).await;
         return result;
     }
 
@@ -120,8 +121,7 @@ impl UserService {
     }
 
     async fn verify_bar_code(user_name: &String, bar_code: String) -> std::result::Result<String, String> {
-        let redis_util = RedisUtil::get_instance().await;
-        let redis_result = redis_util.get_string(&user_name).await;
+        let redis_result = REDIS_UTIL.get_string(&user_name).await;
         println!("{:?}", redis_result);
 
         match redis_result {

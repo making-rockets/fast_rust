@@ -5,7 +5,7 @@ use serde_derive::{Deserialize, Serialize};
 use crate::models::menu::MenuVo;
 
 
-#[derive(Debug, CRUDTable, Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Debug, CRUDTable, Serialize, Deserialize, Clone)]
 pub struct User {
     pub id: Option<u64>,
     pub user_name: Option<String>,
@@ -14,7 +14,7 @@ pub struct User {
     pub password: Option<String>,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct UserVo {
     pub id: Option<i64>,
     pub user_name: Option<String>,
@@ -26,16 +26,14 @@ pub struct UserVo {
     pub end_time: Option<NaiveDateTime>,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct UserLoginVo {
-    pub token: Option<String>,
     pub user_name: Option<String>,
-    pub user_id: Option<u64>,
     pub password: Option<String>,
     pub bar_code: Option<String>,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct UserRoleMenuVo {
     pub user_id: Option<u64>,
     pub user_name: Option<String>,

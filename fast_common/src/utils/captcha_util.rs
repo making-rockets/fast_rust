@@ -1,12 +1,11 @@
 use actix_web::{ HttpResponse};
-use actix_http::header::{ACCESS_CONTROL_ALLOW_ORIGIN, CACHE_CONTROL};
+use actix_http::header::{ACCESS_CONTROL_ALLOW_ORIGIN};
 use serde::{Serialize, Deserialize};
 
 use captcha::filters::{Dots, Noise, Wave};
 
 
 use captcha::Captcha;
-use reqwest::header;
 
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -28,7 +27,7 @@ impl BarCode {
             .apply_filter(Noise::new(0.5))
             .apply_filter(Wave::new(2.0, 20.0).horizontal())
             .apply_filter(Wave::new(2.0, 20.0).vertical())
-            .view(220, 120)
+            .view(200, 80)
             .apply_filter(Dots::new(0));
 
         let code = captcha.chars();
@@ -38,7 +37,7 @@ impl BarCode {
 
 
     pub async fn to_response(&self, base64: Vec<u8>) -> HttpResponse {
-        HttpResponse::Ok().set_header(ACCESS_CONTROL_ALLOW_ORIGIN, "*")
+        HttpResponse::Ok().insert_header(("access-control-allow-origin","*"))
             .insert_header( ("cache-control","no-cache"))
             .content_type(mime::IMAGE_PNG.to_string()).body(base64)
     }

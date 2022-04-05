@@ -12,7 +12,7 @@ use actix_web::http::header::HeaderValue;
 struct HttpUtil {}
 
 impl HttpUtil {
-    async fn post(
+    async fn _post(
         url: &str,
         headers: &mut HeaderMap<HeaderValue>,
         _data: &mut HashMap<String, String, RandomState>,
@@ -45,5 +45,8 @@ impl HttpUtil {
         Ok(response)
 
         //Ok(reqwest::get(url).json::<HashMap<String, String>>().await.unwrap())
+    }
+    pub fn new() -> Self {
+        Self {}
     }
 }

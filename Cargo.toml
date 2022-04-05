@@ -1,2 +1,2 @@
 [workspace]
-members = ["fast_common", "fast_admin"]
+members = ["fast_admin"]

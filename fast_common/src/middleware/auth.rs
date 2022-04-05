@@ -53,10 +53,11 @@ impl<S, B> Service<ServiceRequest> for AuthMiddleware<S>
     }
 
     fn call(&self, req: ServiceRequest) -> Self::Future {
+        println!("actix-web middleware ------header = {:?}", &req.head());
        // let mut svc = self.service.clone();
         let    svc = self.service.call(req);
         Box::pin(async move {
-           // println!("actix-web middleware ------header = {:?}", req.head());
+
             Ok(svc.await?)
             
             // let token = req.headers().get("Authorization");

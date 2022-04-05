@@ -10,7 +10,7 @@ edition = "2021"
 fast_common  ={path = "../fast_common"}
 #log日志支持(必须)
 log = "0.4"
-
+env_logger = "0.9.0"
 actix-web = "4.0.1"
 actix-http = "2.2.0"
 #时间

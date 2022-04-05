@@ -6,11 +6,12 @@ use rbatis::plugin::log::LogPlugin;
 use rbatis::rbatis::Rbatis;
 
 use std::time::Duration;
-use futures::executor::block_on;
-use tokio::runtime::Runtime;
+
+
 
 lazy_static! {
        pub static ref RB :Rbatis =tokio::runtime::Runtime::new().unwrap().block_on(InitDb::new("mysql://root:root@39.101.69.31:3306/test"));
+      //pub static ref RB :Rbatis = Rbatis::new();
 }
 
 
