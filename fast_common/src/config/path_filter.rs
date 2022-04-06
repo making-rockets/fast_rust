@@ -5,12 +5,12 @@ pub struct PathFilter {
 }
 
 impl PathFilter {
-    pub fn add(&mut self, path: String) -> &mut PathFilter {
+    pub fn _add(&mut self, path: String) -> &mut PathFilter {
         self.paths.push(path);
         return self;
     }
 
-    pub fn new() -> PathFilter {
+    pub fn _new() -> PathFilter {
         let vec = Vec::<String>::new();
         PathFilter { paths: vec }
     }

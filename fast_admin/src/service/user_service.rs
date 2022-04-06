@@ -11,6 +11,8 @@ use rbatis::plugin::page::{Page, PageRequest};
 use rbatis::Error;
 use fast_common::utils::crypt_util::Crypt;
 use actix_web::HttpResponse;
+use rbatis::wrapper::Wrapper;
+use fast_common::base::base_service::BaseService;
 use fast_common::common::api_result::{Api, GlobalError};
 use crate::service::menu_service::MenuService;
 use crate::service::role_service;
@@ -19,6 +21,15 @@ use fast_common::models::role::Role;
 use fast_common::utils::redis_util::REDIS_UTIL;
 
 pub struct UserService {}
+
+
+impl BaseService<User, UserVo> for UserService {
+    fn get_wrapper(arg: &UserVo) -> Wrapper {
+        let wrapper = RB.new_wrapper();
+        wrapper
+    }
+}
+
 
 impl UserService {
     pub async fn add(mut user: User) -> Result<DBExecResult> {

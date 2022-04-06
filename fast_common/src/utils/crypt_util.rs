@@ -69,7 +69,7 @@ impl Claims {
     pub fn decode(token: &String) -> Result<Self, String> {
         let result = jsonwebtoken::decode::<Claims>(&token, &DecodingKey::from_secret(SECRET_KEY), &Validation::new(Algorithm::HS512));
         match result {
-            Ok(tokenData) => { Ok(tokenData.claims) }
+            Ok(token_data) => { Ok(token_data.claims) }
             Err(err) => { Err(err.to_string()) }
         }
     }

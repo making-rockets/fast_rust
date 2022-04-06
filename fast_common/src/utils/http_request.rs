@@ -35,7 +35,7 @@ impl HttpUtil {
         Ok(result)
     }
 
-    async fn get(url: &str) -> Result<Response, Error> {
+    async fn _get(url: &str) -> Result<Response, Error> {
         let violations = RefCell::new(Vec::new());
         let url = Url::options()
             .syntax_violation_callback(Some(&|v| violations.borrow_mut().push(v)))
@@ -46,7 +46,8 @@ impl HttpUtil {
 
         //Ok(reqwest::get(url).json::<HashMap<String, String>>().await.unwrap())
     }
-    pub fn new() -> Self {
+
+    pub fn _new() -> Self {
         Self {}
     }
 }

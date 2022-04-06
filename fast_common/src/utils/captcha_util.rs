@@ -1,5 +1,5 @@
 use actix_web::{ HttpResponse};
-use actix_http::header::{ACCESS_CONTROL_ALLOW_ORIGIN};
+
 use serde::{Serialize, Deserialize};
 
 use captcha::filters::{Dots, Noise, Wave};

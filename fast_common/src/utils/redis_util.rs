@@ -4,7 +4,7 @@ use deadpool_redis::{Config, Connection, Pool, Runtime};
 
 
 use std::string::String;
-use redis::{Cmd, RedisResult, ToRedisArgs};
+use redis::{Cmd, ToRedisArgs};
 use serde::Serialize;
 
 use lazy_static::lazy_static;
@@ -63,7 +63,8 @@ impl RedisUtil {
 
 
 pub mod test {
-    use deadpool_redis::{redis::{cmd, FromRedisValue}, Config, Runtime};
+    use deadpool_redis::{Config, Runtime};
+    use redis::cmd;
 
     #[tokio::test]
     async fn main() {
