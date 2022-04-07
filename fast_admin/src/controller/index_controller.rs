@@ -5,7 +5,7 @@ use actix_web::{HttpMessage, HttpResponse, web};
 use actix_web::{get, post, HttpRequest};
 use fast_common::models::user::{UserLoginVo};
 use actix_http::{Response};
-use actix_http::http::HeaderValue;
+
 use actix_web::http::header;
 
 
@@ -43,6 +43,8 @@ pub async fn login(user: Form<UserLoginVo>) -> HttpResponse {
     let result = UserService::login(user.into_inner()).await;
     Api::from_rbatis_result(result).await.to_response_of_json().await
 }
+
+
 
 
 #[get("/logout")]

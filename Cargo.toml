@@ -1,2 +1,4 @@
+
+
 [workspace]
-members = ["fast_admin","fast_demo"]
+members = ["fast_admin","fast_demo","fast_common"]

@@ -5,9 +5,6 @@ use actix_web::web::scope;
 
 pub(crate) fn index_routers() -> impl HttpServiceFactory {
     web::scope("/admin/index")
-        // .guard(guard::Post())
-       // .configure(| f| f)
-        //.service(index::index)
         .service(index::push_reg_code)
         .service(index::login)
         .service(index::logout)

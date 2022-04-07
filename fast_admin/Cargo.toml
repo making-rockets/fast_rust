@@ -12,15 +12,11 @@ fast_common  ={path = "../fast_common"}
 log = "0.4"
 env_logger = "0.9.0"
 actix-web = "4.0.1"
-actix-http = "2.2.0"
+actix-http = "3.0.4"
 #时间
 chrono ="0.4.19"
 #orm
 rbatis = { version = "3.1.6", features = ["debug_mode"] }
 rbson = { version = "*" }
-#cpu_count
-num_cpus = "1.13.0"
 async-trait = "0.1.48"
-#redis
-#redis = { version = "0.17.0", features = ["async-std-comp"] }
 serde = { version = "1.0", features = ["derive"] }
