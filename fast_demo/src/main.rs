@@ -1,9 +1,8 @@
-mod sites;
+use config_struct::StructOptions;
 
-#[async_std::main]
-async fn main() ->(){
-    let org = sites::this_week_in_rust_org().await;
-    println!("{:?}", org);
+fn main() {
+    let result = config_struct::create_struct("./setting.toml", "src/config.rs", &StructOptions::default());
+    println!("{:?}",result);
 }
 
 

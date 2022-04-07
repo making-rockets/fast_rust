@@ -4,7 +4,8 @@ use deadpool_redis::{Config, Connection, Pool, Runtime};
 
 
 use std::string::String;
-use redis::{Cmd, ToRedisArgs};
+use actix_http::header::HeaderValue;
+use redis::{AsyncCommands, Cmd, ToRedisArgs};
 use serde::Serialize;
 
 use lazy_static::lazy_static;
@@ -15,6 +16,14 @@ lazy_static! {
 }
 pub struct RedisUtil {
     pool: Pool,
+}
+
+impl RedisUtil {
+    pub async fn delete(&self, key: &str) -> anyhow::Result<usize> {
+        let mut connection = RedisUtil::get_conn().await?;
+        let pin: usize = connection.del(key).await?;
+        Ok(pin)
+    }
 }
 
 impl RedisUtil {

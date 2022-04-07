@@ -81,10 +81,7 @@ impl UserService {
             let bar_code = user_login_vo.bar_code.unwrap();
             let result = Self::verify_bar_code(&user_name, bar_code).await;
             if result.is_err() {
-                match result.err() {
-                    Some(e) => { return Err(Error::from(e)); }
-                    None => {}
-                }
+                if let Some(e) = result.err() { return Err(Error::from(e)); }
             }
 
             wrapper = wrapper.eq("user_name", user_name);

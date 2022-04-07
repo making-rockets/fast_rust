@@ -10,4 +10,5 @@ pub(crate) fn index_routers() -> impl HttpServiceFactory {
         //.service(index::index)
         .service(index::push_reg_code)
         .service(index::login)
+        .service(index::logout)
 }

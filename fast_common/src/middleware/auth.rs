@@ -6,8 +6,6 @@ use std::task::{Context, Poll};
 
 use actix_web::{ Error};
 
-//use crate::common::api_result::Api;
-
 
 use actix_web::dev::{Service, ServiceRequest, ServiceResponse, Transform};
 
@@ -54,7 +52,9 @@ impl<S, B> Service<ServiceRequest> for AuthMiddleware<S>
 
     fn call(&self, req: ServiceRequest) -> Self::Future {
         println!("actix-web middleware ------header = {:?}", &req.head());
-       // let mut svc = self.service.clone();
+
+        let x = req.path();
+
         let    svc = self.service.call(req);
         Box::pin(async move {
 
