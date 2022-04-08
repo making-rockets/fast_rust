@@ -17,5 +17,4 @@ log_level = "info"
 
 #白名单
 [whitelist]
-admin = ["/admin/index/send_reg_code", "/admin/index/login"]
-api = ["/api/index/send_reg_code", "/api/index/login"]
+list = ["/admin/index/send_reg_code", "/admin/index/login"]

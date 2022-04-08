@@ -32,8 +32,7 @@ pub struct _Config__log {
 #[derive(Debug, Clone)]
 #[allow(non_camel_case_types)]
 pub struct _Config__whitelist {
-    pub admin: Cow<'static, [Cow<'static, str>]>,
-    pub api: Cow<'static, [Cow<'static, str>]>,
+    pub list: Cow<'static, [Cow<'static, str>]>,
 }
 
 pub const CONFIG: Config = Config {
@@ -50,7 +49,6 @@ pub const CONFIG: Config = Config {
         log_temp_size: Cow::Borrowed("100MB"),
     },
     whitelist: _Config__whitelist {
-        admin: Cow::Borrowed(&[Cow::Borrowed("/admin/index/send_reg_code"), Cow::Borrowed("/admin/index/login")]),
-        api: Cow::Borrowed(&[Cow::Borrowed("/api/index/send_reg_code"), Cow::Borrowed("/api/index/login")]),
+        list: Cow::Borrowed(&[Cow::Borrowed("/admin/index/send_reg_code"), Cow::Borrowed("/admin/index/login")]),
     },
 };

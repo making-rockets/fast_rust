@@ -1,15 +1,24 @@
-use actix_http::Method;
-use actix_web::body::MessageBody;
-use actix_web::dev::{Service, ServiceRequest, ServiceResponse, Transform};
-
-use actix_web::http::Error;
-use actix_web::{error, HttpMessage};
-use futures::future::{ok, Ready};
+use std::borrow::{Borrow, BorrowMut};
 use std::cell::RefCell;
-use std::future::Future;
+use std::future::{Ready, ready};
+
 use std::pin::Pin;
 use std::rc::Rc;
 use std::task::{Context, Poll};
+use actix_http::body::MessageBody;
+use actix_http::header::HeaderValue;
+use actix_http::{HttpMessage, Method};
+use actix_web::middleware::DefaultHeaders;
+use actix_web::{Error, error, HttpResponse};
+
+
+use actix_web::dev::{forward_ready, Service, ServiceRequest, ServiceResponse, Transform};
+use actix_web::web::service;
+use futures::future::LocalBoxFuture;
+use actix_web::body::BoxBody;
+
+use crate::common::api_result::Api;
+use crate::config::toml_config;
 
 pub struct HandleMethod;
 
@@ -17,11 +26,10 @@ pub struct HandleMethodMiddleAware<S> {
     service: Rc<RefCell<S>>,
 }
 
-impl<S, B, ServiceRequest> Transform<S, ServiceRequest> for HandleMethod
-where
-    S: Service<ServiceRequest, Response = ServiceResponse<B>, Error = Error> + 'static,
+impl<S, B> Transform<S, ServiceRequest> for HandleMethod where
+    S: Service<ServiceRequest, Response=ServiceResponse<B>, Error=Error> + 'static,
     S::Future: 'static,
-    B: MessageBody + 'static,
+    B: 'static
 {
     type Response = ServiceResponse<B>;
     type Error = Error;
@@ -30,29 +38,32 @@ where
     type Future = Ready<Result<Self::Transform, Self::InitError>>;
 
     fn new_transform(&self, service: S) -> Self::Future {
-        ok(HandleMethodMiddleAware {
+        ready(Ok(HandleMethodMiddleAware {
             service: Rc::new(RefCell::new(service)),
-        })
+        }))
     }
 }
 
-impl<S, B> Service<ServiceRequest> for HandleMethodMiddleAware<S>
-where
-    S: Service<ServiceRequest, Response = ServiceResponse<B>, Error = Error> + 'static,
+impl<S, B> Service<ServiceRequest> for HandleMethodMiddleAware<S> where
+    S: Service<ServiceRequest, Response=ServiceResponse<B>, Error=Error> + 'static,
     S::Future: 'static,
-    B: MessageBody + 'static,
+    B: 'static,
 {
     type Response = ServiceResponse<B>;
     type Error = Error;
-    type Future = Pin<Box<dyn Future<Output = Result<Self::Response, Self::Error>>>>;
+    type Future = LocalBoxFuture<'static, Result<Self::Response, Self::Error>>;
 
-    fn poll_ready(&self, ctx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
-        self.service.poll_ready(ctx)
-    }
+    forward_ready!(service);
 
     fn call(&self, req: ServiceRequest) -> Self::Future {
-        println!("actix-web middleware ------header = {:?}", req.head());
-        let fut = self.service.call(req);
-        Box::pin(async move { Ok(fut.await?) })
+        let service = self.service.clone();
+        Box::pin(async move {
+            println!("获取请求{:?}", &req);
+
+            let result = Api::from(actix_web::error::ErrorUnauthorized("未授权")).to_response_of_json().await;
+
+            ServiceResponse::from()
+            Ok(service.call(req).await?)
+        })
     }
 }

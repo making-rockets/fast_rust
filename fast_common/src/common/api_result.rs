@@ -6,6 +6,7 @@ use serde::de::DeserializeOwned;
 use serde::Serialize;
 
 use std::fmt::{Display, Formatter};
+use actix_http::body::BoxBody;
 
 #[derive(Debug, Serialize, Clone)]
 pub struct GlobalError(pub String);
@@ -47,10 +48,8 @@ impl From<actix_web::error::Error> for Api<()> {
 }
 
 
-
-
-#[derive(Debug, Serialize,Clone)]
-pub struct Api<T> where T:Serialize  {
+#[derive(Debug, Serialize, Clone)]
+pub struct Api<T> where T: Serialize {
     pub code: Option<u16>,
     pub msg: Option<GlobalError>,
     pub data: Option<T>,
@@ -84,7 +83,7 @@ impl<T> Api<T> where T: Serialize + DeserializeOwned + Clone {
     pub async fn from_result(result: Result<T, GlobalError>) -> Self {
         match result {
             Ok(t) => Api {
-                code: Some( StatusCode::OK.as_u16()),
+                code: Some(StatusCode::OK.as_u16()),
                 msg: None,
                 data: Some(t),
             },
@@ -112,8 +111,6 @@ impl<T> Api<T> where T: Serialize + DeserializeOwned + Clone {
     }
 
     pub async fn to_response_of_json(&mut self) -> HttpResponse {
-
-
         HttpResponseBuilder::new(StatusCode::from_u16(self.code.unwrap()).unwrap())
             //.insert_header(header::ACCESS_CONTROL_ALLOW_METHODS.as_ref())
             .content_type(header::ContentType(mime::APPLICATION_JSON))

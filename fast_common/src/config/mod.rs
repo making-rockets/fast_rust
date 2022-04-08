@@ -1,2 +1,2 @@
 pub mod path_filter;
-mod toml_config;
+pub mod toml_config;
