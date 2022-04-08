@@ -1,0 +1,23 @@
+[database]
+url = ""
+username = ""
+password = ""
+
+
+
+[log]
+#日志文件存放目录
+log_dir = "target/logs/"
+#日志分割尺寸-单位KB,MB,GB
+log_temp_size = "100MB"
+#日志打包格式可选“”（空-保留.log）“gzip”（gz压缩包）“zip”（zip压缩包）“lz4”（lz4压缩包（非常快））
+log_pack_compress = ""
+#日志滚动保留-保留全部: All,按时间保留(秒): KeepTime(i64),按版本保留: KeepNum(i64)
+log_rolling_type = "KeepNum(20)"
+#日志等级-info,error,warn,debug,trace
+log_level = "info"
+
+#白名单
+[whitelist]
+admin = ["/admin/index/send_reg_code", "/admin/index/login"]
+api = ["/api/index/send_reg_code", "/api/index/login"]
