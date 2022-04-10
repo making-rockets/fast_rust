@@ -1,9 +1,17 @@
+use std::str::from_utf8;
 use serde::Serialize;
 use serde::Deserialize;
 use short_crypt::ShortCrypt;
 use chrono::{Local};
-use jsonwebtoken::{Header, Algorithm, EncodingKey, DecodingKey, Validation};
 use std::string::String;
+use crate::models::user::{UserRoleMenuVo, UserVo};
+use crate::utils::redis_util::REDIS_UTIL;
+use anyhow::{Error, Result};
+use futures::future::{err, ok};
+use jsonwebtoken::{Algorithm, DecodingKey, EncodingKey, Header, Validation};
+use crate::models::menu::MenuVo;
+use crate::models::role::RoleVo;
+
 
 const KEY_PR: &'static str = "abcdefjhigklmnopqrstuvwxyz1234567890";
 const SIGN_KEY: &str = "abcdefghigklmnopqrstuvwxyz1234567890";
@@ -14,89 +22,92 @@ const SECRET_KEY: &[u8; 13] = b"a.and.b.and.c";
 pub struct Crypt;
 
 impl Crypt {
-    pub fn encrypt<T: Serialize + ?Sized>(obj: &T) -> Result<String, &'static str> {
-        let value = if let Ok(v) = serde_json::to_string(obj) {
-            v
-        } else {
-            return Err("将结构体序列化时出错");
-        };
+    pub fn encrypt<T: Serialize + ?Sized>(obj: &T) -> Result<String> {
+        let value = serde_json::to_string(obj)?;
         let sc = ShortCrypt::new(KEY_PR);
         let encrypt_string = sc.encrypt_to_url_component(&value);
         Ok(encrypt_string)
     }
-    pub fn decrypt_string(encrypt_string: &str) -> Result<String, &'static str> {
+    pub fn decrypt_string(encrypt_string: &str) -> Result<String> {
         let sc = ShortCrypt::new(KEY_PR);
-        match sc.decrypt_url_component(encrypt_string) {
-            Ok(v) => match String::from_utf8(v) {
-                Ok(s) => Ok(s),
-                Err(_) => Err("反解析字符串时出错"),
-            },
-            Err(_) => Err("反解密字符串时出错"),
-        }
+
+        let result = sc.decrypt_url_component(encrypt_string).unwrap();
+
+        Ok(String::from_utf8(result)?)
+        // match result {
+        //     Ok(vec) => {
+        //
+        //     }
+        //     Err(e) => { anyhow::Error::from(e)}
+        // }
     }
 }
 
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Claims {
-    sub: String,
-    company: String,
-    exp: usize,
+    pub user_id: u64,
+    pub user_name: String,
+    pub role: RoleVo,
+    pub menus: Vec<MenuVo>,
+    express_time: usize,
 }
 
+
+
 impl Claims {
-    pub fn new(sub: &str, company: &str, exp: usize) -> Self {
-        Claims { sub: sub.to_string(), company: company.to_owned(), exp }
-    }
-    pub fn new_default(sub: &str) -> Self {
+    pub fn new(user_id: u64, user_name: String, role: RoleVo, menus: Vec<MenuVo>, express_time: usize) -> Self {
         Claims {
-            sub: sub.to_owned(),
-            company: "bxb".to_string(),
-            exp: (Local::now().timestamp() + 1800) as usize,
+            user_id,
+            user_name,
+            role,
+            menus,
+            express_time,
         }
     }
 
-    pub fn encode(&self, _sign: &str) -> Result<String, String> {
+    pub fn encode(&self, _sign: &str) -> Result<String> {
         let mut header = Header::default();
         header.kid = Some(SIGN_KEY.to_owned());
         header.alg = Algorithm::HS512;
-        match jsonwebtoken::encode(&header, &self, &EncodingKey::from_secret(SECRET_KEY)) {
-            Ok(token) => { Ok(token) }
-            Err(err) => { Err(err.to_string()) }
-        }
+        let result = jsonwebtoken::encode(&header, &self, &EncodingKey::from_secret(SECRET_KEY))?;
+        Ok(result)
     }
 
-    pub fn decode(token: &String) -> Result<Self, String> {
-        let result = jsonwebtoken::decode::<Claims>(&token, &DecodingKey::from_secret(SECRET_KEY), &Validation::new(Algorithm::HS512));
-        match result {
-            Ok(token_data) => { Ok(token_data.claims) }
-            Err(err) => { Err(err.to_string()) }
-        }
+    pub fn decode(token: String) -> Result<Self> {
+        let result = jsonwebtoken::decode::<Claims>(&token, &DecodingKey::from_secret(SECRET_KEY), &Validation::new(Algorithm::HS512))?;
+        Ok(result.claims)
     }
-    pub fn default_jwt_token(&self) -> Result<String, String> {
-        let result = self.encode(&SIGN_KEY);
-        return result;
+    pub fn default_jwt_token(&self) -> Result<String> {
+        let result = self.encode(&SIGN_KEY)?;
+        return Ok(result);
     }
 
-    pub fn validation_token(token: &String) -> Result<(), String> {
-        let result = Self::decode(token);
-        match result {
-            Ok(_claims) => { Ok(()) }
-            Err(err) => { Err(err) }
-        }
+    pub fn validation_token(access_token: &str) -> Result<()> {
+        let _result = Self::decode(String::from(access_token))?;
+        Ok(())
     }
-}
 
 
-impl Default for Claims {
-    fn default() -> Self {
-        Claims { sub: "b@b.com".to_owned(), company: "ACME".to_owned(), exp: 10000000000 }
+    ///获取用户信息
+    async fn get_user_info_by_access_token(access_token: &str) -> Result<UserRoleMenuVo> {
+        let x = REDIS_UTIL.get_string(access_token).await?;
+        let claims = Self::decode(x)?;
+        Ok(UserRoleMenuVo::from(claims))
     }
 }
 
 
-#[test]
-fn test() {
-    let i = Local::now().timestamp();
-    println!("{}", i as usize)
+impl From<Claims> for UserRoleMenuVo {
+    fn from(claims: Claims) -> Self {
+        Self {
+            user_id: Some(claims.user_id),
+            user_name: Some(claims.user_name),
+            access_token: None,
+            role_id: Some(claims.role.role_id.unwrap()),
+            role_name: Some(claims.role.role_name.unwrap()),
+            menus: Some(claims.menus),
+        }
+    }
 }
+

@@ -1,91 +1,95 @@
-use std::borrow::{Borrow, BorrowMut};
+#![allow(clippy::type_complexity)]
+
 use std::cell::RefCell;
-use std::pin::Pin;
+use std::ops::{Deref, DerefMut};
 use std::rc::Rc;
+use std::sync::Arc;
 use std::task::{Context, Poll};
-use actix_http::body::MessageBody;
 use actix_http::header::HeaderValue;
-use actix_web::middleware::DefaultHeaders;
-use actix_web::{Error};
+
+use futures::future::{ok, LocalBoxFuture, Ready};
+use futures::{FutureExt, StreamExt};
 
 
-use actix_web::dev::{forward_ready, Service, ServiceRequest, ServiceResponse, Transform};
-use actix_web::web::service;
-
-use futures::future::{ok, Future, Ready, LocalBoxFuture, err};
+use actix_web::{
+    body::{EitherBody, MessageBody},
+    dev::{ServiceRequest, ServiceResponse},
+    Error, HttpMessage, HttpResponse, Result,
+};
+use actix_web::dev::{forward_ready, Service, Transform};
 use crate::common::api_result::Api;
-use crate::config::toml_config;
+use crate::config::toml_config::{Config, CONFIG};
 
 
-fn is_white_list(path: &str) -> bool {
-    let whitelist = toml_config::CONFIG.whitelist;
-    for x in whitelist.list.iter() {
+async fn is_white_list(path: &str) -> bool {
+    for x in CONFIG.whitelist.list.iter() {
         if x.eq(path) {
+            println!("时代");
             return true;
-        };
+        }
     }
     return false;
 }
 
-pub async fn checked_token(token: &str, path: &str) -> anyhow::Result<()> {
-    //check token alive
-    Ok(())
-}
 
-pub struct Auth;
+#[derive(Clone)]
+pub struct Authorization;
 
-impl<S, B> Transform<S, ServiceRequest> for Auth
-    where
-        S: Service<ServiceRequest, Response=ServiceResponse<B>, Error=Error> + 'static,
-        S::Future: 'static,
 
+impl<S, B> Transform<S, ServiceRequest> for Authorization where
+    S: Service<ServiceRequest, Response=ServiceResponse<B>, Error=Error> + 'static,
+    B: MessageBody,
 {
-    type Response = ServiceResponse<B>;
+    type Response = ServiceResponse<EitherBody<B>>;
     type Error = Error;
-    type Transform = AuthMiddleware<S>;
+    type Transform = AuthorizationMiddleware<S>;
     type InitError = ();
     type Future = Ready<Result<Self::Transform, Self::InitError>>;
 
     fn new_transform(&self, service: S) -> Self::Future {
-        ok(AuthMiddleware {
+        ok(AuthorizationMiddleware {
             service: Rc::new(RefCell::new(service)),
         })
     }
 }
 
-pub struct AuthMiddleware<S> {
+
+pub struct AuthorizationMiddleware<S> {
     service: Rc<RefCell<S>>,
+
 }
 
-impl<S, B> Service<ServiceRequest> for AuthMiddleware<S> where
-    S: Service<ServiceRequest, Response=ServiceResponse<B>, Error=Error> + 'static,
-    S::Future: 'static,
+impl<S, B> Service<ServiceRequest> for AuthorizationMiddleware<S>
+    where
+        S: Service<ServiceRequest, Response=ServiceResponse<B>, Error=Error> + 'static,
+        B: MessageBody,
 {
-    type Response = ServiceResponse<B>;
-    type Error = Error;
+    type Response = ServiceResponse<EitherBody<B>>;
+    type Error = S::Error;
     type Future = LocalBoxFuture<'static, Result<Self::Response, Self::Error>>;
     forward_ready!(service);
 
-    fn call(&self, mut req: ServiceRequest) -> Self::Future {
-        let service = self.service.clone();
-        Box::pin(async move {
-            let request_path = req.path();
-
-            if is_white_list(request_path) {
-                service.call(req).await
-            } else {
-                let Authorization = req.headers().get("Authorization");
-                match Authorization {
-                    Some(access_toen) => {
-                        service.call(req).await
-                    }
+    fn call(&self, req: ServiceRequest) -> Self::Future {
+        let srv = self.service.clone();
+        async move {
+            if !is_white_list(req.path()).await {
+                let option = req.headers().get("Authorization");
+                match option {
                     None => {
-                        let result = Api::from(actix_web::error::ErrorUnauthorized("未授权")).to_response_of_json().await;
-                        Ok(req.into_response(req.into_response(result)))
+                        return Ok(req.into_response(
+                            HttpResponse::Unauthorized().json(Api::from(actix_web::error::ErrorUnauthorized("未认证"))).map_into_right_body()
+                        ));
+                    }
+                    Some(header) => {
+                        
+                        return Ok(req.into_response(
+                            HttpResponse::Unauthorized().json(Api::from(actix_web::error::ErrorUnauthorized("未认证"))).map_into_right_body()
+                        ));
                     }
                 }
+            } else {
+                srv.call(req).await.map(|res| res.map_into_left_body())
             }
-        })
+        }.boxed_local()
     }
 }
-

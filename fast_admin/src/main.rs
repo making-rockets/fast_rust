@@ -38,8 +38,8 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(move || {
         App::new()
             .wrap(Logger::default())
-            //.wrap(middleware::auth::Auth)
-            .wrap(middleware::handle_method::HandleMethod)
+            .wrap(middleware::auth::Authorization)
+            //.wrap(middleware::handle_method::HandleMethod)
             .service(routers::index_route::index_routers())
             .service(routers::user_route::user_routes())
             .service(routers::menu_route::menu_routes())

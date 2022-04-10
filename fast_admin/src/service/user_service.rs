@@ -12,6 +12,7 @@ use rbatis::Error;
 use fast_common::utils::crypt_util::Crypt;
 use actix_web::HttpResponse;
 use rbatis::wrapper::Wrapper;
+use crypt_util::Claims;
 use fast_common::base::base_service::BaseService;
 use fast_common::common::api_result::{Api, GlobalError};
 use crate::service::menu_service::MenuService;
@@ -66,7 +67,7 @@ impl UserService {
             .do_if(false, |wrapper| wrapper.gt("create_time", &arg.start_time).and().le("create_time", &arg.end_time));
 
 
-        let page_request = PageRequest::new(arg.page_num.unwrap_or_else(|| 1), arg.page_size.unwrap_or_else(|| 10));
+        let page_request = PageRequest::new(arg.page_num.unwrap_or(1), arg.page_size.unwrap_or(10));
         let page = RB.fetch_page_by_wrapper(wrapper, &page_request).await;
         return page;
     }
@@ -95,9 +96,8 @@ impl UserService {
                         Ok(decrypt) => {
                             let string = format!("{}{}{}", "\"", user_password, "\"");
                             if string == decrypt {
-                                //TODO 登录逻辑
-                                let claims = crypt_util::Claims::new_default(user.clone().id.unwrap().to_string().as_str());
-                                let access_token = claims.default_jwt_token().unwrap();
+
+
                                 //TODO
                                 let user_id = user.clone().id.unwrap() as i64;
                                 let roles = RoleService::find_role_by_user(user_id).await;
@@ -110,7 +110,7 @@ impl UserService {
                                 Ok(UserRoleMenuVo {
                                     user_id: None,
                                     user_name: None,
-                                    access_token: Some(access_token),
+                                    access_token: Some(String::from("")),
                                     role_id: None,
                                     role_name: None,
                                     // menus: Some(menus),

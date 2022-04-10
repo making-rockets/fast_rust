@@ -55,15 +55,11 @@ impl<S, B> Service<ServiceRequest> for HandleMethodMiddleAware<S> where
 
     forward_ready!(service);
 
-    fn call(&self, req: ServiceRequest) -> Self::Future {
+    fn call(&self, mut req: ServiceRequest) -> Self::Future {
         let service = self.service.clone();
         Box::pin(async move {
             println!("获取请求{:?}", &req);
-
-            let result = Api::from(actix_web::error::ErrorUnauthorized("未授权")).to_response_of_json().await;
-
-            ServiceResponse::from()
-            Ok(service.call(req).await?)
+            service.call(req).await
         })
     }
 }

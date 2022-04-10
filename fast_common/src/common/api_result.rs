@@ -1,5 +1,6 @@
+use std::cell::RefCell;
 use actix_web::http::header;
-use actix_web::{http::StatusCode, HttpResponse};
+use actix_web::{http::StatusCode, HttpRequest, HttpResponse, Responder};
 use actix_web::{HttpResponseBuilder, ResponseError};
 
 use serde::de::DeserializeOwned;
@@ -7,6 +8,8 @@ use serde::Serialize;
 
 use std::fmt::{Display, Formatter};
 use actix_http::body::BoxBody;
+use actix_http::Response;
+use actix_web::web::Form;
 
 #[derive(Debug, Serialize, Clone)]
 pub struct GlobalError(pub String);
