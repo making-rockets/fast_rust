@@ -8,12 +8,13 @@ use rbatis::wrapper::Wrapper;
 use serde::de::DeserializeOwned;
 use serde::Serialize;
 use crate::common::orm_config::RB;
+use crate::models::user::User;
 
 #[async_trait]
 pub trait BaseService<Model, Params>: Sync + Send where Model: CRUDTable + Serialize + DeserializeOwned, Params: Serialize + Sync + Send {
     fn get_wrapper(arg: &Params) -> Wrapper;
 
-    async fn save(&self, model: &Model) -> anyhow::Result<DBExecResult> {
+    async fn save(&self, model: User) -> anyhow::Result<DBExecResult> {
         let x = RB.save(&model, &[]).await?;
         Ok(x)
     }

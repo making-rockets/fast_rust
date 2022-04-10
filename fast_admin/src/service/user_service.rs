@@ -11,6 +11,7 @@ use rbatis::plugin::page::{Page, PageRequest};
 use rbatis::Error;
 use fast_common::utils::crypt_util::Crypt;
 use actix_web::HttpResponse;
+use rbatis::value::DateTimeNow;
 use rbatis::wrapper::Wrapper;
 use crypt_util::Claims;
 use fast_common::base::base_service::BaseService;
@@ -31,18 +32,17 @@ impl BaseService<User, UserVo> for UserService {
     }
 }
 
-
 impl UserService {
-    pub async fn add(mut user: User) -> Result<DBExecResult> {
+    pub async fn add(mut user: User) -> anyhow::Result<DBExecResult> {
         let id = 1 as u64;
         user.id = Some(id);
-        let format = "%Y-%m-%d %H:%M:%S";
-        user.create_time = Some(NaiveDateTime::parse_from_str(&Local::now().format(format).to_string(), format).unwrap());
+
+        user.create_time = Some(NaiveDateTime::now());
         let string = user.password.unwrap_or_else(|| "111111".to_string());
-        let result1 = Crypt::encrypt(&string);
-        user.password = Some(result1.unwrap());
-        let mut wrapper = RB.new_wrapper();
-        let result = RB.save(&user, &[]).await?;
+
+        user.password = Some(Crypt::encrypt(&string)?);
+
+
         return Ok(result);
     }
 
