@@ -1,15 +1,15 @@
 use std::cell::RefCell;
-use actix_web::http::header;
-use actix_web::{http::StatusCode, HttpRequest, HttpResponse, Responder};
-use actix_web::{HttpResponseBuilder, ResponseError};
-
-use serde::de::DeserializeOwned;
-use serde::Serialize;
-
 use std::fmt::{Display, Formatter};
+
 use actix_http::body::BoxBody;
 use actix_http::Response;
+use actix_web::{http::StatusCode, HttpRequest, HttpResponse, Responder};
+use actix_web::{HttpResponseBuilder, ResponseError};
+use actix_web::http::header;
 use actix_web::web::Form;
+use serde::de::DeserializeOwned;
+use serde::Serialize;
+use tokio::select_variant;
 
 #[derive(Debug, Serialize, Clone)]
 pub struct GlobalError(pub String);
@@ -95,6 +95,21 @@ impl<T> Api<T> where T: Serialize + DeserializeOwned + Clone {
                 msg: Some(e),
                 data: None,
             },
+        }
+    }
+
+    pub async fn from_any_result(result: anyhow::Result<T>) -> Self {
+        match result {
+            Ok(t) => {
+                Api {
+                    code: Some(StatusCode::OK.as_u16()),
+                    msg: None,
+                    data: Some(t),
+                }
+            }
+            Err(e) => {
+                Api { code: Some(StatusCode::BAD_REQUEST.as_u16()), msg: Some(GlobalError(e.to_string())), data: None }
+            }
         }
     }
 

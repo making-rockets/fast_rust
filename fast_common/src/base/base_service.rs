@@ -11,41 +11,44 @@ use crate::common::orm_config::RB;
 use crate::models::user::User;
 
 #[async_trait]
-pub trait BaseService<Model, Params>: Sync + Send where Model: CRUDTable + Serialize + DeserializeOwned, Params: Serialize + Sync + Send {
-    fn get_wrapper(arg: &Params) -> Wrapper;
+pub trait BaseService: Sync + Send {
+    type Model: CRUDTable + Serialize + DeserializeOwned;
 
-    async fn save(&self, model: User) -> anyhow::Result<DBExecResult> {
+
+    fn get_wrapper(arg: &Self::Model) -> Wrapper;
+
+    async fn save(model: User) -> anyhow::Result<DBExecResult> {
         let x = RB.save(&model, &[]).await?;
         Ok(x)
     }
 
-    async fn update(&self, arg: &Params, model: &Model) -> anyhow::Result<u64> {
+    async fn update(arg: &Self::Model, model: &Self::Model) -> anyhow::Result<u64> {
         let wrapper = Self::get_wrapper(&arg);
         let result = RB.update_by_wrapper(&model, wrapper, &[]).await?;
         Ok(result)
     }
 
-    async fn delete(&self, arg: &Params) -> anyhow::Result<u64> {
+    async fn delete(arg: &Self::Model) -> anyhow::Result<u64> {
         let wrapper = Self::get_wrapper(&arg);
-        let result = RB.remove_by_wrapper::<Model>(wrapper).await?;
+        let result = RB.remove_by_wrapper::<Self::Model>(wrapper).await?;
         Ok(result)
     }
 
 
     /// 默认分页实现
-    async fn page(&self, arg: &Params, page_num: Option<u64>, page_size: Option<u64>) -> anyhow::Result<Page<Model>> {
+    async fn page(arg: &Self::Model, page_num: Option<u64>, page_size: Option<u64>) -> anyhow::Result<Page<Self::Model>> {
         let wrapper = Self::get_wrapper(arg);
         //构建分页条件
         let page_request = PageRequest::new(page_num.unwrap_or(1), page_size.unwrap_or(10));
         //执行分页查询
-        let pages: Page<Model> = RB.fetch_page_by_wrapper(wrapper, &page_request).await?;
+        let pages: Page<Self::Model> = RB.fetch_page_by_wrapper(wrapper, &page_request).await?;
         Ok(pages)
     }
 
     ///默认列表实现
-    async fn list(&self, arg: &Params) -> anyhow::Result<Vec<Model>> {
+    async fn list(arg: &Self::Model) -> anyhow::Result<Vec<Self::Model>> {
         let wrapper = Self::get_wrapper(arg);
-        let list: Vec<Model> = RB.fetch_list_by_wrapper(wrapper).await?;
+        let list: Vec<Self::Model> = RB.fetch_list_by_wrapper(wrapper).await?;
         Ok(list)
     }
 }

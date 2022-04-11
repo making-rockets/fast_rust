@@ -14,6 +14,3 @@ pub struct Service {
     pub role_service: RoleService,
 }
 
-impl Service {
-    get
-}

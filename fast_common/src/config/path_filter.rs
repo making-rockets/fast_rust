@@ -16,10 +16,4 @@ impl PathFilter {
     }
 }
 
-#[test]
-pub fn test() {
-    let mut t = PathFilter::new();
-    let x = t.add("abc".to_string()).add("bcd".to_owned());
-    println!("{:?}", t);
-}
 

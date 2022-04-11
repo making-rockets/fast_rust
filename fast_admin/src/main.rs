@@ -3,7 +3,7 @@
 
 use fast_common::middleware;
 
-use fast_common::common::orm_config::InitDb;
+use fast_common::common::orm_config::{InitDb, RB};
 
 use actix_web::{App, HttpResponse, HttpServer, Responder, web, get};
 use actix_web::http::KeepAlive;
@@ -35,11 +35,13 @@ async fn main() -> std::io::Result<()> {
     std::env::set_var("RUST_LOG", "actix_web=debug");
     init_logger();
 
+    RB.link_opt("mysql://root:root123@localhost:3306/test", InitDb::db_option()).await;
+
     HttpServer::new(move || {
         App::new()
             .wrap(Logger::default())
             .wrap(middleware::auth::Authorization)
-            //.wrap(middleware::handle_method::HandleMethod)
+            .wrap(middleware::handle_method::HandleMethod)
             .service(routers::index_route::index_routers())
             .service(routers::user_route::user_routes())
             .service(routers::menu_route::menu_routes())

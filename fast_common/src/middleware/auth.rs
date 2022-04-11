@@ -5,21 +5,21 @@ use std::ops::{Deref, DerefMut};
 use std::rc::Rc;
 use std::sync::Arc;
 use std::task::{Context, Poll};
+
 use actix_http::header::HeaderValue;
-
-use futures::future::{ok, LocalBoxFuture, Ready};
-use futures::{FutureExt, StreamExt};
-
-
 use actix_web::{
     body::{EitherBody, MessageBody},
     dev::{ServiceRequest, ServiceResponse},
     Error, HttpMessage, HttpResponse, Result,
 };
 use actix_web::dev::{forward_ready, Service, Transform};
+use actix_web::web::head;
+use futures::{FutureExt, StreamExt};
+use futures::future::{LocalBoxFuture, ok, Ready};
+
 use crate::common::api_result::Api;
 use crate::config::toml_config::{Config, CONFIG};
-
+use crate::utils::crypt_util::Claims;
 
 async fn is_white_list(path: &str) -> bool {
     for x in CONFIG.whitelist.list.iter() {
@@ -76,15 +76,19 @@ impl<S, B> Service<ServiceRequest> for AuthorizationMiddleware<S>
                 let option = req.headers().get("Authorization");
                 match option {
                     None => {
-                        return Ok(req.into_response(
-                            HttpResponse::Unauthorized().json(Api::from(actix_web::error::ErrorUnauthorized("未认证"))).map_into_right_body()
-                        ));
+                        Ok(req.into_response(
+                            HttpResponse::Unauthorized().json(Api::from(actix_web::error::ErrorUnauthorized("未认证1"))).map_into_right_body()
+                        ))
                     }
                     Some(header) => {
-                        
-                        return Ok(req.into_response(
-                            HttpResponse::Unauthorized().json(Api::from(actix_web::error::ErrorUnauthorized("未认证"))).map_into_right_body()
-                        ));
+                        let result = Claims::validation_token(header.to_str().unwrap());
+                        if result.is_err() {
+                            Ok(req.into_response(
+                                HttpResponse::Unauthorized().json(Api::from(actix_web::error::ErrorUnauthorized("未认证2"))).map_into_right_body()
+                            ))
+                        } else {
+                            srv.call(req).await.map(|res| res.map_into_left_body())
+                        }
                     }
                 }
             } else {

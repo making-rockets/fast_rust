@@ -1,14 +1,16 @@
+use std::borrow::{Borrow, BorrowMut};
+use actix_web::error::ErrorBadRequest;
 use chrono::{Local, NaiveDateTime};
 use fast_common::{common::orm_config::RB, utils::redis_util::{self, RedisUtil}};
 use fast_common::models::user::{User, UserLoginVo, UserVo, UserRoleMenuVo};
 use fast_common::utils::crypt_util;
 use rbatis::core::db::DBExecResult;
-use rbatis::core::Result;
+
 use rbatis::crud::CRUD;
 use rbatis::plugin::page::{Page, PageRequest};
 
+use anyhow::{anyhow, Error, Result};
 
-use rbatis::Error;
 use fast_common::utils::crypt_util::Crypt;
 use actix_web::HttpResponse;
 use rbatis::value::DateTimeNow;
@@ -25,37 +27,35 @@ use fast_common::utils::redis_util::REDIS_UTIL;
 pub struct UserService {}
 
 
-impl BaseService<User, UserVo> for UserService {
-    fn get_wrapper(arg: &UserVo) -> Wrapper {
-        let wrapper = RB.new_wrapper();
-        wrapper
+impl BaseService for UserService {
+    type Model = User;
+
+    fn get_wrapper(arg: &Self::Model) -> Wrapper {
+        RB.new_wrapper_table::<Self::Model>()
     }
 }
 
 impl UserService {
     pub async fn add(mut user: User) -> anyhow::Result<DBExecResult> {
-        let id = 1 as u64;
-        user.id = Some(id);
 
         user.create_time = Some(NaiveDateTime::now());
         let string = user.password.unwrap_or_else(|| "111111".to_string());
-
         user.password = Some(Crypt::encrypt(&string)?);
-
-
-        return Ok(result);
+        let result = Self::save(user).await;
+        result
     }
 
-    pub async fn update(mut user: User) -> Result<u64> {
-        let mut wrapper = RB.new_wrapper();
-        let result = RB.update_by_wrapper(&user, wrapper, &[]).await;
-        return result;
+    pub async fn update(user: User) -> anyhow::Result<u64> {
+
+        let wrapper = Self::get_wrapper(&user);
+        let result = RB.update_by_wrapper(&user, wrapper, &[]).await?;
+        Ok(result)
     }
 
     pub async fn delete(user: User) -> Result<u64> {
-        let mut wrapper = RB.new_wrapper();
-        let result = RB.remove_by_wrapper::<User>(wrapper).await;
-        return result;
+        let wrapper = Self::get_wrapper(&user);
+        let result = RB.remove_by_wrapper::<User>(wrapper).await?;
+        Ok(result)
     }
 
     pub async fn list(arg: UserVo) -> Result<Page<User>> {
@@ -68,67 +68,49 @@ impl UserService {
 
 
         let page_request = PageRequest::new(arg.page_num.unwrap_or(1), arg.page_size.unwrap_or(10));
-        let page = RB.fetch_page_by_wrapper(wrapper, &page_request).await;
-        return page;
+        let page: Page<User> = RB.fetch_page_by_wrapper(wrapper, &page_request).await?;
+        Ok(page)
     }
 
     pub async fn login(user_login_vo: UserLoginVo) -> Result<UserRoleMenuVo> {
         let mut wrapper = RB.new_wrapper();
         if user_login_vo.user_name.is_none() || user_login_vo.password.is_none() || user_login_vo.bar_code.is_none() {
-            Err(Error::from("required user_name or password or bar_code"))
+            let t = anyhow::Error::msg("params is failed");
+            return Err(t);
         } else {
             let user_name = user_login_vo.user_name.unwrap();
             let user_password = user_login_vo.password.unwrap();
             let bar_code = user_login_vo.bar_code.unwrap();
-            let result = Self::verify_bar_code(&user_name, bar_code).await;
-            if result.is_err() {
-                if let Some(e) = result.err() { return Err(Error::from(e)); }
-            }
+            // let result = Self::verify_bar_code(&user_name, bar_code).await;
+            // if result.is_err() {
+            //     return result;
+            // }
 
             wrapper = wrapper.eq("user_name", user_name);
             let user_result = RB.fetch_by_wrapper::<User>(wrapper).await;
+
+
             match user_result {
-                Ok(user) => {
-                    let password = user.clone().password.unwrap();
-                    let password_encrypt_result = Crypt::decrypt_string(&password);
-
-                    match password_encrypt_result {
-                        Ok(decrypt) => {
-                            let string = format!("{}{}{}", "\"", user_password, "\"");
-                            if string == decrypt {
-
-
-                                //TODO
-                                let user_id = user.clone().id.unwrap() as i64;
-                                let roles = RoleService::find_role_by_user(user_id).await;
-                                if roles.is_err() {
-                                    return Err(Error::from("没有角色".to_string()));
-                                }
-
-                                let menus = MenuService::find_menus_by_role(roles.unwrap().id.unwrap()).await;
-
-                                Ok(UserRoleMenuVo {
-                                    user_id: None,
-                                    user_name: None,
-                                    access_token: Some(String::from("")),
-                                    role_id: None,
-                                    role_name: None,
-                                    // menus: Some(menus),
-                                    menus: None,
-                                })
-                            } else {
-                                Err(Error::from("密码错误"))
-                            }
-                        }
-                        Err(err) => { Err(Error::from(format!("解密失败错误:{}", err))) }
+                Ok(u) => {
+                    if u.password.unwrap().eq(&user_password) {
+                        Ok(UserRoleMenuVo {
+                            user_id: (u.id),
+                            user_name: (u.user_name),
+                            access_token: None,
+                            role_id: None,
+                            role_name: None,
+                            menus: None,
+                        })
+                    } else {
+                        Err(anyhow::Error::msg("验证码错误"))
                     }
                 }
-                Err(err) => { Err(Error::from(err.to_string().as_str())) }
+                Err(e) => { Err(anyhow::Error::msg(e)) }
             }
         }
     }
 
-    async fn verify_bar_code(user_name: &String, bar_code: String) -> std::result::Result<String, String> {
+    async fn verify_bar_code(user_name: &String, bar_code: String) -> Result<String> {
         let redis_result = REDIS_UTIL.get_string(&user_name).await;
         println!("{:?}", redis_result);
 
@@ -136,12 +118,12 @@ impl UserService {
             Ok(ret) => {
                 println!("{:?},{:?}", &ret, &bar_code);
                 if bar_code != (ret) {
-                    Err(Error::from("验证码无效").to_string())
+                    Err(anyhow::Error::msg("无效的验证码"))
                 } else {
                     Ok("".to_string())
                 }
             }
-            Err(err) => { Err("验证码错误".to_string()) }
+            Err(err) => { Err(anyhow::Error::msg("验证码错误")) }
         }
     }
 }
@@ -152,3 +134,5 @@ fn test() {
     let x = "abc".to_string();
     assert_eq!(t, x);
 }
+
+

@@ -13,7 +13,7 @@ use crate::models::menu::MenuVo;
 use crate::models::role::RoleVo;
 
 
-const KEY_PR: &'static str = "abcdefjhigklmnopqrstuvwxyz1234567890";
+const KEY_PR: &str = "abcdefjhigklmnopqrstuvwxyz1234567890";
 const SIGN_KEY: &str = "abcdefghigklmnopqrstuvwxyz1234567890";
 // key, 32位长度
 const SECRET_KEY: &[u8; 13] = b"a.and.b.and.c";
@@ -31,9 +31,10 @@ impl Crypt {
     pub fn decrypt_string(encrypt_string: &str) -> Result<String> {
         let sc = ShortCrypt::new(KEY_PR);
 
-        let result = sc.decrypt_url_component(encrypt_string).unwrap();
-
-        Ok(String::from_utf8(result)?)
+        // let result = sc.decrypt(encrypt_string).unwrap();
+        //
+        // Ok(String::from_utf8(result)?)
+        Ok("".to_string())
         // match result {
         //     Ok(vec) => {
         //
@@ -52,7 +53,6 @@ pub struct Claims {
     pub menus: Vec<MenuVo>,
     express_time: usize,
 }
-
 
 
 impl Claims {
@@ -84,7 +84,7 @@ impl Claims {
     }
 
     pub fn validation_token(access_token: &str) -> Result<()> {
-        let _result = Self::decode(String::from(access_token))?;
+       // let claims = Self::decode(String::from(access_token))?;
         Ok(())
     }
 

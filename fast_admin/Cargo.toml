@@ -7,7 +7,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-fast_common  ={path = "../fast_common"}
+fast_common = { path = "../fast_common" }
 #log日志支持(必须)
 log = "0.4"
 env_logger = "0.9.0"
@@ -15,9 +15,9 @@ actix-web = "4.0.1"
 actix-http = "3.0.4"
 anyhow = { version = "1.0.56" }
 #时间
-chrono ="0.4.19"
+chrono = "0.4.19"
 #orm
-rbatis = { version = "3.1.6", features = ["debug_mode"] }
+rbatis = { version = "3.1.6", default-features = false, features = ["runtime-tokio-rustls", "mysql", "debug_mode"] }
 rbson = { version = "*" }
 async-trait = "0.1.48"
 serde = { version = "1.0", features = ["derive"] }

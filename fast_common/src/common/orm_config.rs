@@ -3,16 +3,20 @@ use rbatis::core::db::DBPoolOptions;
 
 use rbatis::plugin::intercept::SqlIntercept;
 use rbatis::plugin::log::LogPlugin;
-use rbatis::rbatis::Rbatis;
+
 
 use std::time::Duration;
+use futures::executor::block_on;
+
+use lazy_static::lazy_static;
+use rbatis::rbatis::Rbatis;
 
 
 
 lazy_static! {
-       pub static ref RB :Rbatis =tokio::runtime::Runtime::new().unwrap().block_on(InitDb::new("mysql://root:root@39.101.69.31:3306/test"));
-      //pub static ref RB :Rbatis = Rbatis::new();
-}
+        pub static ref RB : Rbatis = Rbatis::new();//block_on(   InitDb::new("mysql://root:root123@localhost:3306/test")  );
+   }
+
 
 
 pub struct InitDb;
@@ -65,4 +69,19 @@ impl LogPlugin for RbatisLog {
     fn get_level_filter(&self) -> &LevelFilter {
         &LevelFilter::Debug
     }
+}
+
+
+async fn process() {
+    println!("Hello world!");
+}
+
+#[test]
+fn etest() {
+    let future = process();
+
+    let runtime1 = tokio::runtime::Runtime::new().unwrap();
+
+    let rbatis = runtime1.block_on(InitDb::new("mysql://root:root123@localhost:3306/test"));
+    println!("{}", rbatis.is_debug_mode());
 }

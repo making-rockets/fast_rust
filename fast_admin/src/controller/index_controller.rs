@@ -1,18 +1,17 @@
 use std::collections::HashMap;
-use crate::service::user_service::UserService;
-use actix_web::web::{Form, Header, Query};
+
+use actix_http::Response;
 use actix_web::{HttpMessage, HttpResponse, web};
-use actix_web::{get, post, HttpRequest};
-use fast_common::models::user::{UserLoginVo};
-use actix_http::{Response};
-
+use actix_web::{get, HttpRequest, post};
 use actix_web::http::header;
-
+use actix_web::web::{Form, Header, Query};
 
 use fast_common::common::api_result::{Api, GlobalError};
-use fast_common::utils::redis_util::{REDIS_UTIL, RedisUtil};
+use fast_common::models::user::UserLoginVo;
 use fast_common::utils::captcha_util::BarCode;
+use fast_common::utils::redis_util::{REDIS_UTIL, RedisUtil};
 
+use crate::service::user_service::UserService;
 
 #[get("/send_reg_code")]
 pub async fn push_reg_code(user_name: Query<UserLoginVo>) -> HttpResponse {
@@ -40,8 +39,9 @@ pub async fn push_reg_code(user_name: Query<UserLoginVo>) -> HttpResponse {
 
 #[post("/login")]
 pub async fn login(user: Form<UserLoginVo>) -> HttpResponse {
+    println!("{:?}",user);
     let result = UserService::login(user.into_inner()).await;
-    Api::from_rbatis_result(result).await.to_response_of_json().await
+    Api::from_any_result(result).await.to_response_of_json().await
 }
 
 
