@@ -14,7 +14,7 @@ actix-web = { version = "4.0.1" }
 actix-http = { version = "3.0.4" }
 anyhow = { version = "1.0.56" }
 tokio = { version = "1.17.0", features = ["full"] }
-
+meilisearch-sdk = "0.15"
 validator = "0.14.0"
 validator_derive = "0.14.0"
 validators = { version = "0.24.1", features = [] }

@@ -1,14 +1,17 @@
-use std::str::from_utf8;
 use serde::Serialize;
 use serde::Deserialize;
 use short_crypt::ShortCrypt;
-use chrono::{Local};
+
 use std::string::String;
 use crate::models::user::{UserRoleMenuVo, UserVo};
 use crate::utils::redis_util::REDIS_UTIL;
-use anyhow::{Error, Result};
-use futures::future::{err, ok};
+use anyhow::{anyhow, Error, Result};
+use anyhow::private::kind::BoxedKind;
+use chrono::{Local, NaiveDateTime};
+use futures::future::{ok};
 use jsonwebtoken::{Algorithm, DecodingKey, EncodingKey, Header, Validation};
+use rbatis::value::DateTimeNow;
+
 use crate::models::menu::MenuVo;
 use crate::models::role::RoleVo;
 
@@ -51,7 +54,8 @@ pub struct Claims {
     pub user_name: String,
     pub role: RoleVo,
     pub menus: Vec<MenuVo>,
-    express_time: usize,
+    pub express_time: usize,
+    pub create_time: NaiveDateTime,
 }
 
 
@@ -63,6 +67,7 @@ impl Claims {
             role,
             menus,
             express_time,
+            create_time: NaiveDateTime::now(),
         }
     }
 
@@ -80,11 +85,16 @@ impl Claims {
     }
     pub fn default_jwt_token(&self) -> Result<String> {
         let result = self.encode(&SIGN_KEY)?;
-        return Ok(result);
+        Ok(result)
     }
 
-    pub fn validation_token(access_token: &str) -> Result<()> {
-       // let claims = Self::decode(String::from(access_token))?;
+    pub fn validation_token(access_token: &str) -> Result<(), anyhow::Error> {
+        let claims = Self::decode(String::from(access_token))?;
+        let current_timestamp = Local::now().timestamp();
+        if current_timestamp < claims.express_time as i64 + claims.create_time.timestamp() as i64 {
+            return Err(anyhow::Error::msg(String::from("token is invalid")));
+        }
+
         Ok(())
     }
 
@@ -111,3 +121,9 @@ impl From<Claims> for UserRoleMenuVo {
     }
 }
 
+
+#[test]
+fn test() {
+    let time = chrono::Local::now().timestamp();
+    println!("{}", "time");
+}

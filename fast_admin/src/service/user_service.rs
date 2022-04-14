@@ -37,7 +37,6 @@ impl BaseService for UserService {
 
 impl UserService {
     pub async fn add(mut user: User) -> anyhow::Result<DBExecResult> {
-
         user.create_time = Some(NaiveDateTime::now());
         let string = user.password.unwrap_or_else(|| "111111".to_string());
         user.password = Some(Crypt::encrypt(&string)?);
@@ -46,7 +45,6 @@ impl UserService {
     }
 
     pub async fn update(user: User) -> anyhow::Result<u64> {
-
         let wrapper = Self::get_wrapper(&user);
         let result = RB.update_by_wrapper(&user, wrapper, &[]).await?;
         Ok(result)
@@ -81,10 +79,10 @@ impl UserService {
             let user_name = user_login_vo.user_name.unwrap();
             let user_password = user_login_vo.password.unwrap();
             let bar_code = user_login_vo.bar_code.unwrap();
-            // let result = Self::verify_bar_code(&user_name, bar_code).await;
-            // if result.is_err() {
-            //     return result;
-            // }
+            let result = Self::verify_bar_code(&user_name, bar_code).await;
+            if result.is_err() {
+                return Err(anyhow!(" verify bar_code is failed" ));
+            }
 
             wrapper = wrapper.eq("user_name", user_name);
             let user_result = RB.fetch_by_wrapper::<User>(wrapper).await;

@@ -22,13 +22,13 @@ use crate::config::toml_config::{Config, CONFIG};
 use crate::utils::crypt_util::Claims;
 
 async fn is_white_list(path: &str) -> bool {
+    let mut is_access = false;
     for x in CONFIG.whitelist.list.iter() {
         if x.eq(path) {
-            println!("时代");
-            return true;
+             is_access = true
         }
     }
-    return false;
+    is_access
 }
 
 
@@ -77,7 +77,7 @@ impl<S, B> Service<ServiceRequest> for AuthorizationMiddleware<S>
                 match option {
                     None => {
                         Ok(req.into_response(
-                            HttpResponse::Unauthorized().json(Api::from(actix_web::error::ErrorUnauthorized("未认证1"))).map_into_right_body()
+                            HttpResponse::Unauthorized().json(Api::from(actix_web::error::ErrorUnauthorized("未认证"))).map_into_right_body()
                         ))
                     }
                     Some(header) => {

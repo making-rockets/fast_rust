@@ -53,7 +53,7 @@ impl<S, B> Service<ServiceRequest> for HandleMethodMiddleAware<S> where
 
     forward_ready!(service);
 
-    fn call(&self, mut req: ServiceRequest) -> Self::Future {
+    fn call(&self,  req: ServiceRequest) -> Self::Future {
         let service = self.service.clone();
         Box::pin(async move {
             println!("获取请求{:?}", &req);

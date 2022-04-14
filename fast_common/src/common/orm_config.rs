@@ -15,7 +15,7 @@ use rbatis::rbatis::Rbatis;
 
 lazy_static! {
         pub static ref RB : Rbatis = Rbatis::new();//block_on(   InitDb::new("mysql://root:root123@localhost:3306/test")  );
-   }
+}
 
 
 

@@ -1,11 +1,11 @@
-use crate::rbatis;
+use crate::rbatis::crud_table;
 use chrono::NaiveDateTime;
 use serde_derive::{Deserialize, Serialize};
 
 use crate::models::menu::MenuVo;
 
-
-#[derive(Debug, CRUDTable, Serialize, Deserialize, Clone)]
+#[crud_table]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct User {
     pub id: Option<u64>,
     pub user_name: Option<String>,

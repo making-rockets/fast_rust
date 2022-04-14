@@ -8,3 +8,4 @@ edition = "2018"
 
 [dependencies]
 config_struct = {version= "0.5.0",features = ["toml-parsing"]}
+chrono = "0.4.19"

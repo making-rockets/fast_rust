@@ -17,15 +17,7 @@ lazy_static! {
 pub struct RedisUtil {
     pool: Pool,
 }
-
-impl RedisUtil {
-    pub async fn delete(&self, key: &str) -> anyhow::Result<usize> {
-        let mut connection = RedisUtil::get_conn().await?;
-        let pin: usize = connection.del(key).await?;
-        Ok(pin)
-    }
-}
-
+ 
 impl RedisUtil {
     fn get_instance() -> RedisUtil {
         let cfg = Config::from_url("redis://39.101.69.31/");
@@ -34,6 +26,12 @@ impl RedisUtil {
 
     pub async fn get_conn() -> anyhow::Result<Connection> {
         Ok(REDIS_UTIL.pool.get().await?)
+    }
+
+    pub async fn delete(&self, key: &str) -> anyhow::Result<usize> {
+        let mut connection = RedisUtil::get_conn().await?;
+        let pin: usize = connection.del(key).await?;
+        Ok(pin)
     }
 
     pub async fn set_string(&self, k: &str, v: String) -> anyhow::Result<()> {

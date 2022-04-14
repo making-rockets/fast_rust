@@ -17,7 +17,7 @@ pub struct BarCode {
 
 impl BarCode {
     pub async fn new(user_name: Option<String>, url: Option<String>) -> BarCode {
-        return BarCode { user_name, url };
+        BarCode { user_name, url }
     }
 
     pub async fn captcha(&self) -> Option<(Vec<u8>, Vec<char>)> {
@@ -32,7 +32,7 @@ impl BarCode {
 
         let code = captcha.chars();
         let png = captcha.as_png().unwrap();
-        return Some((png, code));
+        Some((png, code))
     }
 
 
