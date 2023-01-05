@@ -1,12 +1,12 @@
 use std::collections::HashMap;
+use std::error::Error;
 
 use actix_http::Response;
-use actix_web::{HttpMessage, HttpResponse, web};
-use actix_web::{get, HttpRequest, post};
 use actix_web::http::header;
 use actix_web::web::{Form, Header, Query};
-
-
+use actix_web::{get, post, HttpRequest};
+use actix_web::{web, HttpMessage, HttpResponse};
+use tera::{Context, Tera};
 
 use crate::common::api_result::Api;
 use crate::models::user::UserLoginVo;
@@ -27,30 +27,37 @@ pub async fn push_reg_code(user_name: Query<UserLoginVo>) -> HttpResponse {
                     bar_code.to_response(png_code.0).await
                 }
                 None => {
-                    Api::<()>::error("生成验证码错误".to_owned()).await.to_response_of_json().await
+                    Api::<()>::error("生成验证码错误".to_owned())
+                        .await
+                        .to_response_of_json()
+                        .await
                 }
             }
         }
         None => {
-            Api::<()>::error("user_name is none ".to_owned()).await.to_response_of_json().await
+            Api::<()>::error("user_name is none ".to_owned())
+                .await
+                .to_response_of_json()
+                .await
         }
     }
 }
 
-
 #[post("/login")]
 pub async fn login(user: Form<UserLoginVo>) -> HttpResponse {
-   todo!()
+    todo!()
 }
-
-
-
 
 #[get("/logout")]
 pub async fn logout(request: HttpRequest) -> HttpResponse {
     let header = request.headers().get("authorization");
     match header {
-        None => { Api::<()>::error(String::from("未登录")).await.to_response_of_json().await }
+        None => {
+            Api::<()>::error(String::from("未登录"))
+                .await
+                .to_response_of_json()
+                .await
+        }
         Some(access_token) => {
             REDIS_UTIL.delete(access_token.to_str().unwrap()).await;
             Api::<()>::success().await.to_response_of_json().await
@@ -58,4 +65,17 @@ pub async fn logout(request: HttpRequest) -> HttpResponse {
     }
 }
 
+#[get("/")]
+pub async fn index(request: HttpRequest, template: web::Data<Tera>) -> HttpResponse {
+    let tmpl_name = "hello.html";
 
+    let mut ctx = tera::Context::new();
+    ctx.insert("username", "hello,world");
+    let body = template.render(tmpl_name, &ctx).unwrap();
+    Api::<String>::success_of_data(body)
+        .await
+        .to_response_of_html()
+        .await
+    // println!("{:?}",&body);
+    // HttpResponse::Ok().content_type("text/html").body(body)
+}

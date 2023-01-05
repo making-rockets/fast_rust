@@ -45,7 +45,7 @@ where
     fn call(&self, req: ServiceRequest) -> Self::Future {
         let service = self.service.clone();
         Box::pin(async move {
-            println!("获取请求{:?}", &req);
+            //println!("获取请求{:?}", &req);
             service.call(req).await
         })
     }

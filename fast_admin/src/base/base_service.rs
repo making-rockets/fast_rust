@@ -9,7 +9,7 @@ use serde::{Serialize, de::DeserializeOwned};
 pub trait BaseService: Sync + Send {
     type Model: Serialize + DeserializeOwned;
 
-    fn get_wrapper(arg: &Self::Model) -> ();
+    fn get_wrapper(arg: &Self::Model);
 
     
 }

@@ -1,6 +1,6 @@
 use std::fmt::{Display, Formatter};
 
-use actix_web::http::header;
+use actix_web::http::header::{self, ContentType};
 use actix_web::{http::StatusCode, HttpResponse};
 use actix_web::{HttpResponseBuilder, ResponseError};
 
@@ -38,7 +38,7 @@ impl From<actix_web::error::Error> for Api<()> {
 #[derive(Debug, Serialize, Clone)]
 pub struct Api<T>
 where
-    T: Serialize,
+    T: Serialize + DeserializeOwned,
 {
     pub code: Option<u16>,
     pub msg: Option<GlobalError>,
@@ -104,13 +104,21 @@ where
 
     pub async fn to_response_of_json(&mut self) -> HttpResponse {
         HttpResponseBuilder::new(StatusCode::from_u16(self.code.unwrap()).unwrap())
-            //.insert_header(header::ACCESS_CONTROL_ALLOW_METHODS.as_ref())
             .content_type(header::ContentType(mime::APPLICATION_JSON))
             .insert_header(header::AcceptEncoding(vec![
                 "gzip".parse().unwrap(),
                 "br".parse().unwrap(),
             ]))
             .body(self.to_string().await)
+    }
+    pub async fn to_response_of_html(&mut self) -> HttpResponse {
+        HttpResponseBuilder::new(StatusCode::from_u16(self.code.unwrap()).unwrap())
+            .content_type(ContentType::html())
+            // .insert_header(header::AcceptEncoding(vec![
+            //     "gzip".parse().unwrap(),
+            //     "br".parse().unwrap(),
+            // ]))
+            .body(self.to_string_of_data().await)
     }
 
     pub async fn to_response_of_img(&mut self) -> HttpResponse {
@@ -124,5 +132,11 @@ where
     }
     pub async fn to_vec_u8(&mut self) -> Vec<u8> {
         serde_json::to_vec(&self.data.clone().unwrap()).unwrap()
+    }
+    pub async fn to_string_of_data(&mut self) -> String {
+       let result =  serde_json::to_string(&self.data.as_mut().unwrap()).unwrap();
+       println!("html结果{:?}",result);
+       result
+    
     }
 }

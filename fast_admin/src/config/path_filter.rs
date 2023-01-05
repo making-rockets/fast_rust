@@ -7,7 +7,7 @@ pub struct PathFilter {
 impl PathFilter {
     pub fn _add(&mut self, path: String) -> &mut PathFilter {
         self.paths.push(path);
-        return self;
+        self
     }
 
     pub fn _new() -> PathFilter {
