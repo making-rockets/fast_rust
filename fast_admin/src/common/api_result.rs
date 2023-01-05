@@ -1,26 +1,19 @@
-use std::cell::RefCell;
 use std::fmt::{Display, Formatter};
 
-use actix_http::body::BoxBody;
-use actix_http::Response;
-use actix_web::{http::StatusCode, HttpRequest, HttpResponse, Responder};
-use actix_web::{HttpResponseBuilder, ResponseError};
 use actix_web::http::header;
-use actix_web::web::Form;
-use serde::de::DeserializeOwned;
-use serde::Serialize;
-use tokio::select_variant;
+use actix_web::{http::StatusCode, HttpResponse};
+use actix_web::{HttpResponseBuilder, ResponseError};
+
+use serde::{de::DeserializeOwned, Serialize};
 
 #[derive(Debug, Serialize, Clone)]
 pub struct GlobalError(pub String);
 
-
 impl Display for GlobalError {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self)
+        write!(f, "{:?}", &self)
     }
 }
-
 
 impl From<String> for GlobalError {
     fn from(s: String) -> GlobalError {
@@ -28,17 +21,9 @@ impl From<String> for GlobalError {
     }
 }
 
-
-impl From<rbatis::core::Error> for GlobalError {
-    fn from(e: rbatis::core::Error) -> Self {
-        GlobalError(e.to_string())
-    }
-}
-
 impl std::error::Error for GlobalError {}
 
 impl ResponseError for GlobalError {}
-
 
 impl From<actix_web::error::Error> for Api<()> {
     fn from(e: actix_web::error::Error) -> Self {
@@ -50,16 +35,20 @@ impl From<actix_web::error::Error> for Api<()> {
     }
 }
 
-
 #[derive(Debug, Serialize, Clone)]
-pub struct Api<T> where T: Serialize {
+pub struct Api<T>
+where
+    T: Serialize,
+{
     pub code: Option<u16>,
     pub msg: Option<GlobalError>,
     pub data: Option<T>,
 }
 
-
-impl<T> Api<T> where T: Serialize + DeserializeOwned + Clone {
+impl<T> Api<T>
+where
+    T: Serialize + DeserializeOwned + Clone,
+{
     pub async fn success() -> Self {
         Api {
             code: Some(StatusCode::OK.as_u16()),
@@ -100,28 +89,13 @@ impl<T> Api<T> where T: Serialize + DeserializeOwned + Clone {
 
     pub async fn from_any_result(result: anyhow::Result<T>) -> Self {
         match result {
-            Ok(t) => {
-                Api {
-                    code: Some(StatusCode::OK.as_u16()),
-                    msg: None,
-                    data: Some(t),
-                }
-            }
-            Err(e) => {
-                Api { code: Some(StatusCode::BAD_REQUEST.as_u16()), msg: Some(GlobalError(e.to_string())), data: None }
-            }
-        }
-    }
-
-    pub async fn from_rbatis_result(result: rbatis::Result<T>) -> Self {
-        match result {
             Ok(t) => Api {
                 code: Some(StatusCode::OK.as_u16()),
                 msg: None,
                 data: Some(t),
             },
             Err(e) => Api {
-                code: Some(StatusCode::INTERNAL_SERVER_ERROR.as_u16()),
+                code: Some(StatusCode::BAD_REQUEST.as_u16()),
                 msg: Some(GlobalError(e.to_string())),
                 data: None,
             },
@@ -146,9 +120,9 @@ impl<T> Api<T> where T: Serialize + DeserializeOwned + Clone {
             .body(self.to_vec_u8().await)
     }
     pub async fn to_string(&mut self) -> String {
-        return serde_json::to_string(&self).unwrap();
+        serde_json::to_string(&self).unwrap()
     }
     pub async fn to_vec_u8(&mut self) -> Vec<u8> {
-        return serde_json::to_vec(&self.data.clone().unwrap()).unwrap();
+        serde_json::to_vec(&self.data.clone().unwrap()).unwrap()
     }
 }

@@ -1,10 +1,6 @@
 use actix_web::{ HttpResponse};
-
 use serde::{Serialize, Deserialize};
-
 use captcha::filters::{Dots, Noise, Wave};
-
-
 use captcha::Captcha;
 
 

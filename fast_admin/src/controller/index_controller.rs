@@ -6,12 +6,13 @@ use actix_web::{get, HttpRequest, post};
 use actix_web::http::header;
 use actix_web::web::{Form, Header, Query};
 
-use fast_common::common::api_result::{Api, GlobalError};
-use fast_common::models::user::UserLoginVo;
-use fast_common::utils::captcha_util::BarCode;
-use fast_common::utils::redis_util::{REDIS_UTIL, RedisUtil};
 
+
+use crate::common::api_result::Api;
+use crate::models::user::UserLoginVo;
 use crate::service::user_service::UserService;
+use crate::utils::captcha_util::BarCode;
+use crate::utils::redis_util::REDIS_UTIL;
 
 #[get("/send_reg_code")]
 pub async fn push_reg_code(user_name: Query<UserLoginVo>) -> HttpResponse {
@@ -39,9 +40,7 @@ pub async fn push_reg_code(user_name: Query<UserLoginVo>) -> HttpResponse {
 
 #[post("/login")]
 pub async fn login(user: Form<UserLoginVo>) -> HttpResponse {
-    println!("{:?}",user);
-    let result = UserService::login(user.into_inner()).await;
-    Api::from_any_result(result).await.to_response_of_json().await
+   todo!()
 }
 
 

@@ -7,17 +7,47 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-fast_common = { path = "../fast_common" }
-#log日志支持(必须)
-log = "0.4"
-env_logger = "0.9.0"
-actix-web = "4.0.1"
-actix-http = "3.0.4"
-anyhow = { version = "1.0.56" }
+
+actix-web = "4"
+actix-http = "3"
+anyhow = { version = "1" }
 #时间
-chrono = "0.4.19"
+chrono = { version = "0", features = ["serde"] }
 #orm
-rbatis = { version = "3.1.6", default-features = false, features = ["runtime-tokio-rustls", "mysql", "debug_mode"] }
-rbson = { version = "*" }
-async-trait = "0.1.48"
-serde = { version = "1.0", features = ["derive"] }
+rusqlite = { version = "0.28.0", features = ["modern-full"] }
+async-trait = "0.1"
+
+tera = { version = "1", default-features = false }
+
+
+tokio = { version = "1", features = ["full"] }
+
+
+#token
+jsonwebtoken = { version = "8" }
+serde = { version = "1.0.152", default-features = false, features = [
+    "derive",
+    "serde_derive",
+] }
+serde_json = "1"
+
+
+#静态初始化
+lazy_static = "1"
+once_cell = "1"
+
+#网络请求
+reqwest = "0"
+
+#redis 数据库支持
+deadpool-redis = { version = "0" }
+redis = { version = "0", default-features = false, features = [] }
+
+short-crypt = "1"
+futures = { version = "0" }
+futures-util = "0"
+uuid = "1"
+mime = "0.3.16"
+captcha = "0"
+image = "0.24"
+tracing = { version = "0" }

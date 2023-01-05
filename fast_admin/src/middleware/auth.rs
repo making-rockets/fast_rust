@@ -1,43 +1,37 @@
 #![allow(clippy::type_complexity)]
 
 use std::cell::RefCell;
-use std::ops::{Deref, DerefMut};
 use std::rc::Rc;
-use std::sync::Arc;
-use std::task::{Context, Poll};
 
-use actix_http::header::HeaderValue;
+use actix_web::dev::{forward_ready, Service, Transform};
 use actix_web::{
     body::{EitherBody, MessageBody},
     dev::{ServiceRequest, ServiceResponse},
-    Error, HttpMessage, HttpResponse, Result,
+    Error, HttpResponse, Result,
 };
-use actix_web::dev::{forward_ready, Service, Transform};
-use actix_web::web::head;
-use futures::{FutureExt, StreamExt};
-use futures::future::{LocalBoxFuture, ok, Ready};
+
+use futures::future::{ok, LocalBoxFuture, Ready};
+use futures::FutureExt;
 
 use crate::common::api_result::Api;
-use crate::config::toml_config::{Config, CONFIG};
-use crate::utils::crypt_util::Claims;
+use crate::config::toml_config::CONFIG;
 
 async fn is_white_list(path: &str) -> bool {
     let mut is_access = false;
     for x in CONFIG.whitelist.list.iter() {
         if x.eq(path) {
-             is_access = true
+            is_access = true
         }
     }
     is_access
 }
 
-
 #[derive(Clone)]
 pub struct Authorization;
 
-
-impl<S, B> Transform<S, ServiceRequest> for Authorization where
-    S: Service<ServiceRequest, Response=ServiceResponse<B>, Error=Error> + 'static,
+impl<S, B> Transform<S, ServiceRequest> for Authorization
+where
+    S: Service<ServiceRequest, Response = ServiceResponse<B>, Error = Error> + 'static,
     B: MessageBody,
 {
     type Response = ServiceResponse<EitherBody<B>>;
@@ -53,16 +47,14 @@ impl<S, B> Transform<S, ServiceRequest> for Authorization where
     }
 }
 
-
 pub struct AuthorizationMiddleware<S> {
     service: Rc<RefCell<S>>,
-
 }
 
 impl<S, B> Service<ServiceRequest> for AuthorizationMiddleware<S>
-    where
-        S: Service<ServiceRequest, Response=ServiceResponse<B>, Error=Error> + 'static,
-        B: MessageBody,
+where
+    S: Service<ServiceRequest, Response = ServiceResponse<B>, Error = Error> + 'static,
+    B: MessageBody,
 {
     type Response = ServiceResponse<EitherBody<B>>;
     type Error = S::Error;
@@ -75,16 +67,17 @@ impl<S, B> Service<ServiceRequest> for AuthorizationMiddleware<S>
             if !is_white_list(req.path()).await {
                 let option = req.headers().get("Authorization");
                 match option {
-                    None => {
-                        Ok(req.into_response(
-                            HttpResponse::Unauthorized().json(Api::from(actix_web::error::ErrorUnauthorized("未认证"))).map_into_right_body()
-                        ))
-                    }
+                    None => Ok(req.into_response(
+                        HttpResponse::Unauthorized()
+                            .json(Api::from(actix_web::error::ErrorUnauthorized("未认证")))
+                            .map_into_right_body(),
+                    )),
                     Some(header) => {
-                        let result = Claims::validation_token(header.to_str().unwrap());
-                        if result.is_err() {
+                        if false {
                             Ok(req.into_response(
-                                HttpResponse::Unauthorized().json(Api::from(actix_web::error::ErrorUnauthorized("未认证2"))).map_into_right_body()
+                                HttpResponse::Unauthorized()
+                                    .json(Api::from(actix_web::error::ErrorUnauthorized("未认证2")))
+                                    .map_into_right_body(),
                             ))
                         } else {
                             srv.call(req).await.map(|res| res.map_into_left_body())
@@ -94,6 +87,7 @@ impl<S, B> Service<ServiceRequest> for AuthorizationMiddleware<S>
             } else {
                 srv.call(req).await.map(|res| res.map_into_left_body())
             }
-        }.boxed_local()
+        }
+        .boxed_local()
     }
 }

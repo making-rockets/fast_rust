@@ -4,11 +4,12 @@ use reqwest::header::HeaderMap;
 use reqwest::{Error, Response};
 use std::result::Result;
 
+use actix_web::http::header::HeaderValue;
 use reqwest::Url;
 use std::cell::RefCell;
 use std::collections::hash_map::RandomState;
-use actix_web::http::header::HeaderValue;
 
+#[allow(dead_code)]
 struct HttpUtil {}
 
 impl HttpUtil {

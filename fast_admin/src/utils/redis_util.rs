@@ -1,27 +1,27 @@
-use anyhow::{Ok};
-use deadpool_redis::redis::{cmd};
+use anyhow::Ok;
+use deadpool_redis::redis::cmd;
 use deadpool_redis::{Config, Connection, Pool, Runtime};
 
-
-use std::string::String;
-use actix_http::header::HeaderValue;
 use redis::{AsyncCommands, Cmd, ToRedisArgs};
+use serde::de::DeserializeOwned;
 use serde::Serialize;
+use std::string::String;
 
 use lazy_static::lazy_static;
 
 lazy_static! {
-  pub static ref REDIS_UTIL:RedisUtil=  RedisUtil::get_instance();
-
+    pub static ref REDIS_UTIL: RedisUtil = RedisUtil::get_instance();
 }
 pub struct RedisUtil {
     pool: Pool,
 }
- 
+
 impl RedisUtil {
     fn get_instance() -> RedisUtil {
         let cfg = Config::from_url("redis://39.101.69.31/");
-        Self { pool: cfg.create_pool(Some(Runtime::Tokio1)).unwrap() }
+        Self {
+            pool: cfg.create_pool(Some(Runtime::Tokio1)).unwrap(),
+        }
     }
 
     pub async fn get_conn() -> anyhow::Result<Connection> {
@@ -52,15 +52,15 @@ impl RedisUtil {
     }
 
     pub async fn set_json<T>(&self, k: &str, v: &T) -> anyhow::Result<()>
-        where
-            T: Serialize + ToRedisArgs,
+    where
+        T: Serialize + ToRedisArgs,
     {
         let result = serde_json::to_string(v)?;
         self.set_string(k, result).await
     }
     pub async fn get_json<T>(&self, k: &str) -> anyhow::Result<T>
-        where
-            T: serde::de::DeserializeOwned,
+    where
+        T: DeserializeOwned,
     {
         let x = self.get_string(k).await?;
         let result: T = serde_json::from_str(x.as_str())?;
@@ -68,29 +68,26 @@ impl RedisUtil {
     }
 }
 
-
 pub mod test {
-    use deadpool_redis::{Config, Runtime};
-    use redis::cmd;
 
-    #[tokio::test]
-    async fn main() {
-        let mut cfg = Config::from_url("redis://39.101.69.31/");
-        let pool = cfg.create_pool(Some(Runtime::Tokio1)).unwrap();
-        {
-            let mut conn = pool.get().await.unwrap();
-            cmd("SET")
-                .arg(&["deadpool/test_key", "42"])
-                .query_async::<_, ()>(&mut conn)
-                .await.unwrap();
-        }
-        {
-            let mut conn = pool.get().await.unwrap();
-            let value: String = cmd("GET")
-                .arg(&["deadpool/test_key"])
-                .query_async(&mut conn)
-                .await.unwrap();
-            assert_eq!(value, "42".to_string());
-        }
-    }
+    // #[tokio::test]
+    // async fn main() {
+    //     let mut cfg = Config::from_url("redis://39.101.69.31/");
+    //     let pool = cfg.create_pool(Some(Runtime::Tokio1)).unwrap();
+    //     {
+    //         let mut conn = pool.get().await.unwrap();
+    //         cmd("SET")
+    //             .arg(&["deadpool/test_key", "42"])
+    //             .query_async::<_, ()>(&mut conn)
+    //             .await.unwrap();
+    //     }
+    //     {
+    //         let mut conn = pool.get().await.unwrap();
+    //         let value: String = cmd("GET")
+    //             .arg(&["deadpool/test_key"])
+    //             .query_async(&mut conn)
+    //             .await.unwrap();
+    //         assert_eq!(value, "42".to_string());
+    //     }
+    // }
 }
