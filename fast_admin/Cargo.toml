@@ -10,19 +10,15 @@ edition = "2021"
 
 actix-web = "4"
 actix-http = "3"
+actix-files = "0"
 anyhow = { version = "1" }
 #时间
 chrono = { version = "0", features = ["serde"] }
 #orm
 rusqlite = { version = "0.28.0", features = ["modern-full"] }
 async-trait = "0.1"
-
 tera = { version = "1", default-features = false }
-
-
 tokio = { version = "1", features = ["full"] }
-
-
 #token
 jsonwebtoken = { version = "8" }
 serde = { version = "1.0.152", default-features = false, features = [

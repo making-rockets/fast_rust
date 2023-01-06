@@ -65,16 +65,18 @@ pub async fn logout(request: HttpRequest) -> HttpResponse {
     }
 }
 
-#[get("/")]
+#[get("")]
 pub async fn index(request: HttpRequest, template: web::Data<Tera>) -> HttpResponse {
-    let tmpl_name = "hello.html";
+    let tmpl_name = "login.html";
 
-    let mut ctx = tera::Context::new();
-    ctx.insert("username", "hello,world");
-    let body = template.render(tmpl_name, &ctx).unwrap();
-    Api::<String>::success_of_data(body)
+    let mut context = tera::Context::new();
+    context.insert("username", "hello,world");
+    context.insert("context_path", "http://127.0.0.1:3000");
+    context.insert("website", "hello,world");
+    let body = template.render(tmpl_name, &context).unwrap();
+    Api::<String>::success()
         .await
-        .to_response_of_html()
+        .to_response_of_html(body)
         .await
     // println!("{:?}",&body);
     // HttpResponse::Ok().content_type("text/html").body(body)

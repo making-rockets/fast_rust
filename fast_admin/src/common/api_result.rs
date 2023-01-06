@@ -111,14 +111,14 @@ where
             ]))
             .body(self.to_string().await)
     }
-    pub async fn to_response_of_html(&mut self) -> HttpResponse {
+    pub async fn to_response_of_html(&mut self,body:String) -> HttpResponse {
         HttpResponseBuilder::new(StatusCode::from_u16(self.code.unwrap()).unwrap())
             .content_type(ContentType::html())
-            // .insert_header(header::AcceptEncoding(vec![
-            //     "gzip".parse().unwrap(),
-            //     "br".parse().unwrap(),
-            // ]))
-            .body(self.to_string_of_data().await)
+            .insert_header(header::AcceptEncoding(vec![
+                "gzip".parse().unwrap(),
+                "br".parse().unwrap(),
+            ]))
+            .body(body)
     }
 
     pub async fn to_response_of_img(&mut self) -> HttpResponse {
@@ -134,9 +134,8 @@ where
         serde_json::to_vec(&self.data.clone().unwrap()).unwrap()
     }
     pub async fn to_string_of_data(&mut self) -> String {
-       let result =  serde_json::to_string(&self.data.as_mut().unwrap()).unwrap();
-       println!("html结果{:?}",result);
-       result
-    
+        let result = serde_json::to_string(&self.data).unwrap();
+        println!("html结果{:?}", result);
+        result
     }
 }
