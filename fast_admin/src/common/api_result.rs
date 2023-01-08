@@ -111,9 +111,12 @@ where
             ]))
             .body(self.to_string().await)
     }
-    pub async fn to_response_of_html(&mut self,body:String) -> HttpResponse {
+    pub async fn to_response_of_html(&mut self, body: String) -> HttpResponse {
         HttpResponseBuilder::new(StatusCode::from_u16(self.code.unwrap()).unwrap())
             .content_type(ContentType::html())
+            .insert_header(("Expries", -1))
+            .insert_header(("Cache-Control", "no-cache"))
+            .insert_header(("Pragma", "no-cache"))
             .insert_header(header::AcceptEncoding(vec![
                 "gzip".parse().unwrap(),
                 "br".parse().unwrap(),

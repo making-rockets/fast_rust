@@ -43,9 +43,28 @@ pub async fn push_reg_code(user_name: Query<UserLoginVo>) -> HttpResponse {
     }
 }
 
-#[post("/login")]
-pub async fn login(user: Form<UserLoginVo>) -> HttpResponse {
-    todo!()
+#[get("/login")]
+pub async fn login(request: HttpRequest, template: web::Data<Tera>) -> HttpResponse {
+    let tmpl_name = "login.html";
+
+    let mut context = tera::Context::new();
+
+    let body = template.render(tmpl_name, &context).unwrap();
+    Api::<String>::success()
+        .await
+        .to_response_of_html(body)
+        .await
+}
+
+#[get("/index")]
+pub async fn index(request: HttpRequest, template: web::Data<Tera>) -> HttpResponse {
+    let tmpl_name = "index.html";
+    let mut context = tera::Context::new();
+    let body = template.render(tmpl_name, &context).unwrap();
+    Api::<String>::success()
+        .await
+        .to_response_of_html(body)
+        .await
 }
 
 #[get("/logout")]
@@ -63,21 +82,4 @@ pub async fn logout(request: HttpRequest) -> HttpResponse {
             Api::<()>::success().await.to_response_of_json().await
         }
     }
-}
-
-#[get("")]
-pub async fn index(request: HttpRequest, template: web::Data<Tera>) -> HttpResponse {
-    let tmpl_name = "login.html";
-
-    let mut context = tera::Context::new();
-    context.insert("username", "hello,world");
-    context.insert("context_path", "http://127.0.0.1:3000");
-    context.insert("website", "hello,world");
-    let body = template.render(tmpl_name, &context).unwrap();
-    Api::<String>::success()
-        .await
-        .to_response_of_html(body)
-        .await
-    // println!("{:?}",&body);
-    // HttpResponse::Ok().content_type("text/html").body(body)
 }

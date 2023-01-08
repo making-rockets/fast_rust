@@ -416,7 +416,7 @@
 		var marker = new google.maps.Marker({
 			position: new google.maps.LatLng(40.6700, -73.9400),
 			map: map,
-			icon: "assets/images/icons/map-marker.png",
+			icon: "//assets/images/icons/map-marker.png",
 			title: 'Cryptox'
 		});
 	}

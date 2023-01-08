@@ -47,3 +47,4 @@ mime = "0.3.16"
 captcha = "0"
 image = "0.24"
 tracing = { version = "0" }
+env_logger ={version = "0"}
