@@ -56,7 +56,7 @@ pub async fn login(request: HttpRequest, template: web::Data<Tera>) -> HttpRespo
         .await
 }
 
-#[get("/index")]
+#[get("")]
 pub async fn index(request: HttpRequest, template: web::Data<Tera>) -> HttpResponse {
     let tmpl_name = "index.html";
     let mut context = tera::Context::new();

@@ -23,6 +23,7 @@ mod router;
 mod service;
 mod storage;
 mod utils;
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     std::env::set_var("RUST_LOG", "actix_web=debug");
@@ -46,14 +47,17 @@ async fn main() -> std::io::Result<()> {
             .app_data(web::Data::new(tera))
             //.wrap(middleware::auth::Authorization)
             .wrap(middleware::handle_method::HandleMethod)
-            .service( router::routers())
-            .service( 
+            .service(router::index_router())
+            .service(router::menu_router())
+            .service(router::student_router())
+            .service(router::user_router())
+            .service(
                 Files::new("/assets", "fast_admin/src/templates/teacher/assets")
                     .show_files_listing(),
             ) //静态文件
     })
-    .keep_alive(KeepAlive::Os)
-    .bind("127.0.0.1:3000")?
-    .run()
-    .await
+        .keep_alive(KeepAlive::Os)
+        .bind("127.0.0.1:3000")?
+        .run()
+        .await
 }
