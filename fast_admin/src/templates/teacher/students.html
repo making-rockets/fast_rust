@@ -44,7 +44,7 @@
                 </div>
                 <div class="col-auto text-right float-right ml-auto">
                     <a href="#" class="btn btn-outline-primary mr-2"><i class="fas fa-download"></i> Download</a>
-                    <a href="/admin/add-student" class="btn btn-primary"><i class="fas fa-plus"></i></a>
+                    <a href="/admin/student/add-student" class="btn btn-primary"><i class="fas fa-plus"></i></a>
                 </div>
             </div>
         </div>
@@ -62,8 +62,6 @@
                                     <th>ID</th>
                                     <th>名称</th>
                                     <th>班级</th>
-                                    <th>DOB</th>
-                                    <th>父亲名称</th>
                                     <th>手机号</th>
                                     <th>地址</th>
                                     <th class="text-right">Action</th>
@@ -75,20 +73,18 @@
                                     <td>{{loop.index}}</td>
                                     <td>
                                         <h2 class="table-avatar">
-                                            <a href="/admin/student-details" class="avatar avatar-sm mr-2">
+                                            <a href="/admin/student/student-details" class="avatar avatar-sm mr-2">
                                                 <img class="avatar-img rounded-circle"
                                                      src="/assets/img/profiles/avatar-01.jpg"
                                                      alt="User Image">{{student.name}}</a>
                                         </h2>
                                     </td>
                                     <td>{{student.class}}</td>
-                                    <td>{{student.DOB}}</td>
-                                    <td>{{student.parent_name}}</td>
                                     <td>{{student.mobile}}</td>
                                     <td>{{student.address}}</td>
                                     <td class="text-right">
-                                        <div class="actions">sadfasdfasdfsafd
-                                            <a href="/admin/edit-student?studentId={{student.id}}"
+                                        <div class="actions">
+                                            <a href="/admin/student/edit-student?studentId={{student.id}}"
                                                class="btn btn-sm bg-success-light mr-2">
                                                 <i class="fas fa-pen"></i>
                                             </a>

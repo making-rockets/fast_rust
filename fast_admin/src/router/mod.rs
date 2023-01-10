@@ -25,7 +25,8 @@ pub(crate) fn menu_router() -> impl HttpServiceFactory {
 
 pub(crate) fn student_router() -> impl HttpServiceFactory {
     web::scope("/admin/student").service(student::students) //学生列表
-        .service(student::add_student) //添加学生
+        .service(student::add_student) //添加学生跳转页面
+        .service(student::add_student_submit)//添加学生
         .service(student::edit_student) //编辑学生
         .service(student::student_details)//学生详情
 }
