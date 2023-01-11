@@ -14,8 +14,7 @@ actix-files = "0"
 anyhow = { version = "1" }
 #时间
 chrono = { version = "0", features = ["serde"] }
-#orm
-rusqlite = { version = "0.28.0", features = ["modern-full"] }
+
 async-trait = "0.1"
 tera = { version = "1", default-features = false }
 tokio = { version = "1", features = ["full"] }
@@ -48,3 +47,7 @@ captcha = "0"
 image = "0.24"
 tracing = { version = "0" }
 env_logger ={version = "0"}
+#orm
+rusqlite = { version = "0", features = ["modern-full"] }
+r2d2 = {version = "0"}
+r2d2_sqlite={version = "0"}

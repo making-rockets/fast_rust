@@ -15,6 +15,11 @@ pub struct Student {
     //pub create_time:NaiveDateTime
 }
 
+pub async fn insert_student(student: Student) {
+
+}
+
+
 pub async fn get_students() -> anyhow::Result<Vec<Student>> {
     let mut studetns = Vec::new();
     for i in 0..10 {
@@ -24,7 +29,7 @@ pub async fn get_students() -> anyhow::Result<Vec<Student>> {
             class: format!("{}{}", i, "班级"),
             mobile: format!("{}{}", i, "手机号"),
             address: format!("{}{}", i, "地址"),
-           // create_time: NaiveDateTime::default(),
+            // create_time: NaiveDateTime::default(),
         };
 
         studetns.push(student);
@@ -40,6 +45,6 @@ pub async fn get_student(student_id: i64) -> anyhow::Result<Student> {
         class: "两拨2".to_owned(),
         mobile: "两拨5".to_owned(),
         address: "两拨6".to_owned(),
-       // create_time: NaiveDateTime::default(),
+        // create_time: NaiveDateTime::default(),
     })
 }

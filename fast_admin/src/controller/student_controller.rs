@@ -54,13 +54,18 @@ pub async fn add_student(request: HttpRequest, template: web::Data<Tera>) -> Htt
         .await
 }
 
-#[get("/add-student-submit")]
-pub async fn add_student_submit(student: web::Query<Student>, template: web::Data<Tera>) -> HttpResponse {
+#[post("/add-student-submit")]
+pub async fn add_student_submit(student: web::Form<Student>, template: web::Data<Tera>) -> HttpResponse {
     println!("获取到的数据为{:?}", student.into_inner());
 
+    //添加数据
+    insert_student(student.into_inner()).await;
+    
 
     let tmpl_name = "students.html";
     let mut context = tera::Context::new();
+    //添加完数据后返回数据库中的所有数据
+    context.insert("students",&get_students().await.unwrap());
     let body = template.render(tmpl_name, &context).unwrap();
     Api::<String>::success()
         .await

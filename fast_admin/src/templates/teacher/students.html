@@ -86,7 +86,11 @@
                                         <div class="actions">
                                             <a href="/admin/student/edit-student?studentId={{student.id}}"
                                                class="btn btn-sm bg-success-light mr-2">
-                                                <i class="fas fa-pen"></i>
+                                                <i class="fas fa-pen"> </i>
+                                            </a>
+                                            <a href="/admin/student/student-details?studentId={{student.id}}"
+                                               class="btn btn-sm bg-success-light mr-2">
+                                                <i class="fas fa-pen"> </i>
                                             </a>
                                             <a href="#" class="btn btn-sm bg-danger-light">
                                                 <i class="fas fa-trash"></i>
@@ -135,8 +139,8 @@
 <script src="/assets/js/util/axios.js"></script>
 <script src="/assets/js/student.js"></script>
 <script type="text/javascript">
-    let student = new Student().getStudent();
-    console.log(student);
+    /*let student = new Student().getStudent();
+    console.log(student);*/
 </script>
 </body>
 
