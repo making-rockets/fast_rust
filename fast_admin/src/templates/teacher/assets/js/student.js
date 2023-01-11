@@ -36,7 +36,7 @@ class Student {
     }
 
     getStudent(studentId) {
-        //    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
+        //    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 sadfdsf
         // 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
 
         let student = api.get(`/admin/student/edit-student`, {studentId}).then(res => {
