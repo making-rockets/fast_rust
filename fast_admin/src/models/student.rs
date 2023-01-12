@@ -1,6 +1,10 @@
 use std::fmt::format;
 use std::process::id;
+use actix_web::web;
+use actix_web::web::Data;
 use chrono::NaiveDateTime;
+use mysql_async::{Conn, params};
+use mysql_async::prelude::{BatchQuery, Query, WithParams};
 
 use serde::{Deserialize, Serialize};
 use serde_json::to_string;
@@ -15,8 +19,16 @@ pub struct Student {
     //pub create_time:NaiveDateTime
 }
 
-pub async fn insert_student(student: Student) {
-
+pub async fn insert_student(student: Student,  conn: &mut Data<Conn>) {
+  let result =    r"INSERT INTO student (id, name, class,mobile,address)
+      VALUES (:id, :name, :class,:mobile,:address)"
+        .with(params! {
+            "id" => student.id.unwrap(),
+            "name" => student.name,
+            "class" => student.class,
+            "mobile" => student.mobile,
+            "address" => student.address,
+        }).run( conn.into_inner(). ).await.unwrap().;
 }
 
 

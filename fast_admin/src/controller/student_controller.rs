@@ -1,13 +1,15 @@
+use std::borrow::BorrowMut;
 use std::collections::HashMap;
 
 use actix_web::{get, post, web::{self, Path, Query}, HttpRequest, HttpResponse, Responder};
+use mysql_async::Conn;
 use tera::{Template, Tera};
 
 use crate::{
     common::api_result::Api,
     models::student::{get_student, get_students},
 };
-use crate::models::student::Student;
+use crate::models::student::{insert_student, Student};
 
 #[get("/students")]
 pub async fn students(request: HttpRequest, template: web::Data<Tera>) -> HttpResponse {
@@ -55,17 +57,17 @@ pub async fn add_student(request: HttpRequest, template: web::Data<Tera>) -> Htt
 }
 
 #[post("/add-student-submit")]
-pub async fn add_student_submit(student: web::Form<Student>, template: web::Data<Tera>) -> HttpResponse {
-    println!("获取到的数据为{:?}", student.into_inner());
+pub async fn add_student_submit(student: web::Form<Student>, template: web::Data<Tera>, mut connect:web::Data<Conn>) -> HttpResponse {
+
 
     //添加数据
-    insert_student(student.into_inner()).await;
-    
+    insert_student(student.into_inner(), connect.borrow_mut()).await;
+
 
     let tmpl_name = "students.html";
     let mut context = tera::Context::new();
     //添加完数据后返回数据库中的所有数据
-    context.insert("students",&get_students().await.unwrap());
+    context.insert("students", &get_students().await.unwrap());
     let body = template.render(tmpl_name, &context).unwrap();
     Api::<String>::success()
         .await

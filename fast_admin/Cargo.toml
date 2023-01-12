@@ -46,8 +46,9 @@ mime = "0.3.16"
 captcha = "0"
 image = "0.24"
 tracing = { version = "0" }
-env_logger ={version = "0"}
+env_logger = { version = "0" }
 #orm
-rusqlite = { version = "0", features = ["modern-full"] }
-r2d2 = {version = "0"}
-r2d2_sqlite={version = "0"}
+#rusqlite = { version = "0", features = ["modern-full"] }
+#r2d2 = {version = "0"}
+#r2d2_sqlite={version = "0"}
+mysql_async = { version = "0", feautres = ["default"] }

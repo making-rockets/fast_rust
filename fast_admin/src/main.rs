@@ -2,6 +2,7 @@
 #![allow(unused)]
 
 use std::collections::{hash_map, HashMap};
+use std::sync::Arc;
 
 use actix_files::Files;
 use actix_web::http::KeepAlive;
@@ -26,25 +27,28 @@ mod utils;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+    //注册日志
     std::env::set_var("RUST_LOG", "actix_web=debug");
     env_logger::init();
+
+    //注册tera
+    let mut tera = match Tera::new("fast_admin/src/templates/teacher/*.html") {
+        Ok(t) => t,
+        Err(e) => {
+            println!("错误{:?}", e);
+            std::process::exit(1);
+        }
+    };
+    tera.full_reload().map_err(|e| println!("{:?}", e));
+
     HttpServer::new(move || {
-        //注册actix-files;
-
-        //注册tera
-        let mut tera = match Tera::new("fast_admin/src/templates/teacher/*.html") {
-            Ok(t) => t,
-            Err(e) => {
-                println!("错误{:?}", e);
-                std::process::exit(1);
-            }
-        };
-        // tera.register_function("context_template()", context_path);
-        tera.full_reload().map_err(|e| println!("{:?}", e));
-
+        //注册mysql
+        let pool = mysql_async::Pool::new("mysql://root:root123@127.0.0.1:3306/test");
+        let mut conn =pool.get_conn();
         App::new()
             .wrap(Logger::default())
-            .app_data(web::Data::new(tera))
+            .app_data(web::Data::new(tera.clone()))
+            .app_data(web::Data::new(conn))
             //.wrap(middleware::auth::Authorization)
             .wrap(middleware::handle_method::HandleMethod)
             .service(router::index_router())
