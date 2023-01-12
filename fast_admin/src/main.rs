@@ -11,8 +11,11 @@ use actix_web::{routes, web, App, HttpResponse, HttpServer, Responder};
 
 use chrono::naive::serde;
 use lazy_static::lazy_static;
+use mysql_async::Conn;
+use once_cell::sync::Lazy;
 use serde_json::{from_value, to_value, Value};
 use tera::{try_get_value, Context, Error, Tera};
+use tokio::sync::Mutex;
 
 mod base;
 mod common;
@@ -43,12 +46,11 @@ async fn main() -> std::io::Result<()> {
 
     HttpServer::new(move || {
         //注册mysql
-        let pool = mysql_async::Pool::new("mysql://root:root123@127.0.0.1:3306/test");
-        let mut conn =pool.get_conn();
+
         App::new()
             .wrap(Logger::default())
             .app_data(web::Data::new(tera.clone()))
-            .app_data(web::Data::new(conn))
+            //.app_data(web::Data::new(conn))
             //.wrap(middleware::auth::Authorization)
             .wrap(middleware::handle_method::HandleMethod)
             .service(router::index_router())
@@ -64,4 +66,21 @@ async fn main() -> std::io::Result<()> {
         .bind("127.0.0.1:3000")?
         .run()
         .await
+}
+
+static GLOBAL_DATA: Lazy<Conn> = Lazy::new(|| {
+    tokio::runtime::Runtime::new().unwrap().block_on(async move {
+        let pool: mysql_async::Pool = mysql_async::Pool::new("mysql://root:root123@127.0.0.1:3306/test");
+        pool.get_conn().await.unwrap()
+    })
+});
+
+lazy_static! {
+     pub static ref  CONN:Conn =
+
+    tokio::runtime::Runtime::new().unwrap().block_on(async move {
+        let pool: mysql_async::Pool = mysql_async::Pool::new("mysql://root:root123@127.0.0.1:3306/test");
+         pool.get_conn().await.unwrap()
+    });
+
 }

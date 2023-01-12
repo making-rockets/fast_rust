@@ -28,7 +28,7 @@ pub async fn insert_student(student: Student,  conn: &mut Data<Conn>) {
             "class" => student.class,
             "mobile" => student.mobile,
             "address" => student.address,
-        }).run( conn.into_inner(). ).await.unwrap().;
+        });
 }
 
 
