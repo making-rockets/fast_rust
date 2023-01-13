@@ -3,11 +3,12 @@ use std::process::id;
 use actix_web::web;
 use actix_web::web::Data;
 use chrono::NaiveDateTime;
-use mysql_async::{Conn, params};
-use mysql_async::prelude::{BatchQuery, Query, WithParams};
+use mysql_async::{Conn, params, QueryResult, Result};
+use mysql_async::prelude::{BatchQuery, FromRow, Protocol, Query, Queryable, WithParams};
 
 use serde::{Deserialize, Serialize};
 use serde_json::to_string;
+use crate::{GLOBAL_CONN_LAZY_STATIC, GLOBAL_CONN_ONCE_CELL};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Student {
@@ -19,35 +20,44 @@ pub struct Student {
     //pub create_time:NaiveDateTime
 }
 
-pub async fn insert_student(student: Student,  conn: &mut Data<Conn>) {
-  let result =    r"INSERT INTO student (id, name, class,mobile,address)
+pub async fn insert_student(student: Student) {
+    let mut conn = GLOBAL_CONN_ONCE_CELL.get_conn().await.unwrap();
+    let result = r"INSERT INTO student (id, name, class,mobile,address)
       VALUES (:id, :name, :class,:mobile,:address)"
         .with(params! {
-            "id" => student.id.unwrap(),
+            "id" => 1,
             "name" => student.name,
             "class" => student.class,
             "mobile" => student.mobile,
             "address" => student.address,
-        });
+        }).run(&mut conn).await;
+    println!("{:?}", result);
+}
+
+pub async fn get_all_results<TupleType, P>(mut result: QueryResult<'_, '_, P>) -> Result<Vec<TupleType>>
+    where TupleType: FromRow + Send + 'static, P: Protocol + Send + 'static, {
+    Ok(result.collect().await?)
 }
 
 
 pub async fn get_students() -> anyhow::Result<Vec<Student>> {
-    let mut studetns = Vec::new();
-    for i in 0..10 {
-        let student = Student {
-            id: Some(i.to_string()),
-            name: format!("{}{}", i, "名称"),
-            class: format!("{}{}", i, "班级"),
-            mobile: format!("{}{}", i, "手机号"),
-            address: format!("{}{}", i, "地址"),
-            // create_time: NaiveDateTime::default(),
-        };
+    let mut conn = GLOBAL_CONN_ONCE_CELL.get_conn().await.unwrap();
 
-        studetns.push(student);
-    }
+    let result = conn.query("select * from student").await?;
 
-    Ok(studetns)
+   let result =  get_all_results(result).await?;
+
+    let students = "SELECT * FROM student"
+        .with(())
+        .map(&mut conn, |(id, &name, class, mobile, address, )| Student {
+            id: Some(id),
+            name: serde_json::to_string(name).unwrap(),
+            class: serde_json::to_string(class).unwrap(),
+            mobile: serde_json::to_string(mobile).unwrap(),
+            address: serde_json::to_string(address).unwrap(),
+        },
+        ).await?;
+    Ok(vec![])
 }
 
 pub async fn get_student(student_id: i64) -> anyhow::Result<Student> {

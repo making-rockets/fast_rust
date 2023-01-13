@@ -5,20 +5,17 @@ use actix_web::{get, post, web::{self, Path, Query}, HttpRequest, HttpResponse, 
 use mysql_async::Conn;
 use tera::{Template, Tera};
 
-use crate::{
-    common::api_result::Api,
-    models::student::{get_student, get_students},
-};
+use crate::{common::api_result::Api, GLOBAL_TERA, models::student::{get_student, get_students}};
 use crate::models::student::{insert_student, Student};
 
 #[get("/students")]
-pub async fn students(request: HttpRequest, template: web::Data<Tera>) -> HttpResponse {
+pub async fn students(request: HttpRequest) -> HttpResponse {
     let tmpl_name = "students.html";
     let mut context = tera::Context::new();
 
     let students = get_students().await.unwrap();
     context.insert("students", &students);
-    let body = template.render(tmpl_name, &context).unwrap();
+    let body = GLOBAL_TERA.render(tmpl_name, &context).unwrap();
     Api::<String>::success()
         .await
         .to_response_of_html(body)
@@ -29,7 +26,6 @@ pub async fn students(request: HttpRequest, template: web::Data<Tera>) -> HttpRe
 pub async fn edit_student(
     request: HttpRequest,
     student_id: Query<HashMap<String, i64>>,
-    template: web::Data<Tera>,
 ) -> HttpResponse {
     let tmpl_name = "edit-student.html";
     let mut context = tera::Context::new();
@@ -37,7 +33,7 @@ pub async fn edit_student(
     context.insert(
         "student", &get_student(*student_id.get("studentId").unwrap()).await.unwrap());
 
-    let body = template.render(tmpl_name, &context).unwrap();
+    let body = GLOBAL_TERA.render(tmpl_name, &context).unwrap();
     Api::<String>::success()
         .await
         .to_response_of_html(body)
@@ -46,10 +42,10 @@ pub async fn edit_student(
 
 
 #[get("/add-student")]
-pub async fn add_student(request: HttpRequest, template: web::Data<Tera>) -> HttpResponse {
+pub async fn add_student(request: HttpRequest) -> HttpResponse {
     let tmpl_name = "add-student.html";
     let mut context = tera::Context::new();
-    let body = template.render(tmpl_name, &context).unwrap();
+    let body = GLOBAL_TERA.render(tmpl_name, &context).unwrap();
     Api::<String>::success()
         .await
         .to_response_of_html(body)
@@ -57,18 +53,18 @@ pub async fn add_student(request: HttpRequest, template: web::Data<Tera>) -> Htt
 }
 
 #[post("/add-student-submit")]
-pub async fn add_student_submit(student: web::Form<Student>, template: web::Data<Tera>, mut connect:web::Data<Conn>) -> HttpResponse {
+pub async fn add_student_submit(student: web::Form<Student>) -> HttpResponse {
 
 
     //添加数据
-    insert_student(student.into_inner(), connect.borrow_mut()).await;
+    insert_student(student.into_inner()).await;
 
 
     let tmpl_name = "students.html";
     let mut context = tera::Context::new();
     //添加完数据后返回数据库中的所有数据
     context.insert("students", &get_students().await.unwrap());
-    let body = template.render(tmpl_name, &context).unwrap();
+    let body = GLOBAL_TERA.render(tmpl_name, &context).unwrap();
     Api::<String>::success()
         .await
         .to_response_of_html(body)
@@ -77,10 +73,10 @@ pub async fn add_student_submit(student: web::Form<Student>, template: web::Data
 
 
 #[get("/student-details")]
-pub async fn student_details(request: HttpRequest, template: web::Data<Tera>) -> HttpResponse {
+pub async fn student_details(request: HttpRequest) -> HttpResponse {
     let tmpl_name = "student-details.html";
     let mut context = tera::Context::new();
-    let body = template.render(tmpl_name, &context).unwrap();
+    let body = GLOBAL_TERA.render(tmpl_name, &context).unwrap();
     Api::<String>::success()
         .await
         .to_response_of_html(body)

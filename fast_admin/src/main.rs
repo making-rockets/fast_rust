@@ -33,23 +33,10 @@ async fn main() -> std::io::Result<()> {
     //注册日志
     std::env::set_var("RUST_LOG", "actix_web=debug");
     env_logger::init();
-
-    //注册tera
-    let mut tera = match Tera::new("fast_admin/src/templates/teacher/*.html") {
-        Ok(t) => t,
-        Err(e) => {
-            println!("错误{:?}", e);
-            std::process::exit(1);
-        }
-    };
-    tera.full_reload().map_err(|e| println!("{:?}", e));
-
     HttpServer::new(move || {
-        //注册mysql
-
         App::new()
             .wrap(Logger::default())
-            .app_data(web::Data::new(tera.clone()))
+            //.app_data(web::Data::new(tera.clone()))
             //.app_data(web::Data::new(conn))
             //.wrap(middleware::auth::Authorization)
             .wrap(middleware::handle_method::HandleMethod)
@@ -68,19 +55,28 @@ async fn main() -> std::io::Result<()> {
         .await
 }
 
-static GLOBAL_DATA: Lazy<Conn> = Lazy::new(|| {
-    tokio::runtime::Runtime::new().unwrap().block_on(async move {
-        let pool: mysql_async::Pool = mysql_async::Pool::new("mysql://root:root123@127.0.0.1:3306/test");
-        pool.get_conn().await.unwrap()
-    })
+pub static GLOBAL_CONN_ONCE_CELL: Lazy<mysql_async::Pool> = Lazy::new(|| {
+    let pool: mysql_async::Pool = mysql_async::Pool::new("mysql://root:root123@127.0.0.1:3306/test");
+    pool
 });
 
 lazy_static! {
-     pub static ref  CONN:Conn =
+    pub static ref  GLOBAL_CONN_LAZY_STATIC: mysql_async::Pool =  mysql_async::Pool::new("mysql://root:root123@127.0.0.1:3306/test");
+}
 
-    tokio::runtime::Runtime::new().unwrap().block_on(async move {
-        let pool: mysql_async::Pool = mysql_async::Pool::new("mysql://root:root123@127.0.0.1:3306/test");
-         pool.get_conn().await.unwrap()
-    });
+
+lazy_static! {
+    //注册tera
+  pub static ref  GLOBAL_TERA:Tera = match Tera::new("fast_admin/src/templates/teacher/*.html") {
+        Ok(mut tera) => {
+             tera.full_reload().map_err(|e| println!("{:?}", e));
+             tera
+        },
+        Err(e) => {
+            println!("错误{:?}", e);
+            std::process::exit(1);
+        }
+    };
+
 
 }
