@@ -11,11 +11,13 @@ use actix_web::{routes, web, App, HttpResponse, HttpServer, Responder};
 
 use chrono::naive::serde;
 use lazy_static::lazy_static;
-use mysql_async::Conn;
 use once_cell::sync::Lazy;
 use serde_json::{from_value, to_value, Value};
 use tera::{try_get_value, Context, Error, Tera};
+
 use tokio::sync::Mutex;
+use tokio_postgres::{Client, Connection, NoTls};
+
 
 mod base;
 mod common;
@@ -30,6 +32,8 @@ mod utils;
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+
+
     //注册日志
     std::env::set_var("RUST_LOG", "actix_web=debug");
     env_logger::init();
@@ -55,14 +59,10 @@ async fn main() -> std::io::Result<()> {
         .await
 }
 
-pub static GLOBAL_CONN_ONCE_CELL: Lazy<mysql_async::Pool> = Lazy::new(|| {
-    let pool: mysql_async::Pool = mysql_async::Pool::new("mysql://root:root123@127.0.0.1:3306/test");
-    pool
-});
 
-lazy_static! {
-    pub static ref  GLOBAL_CONN_LAZY_STATIC: mysql_async::Pool =  mysql_async::Pool::new("mysql://root:root123@127.0.0.1:3306/test");
-}
+
+
+
 
 
 lazy_static! {
@@ -77,6 +77,16 @@ lazy_static! {
             std::process::exit(1);
         }
     };
+    pub static ref PG_POOL:  deadpool_postgres::Pool =  {
 
-
+        let mut cfg = deadpool_postgres::Config::new();
+        cfg.host = Some("127.0.0.1".to_owned());
+        cfg.port = Some(5432);
+        cfg.user = Some("postgres".to_owned());
+        cfg.password = Some("123456".to_owned());
+        cfg.dbname= Some("postgres".to_owned());
+        cfg.manager = Some(deadpool_postgres::ManagerConfig { recycling_method: deadpool_postgres::RecyclingMethod::Fast });
+        let pool = cfg.create_pool(Some(deadpool_postgres::Runtime::Tokio1), NoTls).unwrap();
+        pool
+    };
 }

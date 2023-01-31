@@ -2,7 +2,6 @@ use std::borrow::BorrowMut;
 use std::collections::HashMap;
 
 use actix_web::{get, post, web::{self, Path, Query}, HttpRequest, HttpResponse, Responder};
-use mysql_async::Conn;
 use tera::{Template, Tera};
 
 use crate::{common::api_result::Api, GLOBAL_TERA, models::student::{get_student, get_students}};

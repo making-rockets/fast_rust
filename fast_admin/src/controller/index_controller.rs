@@ -9,6 +9,7 @@ use actix_web::{web, HttpMessage, HttpResponse};
 use tera::{Context, Tera};
 
 use crate::common::api_result::Api;
+use crate::GLOBAL_TERA;
 use crate::models::user::UserLoginVo;
 use crate::service::user_service::UserService;
 use crate::utils::captcha_util::BarCode;
@@ -57,10 +58,10 @@ pub async fn login(request: HttpRequest, template: web::Data<Tera>) -> HttpRespo
 }
 
 #[get("")]
-pub async fn index(request: HttpRequest, template: web::Data<Tera>) -> HttpResponse {
+pub async fn index(request: HttpRequest) -> HttpResponse {
     let tmpl_name = "index.html";
     let mut context = tera::Context::new();
-    let body = template.render(tmpl_name, &context).unwrap();
+    let body = GLOBAL_TERA.render(tmpl_name, &context).unwrap();
     Api::<String>::success()
         .await
         .to_response_of_html(body)
