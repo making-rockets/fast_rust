@@ -38,7 +38,7 @@ pub async fn edit_student(
         .to_response_of_html(body)
         .await
 }
-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
+
 
 #[get("/add-student")]
 pub async fn add_student(request: HttpRequest) -> HttpResponse {

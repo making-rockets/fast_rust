@@ -49,5 +49,5 @@ image = "0.24"
 tracing = { version = "0" }
 env_logger = { version = "0" }
 #orm
-tokio-postgres = {version = "0",features = ["default"]}
+tokio-postgres = {version = "0",features = ["default","with-chrono-0_4"]}
 deadpool-postgres={version = "0"}

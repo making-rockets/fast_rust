@@ -2,31 +2,34 @@ use std::fmt::format;
 use std::process::id;
 use actix_web::web;
 use actix_web::web::Data;
-use chrono::NaiveDateTime;
+use chrono::{DateTime, Local, NaiveDateTime};
+use futures_util::pin_mut;
+
 use redis::Client;
 
 use serde::{Deserialize, Serialize};
 use serde_json::to_string;
 use crate::{PG_POOL};
+use crate::controller::student_controller::student_details;
 
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Student {
     pub id: Option<String>,
-    pub name: String,
-    pub class: String,
-    pub mobile: String,
-    pub address: String,
-    //pub create_time:NaiveDateTime
+    pub name: Option<String>,
+    pub class: Option<String>,
+    pub mobile: Option<String>,
+    pub address: Option<String>,
+    pub create_time: Option<DateTime<Local>>,
 }
 
 pub async fn insert_student(student: Student) {
     let client = PG_POOL.get().await.unwrap();
-    let statement = client.prepare("select * from student").await.unwrap();
-    let result = client.query(&statement, &[]).await;
-    for x in result.unwrap().iter() {
-        println!("{:?}", x.get::<usize,i64 >(0 ));
-    }
+
+    let statment = client.prepare("insert into student(id,name,class,mobile,address,create_time) values ($1,$2,$3,$4,%5,$6)").await.unwrap();
+    client.execute(&statment, &[&100, &student.name.unwrap(), &student.class.unwrap(), &student.mobile.unwrap(), &student.address.unwrap(),
+        &chrono::Local::now()
+    ]);
 }
 
 
@@ -35,12 +38,5 @@ pub async fn get_students() -> anyhow::Result<Vec<Student>> {
 }
 
 pub async fn get_student(student_id: i64) -> anyhow::Result<Student> {
-    Ok(Student {
-        id: Some(student_id.to_string()),
-        name: "两拨1".to_owned(),
-        class: "两拨2".to_owned(),
-        mobile: "两拨5".to_owned(),
-        address: "两拨6".to_owned(),
-        // create_time: NaiveDateTime::default(),
-    })
+    Ok(todo!())
 }
