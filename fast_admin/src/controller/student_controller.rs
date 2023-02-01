@@ -70,7 +70,7 @@ pub async fn add_student_submit(student: web::Form<Student>) -> HttpResponse {
         .await
 }
 
-
+//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
 #[get("/student-details")]
 pub async fn student_details(request: HttpRequest) -> HttpResponse {
     let tmpl_name = "student-details.html";
