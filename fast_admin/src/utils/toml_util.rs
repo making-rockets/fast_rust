@@ -1,10 +1,3 @@
- 
-
-
 pub struct ParseToml {}
 
-impl ParseToml {
-
-
-
-}
+impl ParseToml {}

@@ -7,7 +7,6 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-
 actix-web = "4"
 actix-http = "3"
 actix-files = "0"
@@ -42,12 +41,15 @@ redis = { version = "0", default-features = false, features = [] }
 short-crypt = "1"
 futures = { version = "0" }
 futures-util = "0"
-uuid = "1"
+uuid ={version = "1",features = ["v4","fast-rng"]}
 mime = "0.3.16"
 captcha = "0"
 image = "0.24"
 tracing = { version = "0" }
 env_logger = { version = "0" }
 #orm
-tokio-postgres = {version = "0",features = ["default","with-chrono-0_4"]}
-deadpool-postgres={version = "0"}
+tokio-postgres = { version = "0", features = ["default", "with-chrono-0_4"] }
+postgres-from-row= {version = "0"}
+deadpool-postgres = { version = "0" }
+utoipa = { version = "3", features = ["actix_extras"] }
+utoipa-swagger-ui = { version = "3", features = ["debug-embed", "actix-web"] }

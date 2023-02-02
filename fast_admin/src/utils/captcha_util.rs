@@ -1,15 +1,13 @@
-use actix_web::{ HttpResponse};
-use serde::{Serialize, Deserialize};
+use actix_web::HttpResponse;
 use captcha::filters::{Dots, Noise, Wave};
 use captcha::Captcha;
-
+use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct BarCode {
     user_name: Option<String>,
     url: Option<String>,
 }
-
 
 impl BarCode {
     pub async fn new(user_name: Option<String>, url: Option<String>) -> BarCode {
@@ -31,13 +29,13 @@ impl BarCode {
         Some((png, code))
     }
 
-
     pub async fn to_response(&self, base64: Vec<u8>) -> HttpResponse {
-        HttpResponse::Ok().insert_header(("access-control-allow-origin","*"))
-            .insert_header( ("cache-control","no-cache"))
-            .content_type(mime::IMAGE_PNG.to_string()).body(base64)
+        HttpResponse::Ok()
+            .insert_header(("access-control-allow-origin", "*"))
+            .insert_header(("cache-control", "no-cache"))
+            .content_type(mime::IMAGE_PNG.to_string())
+            .body(base64)
     }
-
 
     // pub async fn qrcode(arg: web::Query<BarCode>) -> impl Responder {
     //     let code = QrCode::new(arg.into_inner().url.unwrap().as_bytes()).unwrap();
@@ -55,4 +53,3 @@ impl BarCode {
 
     pub async fn validate_captcha() {}
 }
-

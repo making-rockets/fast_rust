@@ -3,7 +3,6 @@ use serde::{Deserialize, Serialize};
 
 use crate::models::menu::MenuVo;
 
- 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct User {
     pub id: Option<u64>,

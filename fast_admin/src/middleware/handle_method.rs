@@ -1,9 +1,10 @@
+use actix_web::dev::{forward_ready, Service, ServiceRequest, ServiceResponse, Transform};
+use actix_web::{web, Error};
+use futures::future::LocalBoxFuture;
+use futures_util::{StreamExt, TryStreamExt};
 use std::cell::RefCell;
 use std::future::{ready, Ready};
 use std::rc::Rc;
-use actix_web::Error;
-use actix_web::dev::{forward_ready, Service, ServiceRequest, ServiceResponse, Transform};
-use futures::future::LocalBoxFuture;
 
 pub struct HandleMethod;
 
@@ -42,10 +43,15 @@ where
 
     forward_ready!(service);
 
-    fn call(&self, req: ServiceRequest) -> Self::Future {
+    fn call(&self, mut req: ServiceRequest) -> Self::Future {
         let service = self.service.clone();
         Box::pin(async move {
-            //println!("获取请求{:?}", &req);
+            let (http_request, payload) = req.parts_mut();
+            let mut bytes = web::BytesMut::new();
+            while let Some(item) = payload.next().await {
+                bytes.extend_from_slice(&item?);
+            }
+
             service.call(req).await
         })
     }

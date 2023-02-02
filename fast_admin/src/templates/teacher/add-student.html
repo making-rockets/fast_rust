@@ -86,8 +86,9 @@
                                     <div class="col-12 col-sm-6">
                                         <div class="form-group">
                                             <label>创建时间</label>
-                                            <div>
-                                                <input type="date" class="form-control" name="create_time">
+                                            <div class="datetimepicker">
+                                                <input type="datetime-local" id="create_time"
+                                                       class="form-control datetimepicker" name="create_time">
                                             </div>
                                         </div>
                                     </div>
@@ -113,11 +114,13 @@
 <!-- Bootstrap Core JS -->
 <script src="/assets/js/popper.min.js"></script>
 <script src="/assets/plugins/bootstrap/js/bootstrap.min.js"></script>
-
+<script src="assets/js/bootstrap-datetimepicker.min.js"></script>
 <!-- Slimscroll JS -->
 <script src="/assets/plugins/slimscroll/jquery.slimscroll.min.js"></script>
 
 <!-- Custom JS -->
 <script src="/assets/js/script.js"></script>
+
+
 </body>
 </html>

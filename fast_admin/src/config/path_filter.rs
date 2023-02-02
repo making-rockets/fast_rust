@@ -1,7 +1,6 @@
- 
 #[derive(Debug, Clone)]
 pub struct PathFilter {
-    pub paths: Vec<String>
+    pub paths: Vec<String>,
 }
 
 impl PathFilter {
@@ -15,5 +14,3 @@ impl PathFilter {
         PathFilter { paths: vec }
     }
 }
-
-

@@ -1,9 +1,4 @@
-
-
-
 pub struct RoleService {}
 
 //TODO
-impl RoleService {
-
-}
+impl RoleService {}
