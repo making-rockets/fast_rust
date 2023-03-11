@@ -3,21 +3,24 @@ use std::error::Error;
 
 use actix_http::Response;
 use actix_web::http::header;
-use actix_web::web::{Form, Header, Query};
-use actix_web::{get, post, HttpRequest};
+use actix_web::web::{Data, Form, Header, Query};
+use actix_web::{get, post, HttpRequest, App};
 use actix_web::{web, HttpMessage, HttpResponse};
+use sqlx::{Pool, Sqlite};
 use tera::{Context, Tera};
 
 use crate::common::api_result::Api;
-use crate::models::user::UserLoginVo;
+
 use crate::service::user_service::UserService;
 use crate::utils::captcha_util::BarCode;
 use crate::utils::redis_util::REDIS_UTIL;
 use crate::GLOBAL_TERA;
+use crate::models::user::User;
 
 #[get("/send_reg_code")]
-pub async fn push_reg_code(user_name: Query<UserLoginVo>) -> HttpResponse {
-    match user_name.into_inner().user_name {
+pub async fn push_reg_code(user_name: Query<()>) -> HttpResponse {
+    todo!()
+    /*match user_name.into_inner().user_name {
         Some(user_name) => {
             let bar_code = BarCode::new(Some(user_name.clone()), None).await;
             let result = bar_code.captcha().await;
@@ -41,7 +44,7 @@ pub async fn push_reg_code(user_name: Query<UserLoginVo>) -> HttpResponse {
                 .to_response_of_json()
                 .await
         }
-    }
+    }*/
 }
 
 #[get("/login")]
@@ -58,10 +61,12 @@ pub async fn login(request: HttpRequest) -> HttpResponse {
 }
 
 #[get("")]
-pub async fn index(request: HttpRequest) -> HttpResponse {
+pub async fn index(request: HttpRequest, pool: Data<Pool<Sqlite>>) -> HttpResponse {
     let tmpl_name = "index.html";
     let mut context = tera::Context::new();
     let body = GLOBAL_TERA.render(tmpl_name, &context).unwrap();
+    let u = User::get_user(1,pool.as_ref()).await;
+
     Api::<String>::success()
         .await
         .to_response_of_html(body)

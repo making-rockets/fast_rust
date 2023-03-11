@@ -1,5 +1,5 @@
 use crate::common::api_result::Api;
-use crate::models::user::{User, UserVo};
+use crate::models::user::{User};
 use crate::service::user_service::UserService;
 use actix_web::web::Form;
 use actix_web::{delete, get, post, put, web::Query};
@@ -11,7 +11,7 @@ pub async fn new_user(arg: Form<User>, _request: HttpRequest) -> HttpResponse {
 }
 
 #[get("list")]
-pub async fn list(arg: Query<UserVo>, request: HttpRequest) -> HttpResponse {
+pub async fn list(arg: Query<()>, request: HttpRequest) -> HttpResponse {
     todo!()
 }
 

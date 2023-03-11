@@ -1,5 +1,5 @@
 use crate::common::api_result::Api;
-use crate::models::menu::{Menu, MenuVo};
+use crate::models::menu::{Menu};
 use crate::service::menu_service::MenuService;
 use actix_web::web::Form;
 use actix_web::{delete, get, post, put, web::Query};
@@ -11,7 +11,7 @@ pub async fn new_user(arg: Form<Menu>, _request: HttpRequest) -> HttpResponse {
 }
 
 #[get("/list")]
-pub async fn list(arg: Query<MenuVo>, _req: HttpRequest) -> HttpResponse {
+pub async fn list(arg: Query<()>, _req: HttpRequest) -> HttpResponse {
     todo!()
 }
 

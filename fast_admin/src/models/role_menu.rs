@@ -1,4 +1,4 @@
-use crate::models::menu::MenuVo;
+
 use chrono::NaiveDateTime;
 
 pub struct RoleMenu {
@@ -13,5 +13,5 @@ pub struct RoleMenu {
 pub struct RoleMenuVo {
     pub role_id: Option<u64>,
     pub role_name: Option<String>,
-    pub menus: Vec<MenuVo>,
+
 }
