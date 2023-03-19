@@ -1,7 +1,6 @@
 use actix_web::web;
 use actix_web::web::Data;
 use chrono::{DateTime, Local, NaiveDateTime, TimeZone};
-use deadpool_postgres::GenericClient;
 use futures_util::future::ok;
 use futures_util::pin_mut;
 use std::fmt::format;

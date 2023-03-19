@@ -1,5 +1,5 @@
 [package]
-name = "proc_macro"
+name = "fast_proc_macro"
 version = "0.1.0"
 edition = "2021"
 
@@ -10,6 +10,6 @@ name = "proc_macro"
 proc-macro = true
 
 [dependencies]
-syn = "1"
-quote = "1"
-proc-macro2 = "1"
+syn = { version = "1", features = ["extra-traits", "default","derive","full"] }
+quote = { version = "1", features = ["proc-macro", "default"] }
+proc-macro2 = { version = "1", features = ["proc-macro", "default"] }

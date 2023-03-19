@@ -2,6 +2,7 @@
 #![allow(unused)]
 
 use std::collections::{hash_map, HashMap};
+use std::future::Future;
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 use std::str::FromStr;
@@ -12,21 +13,28 @@ use actix_web::http::KeepAlive;
 use actix_web::middleware::Logger;
 use actix_web::{routes, web, App, HttpResponse, HttpServer, Responder};
 use actix_web::web::Data;
-use async_static::async_static;
+use async_once::AsyncOnce;
 
 
 use chrono::naive::serde;
 use futures_util::TryFutureExt;
 use lazy_static::lazy_static;
 
+
 use serde_json::{from_value, to_value, Value};
-use sqlx::{Connection, ConnectOptions, Pool, Sqlite, SqliteConnection, SqlitePool};
+use sqlx::ConnectOptions;
 use sqlx::sqlite::{SqliteConnectOptions, SqliteJournalMode, SqlitePoolOptions};
+
 use tera::{try_get_value, Context, Error, Tera};
 
 use tokio::sync::Mutex;
+use tracing::log;
 use tracing::log::{LevelFilter, Log};
-
+use tracing_actix_web::TracingLogger;
+use tracing_subscriber::fmt;
+use tracing_subscriber::fmt::writer::MakeWriterExt;
+use tracing_subscriber::layer::SubscriberExt;
+use tracing_subscriber::util::SubscriberInitExt;
 
 
 mod base;
@@ -46,8 +54,6 @@ async fn main() -> std::io::Result<()> {
     std::env::set_var("RUST_LOG", "actix_web=debug");
     env_logger::init();
 
-    let mut config_path = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-    println!("{:?}", config_path);
 
     let mut sqlite_connect_options = SqliteConnectOptions::from_str("sqlite://D:\\project\\rust\\fast_rust\\db.sqlite").expect("打不开");
     sqlite_connect_options = sqlite_connect_options.journal_mode(SqliteJournalMode::Wal);
@@ -59,10 +65,12 @@ async fn main() -> std::io::Result<()> {
 
     HttpServer::new(move || {
         App::new()
+            .wrap(tracing_actix_web::TracingLogger::default())
             .wrap(Logger::default())
             .app_data(Data::new(sql_pool.clone()))
             //.wrap(middleware::auth::Authorization)
             .wrap(middleware::handle_method::HandleMethod)
+            .wrap(actix_web::middleware::Compress::default())
             .service(router::index_router())
             .service(router::menu_router())
             .service(router::student_router())
@@ -89,21 +97,27 @@ lazy_static! {
         }
     };
 
+  // pub static ref GLOBAL_SQLX:AsyncOnce<Pool<Sqlite>> = {
+  //
+  //      let t =  AsyncOnce::new(async {
+  //           sqlx_pool().await
+  //       });
+  //       t
+  // } ;
 
 
 
 
 }
 
-// async_static! {
-//   pub static ref pool:Pool<Sqlite> = {
-//
-//         let mut sqlite_connect_options = SqliteConnectOptions::new();
-//         sqlite_connect_options = sqlite_connect_options.filename("sqlite://fast_rust.db");
-//         sqlite_connect_options.log_statements(LevelFilter::Debug);
-//         let sql_pool = SqlitePoolOptions::new().connect_with(sqlite_connect_options.clone()).await.unwrap();
-//         return sql_pool;
-//     };
+
+// pub async fn sqlx_pool() -> Pool<Sqlite> {
+//     let mut sqlite_connect_options = SqliteConnectOptions::from_str("sqlite://D:\\project\\rust\\fast_rust\\db.sqlite").expect("打不开");
+//     sqlite_connect_options = sqlite_connect_options.journal_mode(SqliteJournalMode::Wal);
+//     sqlite_connect_options.log_statements(LevelFilter::Debug);
+//     sqlite_connect_options.connect().await.unwrap_or_else(|_| std::process::exit(1));
+//     let sql_pool = SqlitePoolOptions::new().connect_with(sqlite_connect_options.clone()).await.unwrap();
+//     sql_pool
 // }
 
 
