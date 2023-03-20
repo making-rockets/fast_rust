@@ -10,7 +10,7 @@ use sqlx::encode::IsNull;
 use sqlx::sqlite::SqliteTypeInfo;
 use tracing_subscriber::fmt::format;
 
-use crate::models::{Page, page_info, PageInfo};
+use crate::models::{build_limit, Page, page_info, PageInfo};
 
 
 #[derive(Debug, Serialize, Deserialize, Clone, FromRow, Encode, Type)]
@@ -50,8 +50,7 @@ impl User {
         if user.status.is_some() {
             query_builder.push(" and status = ").push(user.status.unwrap());
         }
-
-        query_builder.push(" limit ").push((current_page )*current_size ).push(" offset ").push((current_page -1 ));
+        query_builder = build_limit(query_builder, current_page, current_size);
 
         let query = query_builder.build_query_as::<User>();
         let sql = query.sql();

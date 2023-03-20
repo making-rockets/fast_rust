@@ -2,7 +2,7 @@ use async_trait::async_trait;
 use futures_util::future::ok;
 use serde::{de, Deserialize, Serialize};
 use serde::de::value::UsizeDeserializer;
-use sqlx::{Executor, Pool, Row, Sqlite};
+use sqlx::{Encode, Executor, Pool, QueryBuilder, Row, Sqlite};
 
 pub mod menu;
 pub mod role;
@@ -50,7 +50,7 @@ pub struct Page<T: Clone + Serialize + de::DeserializeOwned> {
 
 impl<T> Page<T> where T: Clone + Serialize + de::DeserializeOwned {
     pub async fn new(current_page: i64, current_size: i64, item_total: i64) -> Page<T> {
-        let page_total = item_total % current_size;
+        let page_total = (item_total + 1) / current_size;
         Page {
             item_total,
             list: vec![],
@@ -78,27 +78,7 @@ pub async fn page_info<T>(sql: String, current_page: i64, current_size: i64, lis
     return Ok(page);
 }
 
-#[macro_export]
-macro_rules! struct_fields {
-    (     $name:ident {}) => {
-
-     impl $name {
-      fn field_names()  {
-        let struct_name_ident = stringify!(%name);
-        println!("{}",struct_name_ident);
-      }
-     }
-    }
-}
-
-
-#[test]
-pub fn test() {
-    let string = "select user_name ,abc,def from  user";
-
-    let index = string.find("from").unwrap();
-
-    let page_sql = &string[index..];
-    println!("{}", page_sql);
-    ;
+pub fn build_limit(mut query_builder:  QueryBuilder<Sqlite>, current_page: i64, current_size: i64) -> QueryBuilder<Sqlite>{
+    query_builder.push(" limit ").push((current_page) * current_size).push(" offset ").push((current_page - 1));
+    return query_builder;
 }
