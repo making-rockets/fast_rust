@@ -36,19 +36,13 @@ impl From<actix_web::error::Error> for Api<()> {
 }
 
 #[derive(Debug, Serialize, Clone)]
-pub struct Api<T>
-where
-    T: Serialize + DeserializeOwned,
-{
+pub struct Api<T> where T: Serialize, {
     pub code: Option<u16>,
     pub msg: Option<GlobalError>,
     pub data: Option<T>,
 }
 
-impl<T> Api<T>
-where
-    T: Serialize + DeserializeOwned + Clone,
-{
+impl<T> Api<T> where T: Serialize + Clone {
     pub async fn success() -> Self {
         Api {
             code: Some(StatusCode::OK.as_u16()),

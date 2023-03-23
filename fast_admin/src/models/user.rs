@@ -10,10 +10,10 @@ use sqlx::encode::IsNull;
 use sqlx::sqlite::SqliteTypeInfo;
 use tracing_subscriber::fmt::format;
 
-use crate::models::{build_limit, Page, page_info, PageInfo};
+use crate::models::{build_limit, Page, PageInfo};
 
 
-#[derive(Debug, Serialize, Deserialize, Clone, FromRow, Encode, Type)]
+#[derive(Debug, Serialize, Deserialize, Clone, FromRow)]
 pub struct User {
     pub user_id: Option<i64>,
     pub user_name: Option<String>,
@@ -73,7 +73,7 @@ impl User {
 
         let list = sqlx::query_as::<Sqlite, User>(sql).fetch_all(pool).await?;
         println!("{:?}", list);
-        let mut page_info = page_info::<User>(sql.to_string(), current_page, current_size, list, pool).await?;
+        let mut page_info = Page::page_info(sql.to_string(), current_page, current_size, list, pool).await?;
 
         Ok(page_info)
     }
