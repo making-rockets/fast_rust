@@ -2,6 +2,7 @@
 #![allow(unused)]
 
 use std::collections::{hash_map, HashMap};
+use std::env;
 use std::future::Future;
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
@@ -52,13 +53,17 @@ mod utils;
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     //注册日志
-    std::env::set_var("RUST_LOG", "actix_web=debug");
+    std::env::set_var("RUST_LOG", "actix_web=DEBUG");
     env_logger::init();
 
 
-    let mut sqlite_connect_options = SqliteConnectOptions::from_str("sqlite://D:\\project\\rust\\fast_rust\\db.sqlite").expect("打不开");
+
+    let current_path_buf = env::current_dir().unwrap();
+    let current_path = current_path_buf.as_path().to_str().unwrap();
+    let mut sqlite_connect_options = SqliteConnectOptions::from_str(&format!("sqlite://{}/db.sqlite", current_path)).expect("打不开");
     sqlite_connect_options = sqlite_connect_options.journal_mode(SqliteJournalMode::Wal);
     sqlite_connect_options.log_statements(LevelFilter::Debug);
+
     sqlite_connect_options.connect().await.unwrap_or_else(|_| std::process::exit(1));
 
     let sql_pool = SqlitePoolOptions::new().connect_with(sqlite_connect_options.clone()).await.unwrap();
@@ -70,7 +75,7 @@ async fn main() -> std::io::Result<()> {
             .wrap(Logger::default())
             .app_data(Data::new(sql_pool.clone()))
             //.wrap(middleware::auth::Authorization)
-            .wrap(middleware::handle_method::HandleMethod)
+            //.wrap(middleware::handle_method::HandleMethod)
             .wrap(actix_web::middleware::Compress::default())
             .service(router::index_router())
             .service(router::menu_router())

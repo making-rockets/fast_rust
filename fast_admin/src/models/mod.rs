@@ -39,7 +39,7 @@ pub trait PageInfo<T> where T: Clone + Send + Sync + Serialize + de::Deserialize
 }
 
 
-#[derive(Clone, Debug,Serialize)]
+#[derive(Clone, Debug, Serialize)]
 pub struct Page<T: Clone + Serialize> {
     item_total: i64,
     list: Vec<T>,
@@ -50,7 +50,7 @@ pub struct Page<T: Clone + Serialize> {
 
 impl<T> Page<T> where T: Clone + Serialize {
     pub async fn new(current_page: i64, current_size: i64, item_total: i64) -> Page<T> {
-        let page_total = (item_total + 1) / current_size;
+        let page_total = (item_total + 1) / current_size + 1;
         Page {
             item_total,
             list: vec![],
@@ -69,16 +69,16 @@ impl<T> Page<T> where T: Clone + Serialize {
     pub async fn page_info(sql: String, current_page: i64, current_size: i64, list: Vec<T>, pool: &Pool<Sqlite>) -> anyhow::Result<Page<T>> where T: Clone + Serialize + de::DeserializeOwned {
         let page_sql_index = sql.find("from").unwrap();
         let page_sql = "select count(*) as count ".to_string() + &sql[page_sql_index..];
-        println!("{}", page_sql);
         let map = sqlx::query(page_sql.as_str()).fetch_one(pool).await?;
         let count = map.get::<i64, &'static str>("count");
         let mut page: Page<T> = Page::new(current_page, current_size, count).await;
         page = page.add_data(list).await;
-        return Ok(page);
+        Ok(page)
     }
 }
 
 pub fn build_limit(mut query_builder: QueryBuilder<Sqlite>, current_page: i64, current_size: i64) -> QueryBuilder<Sqlite> {
     query_builder.push(" limit ").push((current_page) * current_size).push(" offset ").push((current_page - 1));
-    return query_builder;
+    println!("分页sql:--> {}", &query_builder.sql());
+    query_builder
 }

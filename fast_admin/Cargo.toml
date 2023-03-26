@@ -51,6 +51,7 @@ tracing = { version = "0" }
 tracing-subscriber = { version = "0" }
 tracing-actix-web = { version = "0" }
 env_logger = { version = "0" }
+log = {version = "0"}
 sqlx = { version = "0",  features = ["sqlite", "chrono","runtime-tokio-native-tls"] }
 #ormx = {version = "0",features = ["sqlite"]}
 #ormx-macros = {version = "0",fetures = ["sqlite"]}

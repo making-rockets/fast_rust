@@ -65,10 +65,6 @@ pub async fn index(request: HttpRequest, data: Data<Pool<Sqlite>>) -> HttpRespon
     let tmpl_name = "index.html";
     let mut context = tera::Context::new();
     let body = GLOBAL_TERA.render(tmpl_name, &context).unwrap();
-    let user = User::new().await;
-    let tt = User::user_page(user, 1, 1, data.get_ref()).await;
-    println!("{:?}", tt);
-
     Api::<String>::success()
         .await
         .to_response_of_html(body)

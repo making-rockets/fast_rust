@@ -10,11 +10,11 @@ use actix_web::{guard, web};
 
 pub(crate) fn user_router() -> impl HttpServiceFactory {
     web::scope("/admin/user")
-        .service(user::new_user) //创建新用户
-        .service(user::update) //编辑用户
-        .service(user::delete) //删除用户
-        .service(user::list) //用户列表
-        .service(user::page)                      //用户分页
+        .service(user::add_user) //创建新用户
+        .service(user::edit_user) //编辑用户
+        .service(user::delete_user) //删除用户
+        .service(user::list_user) //用户列表
+        .service(user::page_user)                      //用户分页
 }
 
 pub(crate) fn menu_router() -> impl HttpServiceFactory {
