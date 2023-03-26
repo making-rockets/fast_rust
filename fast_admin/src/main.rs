@@ -56,11 +56,10 @@ async fn main() -> std::io::Result<()> {
     std::env::set_var("RUST_LOG", "actix_web=DEBUG");
     env_logger::init();
 
+    let mut config_path = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    let parent_path = config_path.parent().unwrap().to_str().unwrap();
 
-
-    let current_path_buf = env::current_dir().unwrap();
-    let current_path = current_path_buf.as_path().to_str().unwrap();
-    let mut sqlite_connect_options = SqliteConnectOptions::from_str(&format!("sqlite://{}/db.sqlite", current_path)).expect("打不开");
+    let mut sqlite_connect_options = SqliteConnectOptions::from_str(&format!("sqlite://{}/db.sqlite", parent_path)).expect("打不开");
     sqlite_connect_options = sqlite_connect_options.journal_mode(SqliteJournalMode::Wal);
     sqlite_connect_options.log_statements(LevelFilter::Debug);
 
