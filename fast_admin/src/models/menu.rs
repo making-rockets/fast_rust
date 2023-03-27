@@ -29,7 +29,7 @@ pub struct MenuVo {
     pub status: Option<i64>,
     pub clazz: Option<String>,
     pub sub_menu: Option<Vec<MenuVo>>,
-
+//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
 }
 
 impl From<Menu> for MenuVo {
