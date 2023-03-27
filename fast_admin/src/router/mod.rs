@@ -19,9 +19,10 @@ pub(crate) fn user_router() -> impl HttpServiceFactory {
 
 pub(crate) fn menu_router() -> impl HttpServiceFactory {
     web::scope("/admin/menu")
-        .service(menu::new_user) //创建新菜单
-        .service(menu::update) //编辑菜单
-        .service(menu::delete) //删除菜单
+        .service(menu::add_menu) //创建新菜单
+        .service(menu::edit_menu) //编辑菜单
+        .service(menu::delete_menu) //编辑菜单
+        .service(menu::list_menu) //列表菜单
 }
 
 pub(crate) fn student_router() -> impl HttpServiceFactory {

@@ -1,26 +1,33 @@
 use crate::common::api_result::Api;
-use crate::models::menu::{Menu};
+use crate::models::menu::{Menu, MenuVo};
 use crate::service::menu_service::MenuService;
-use actix_web::web::Form;
+use actix_web::web::{Data, Json};
 use actix_web::{delete, get, post, put, web::Query};
 use actix_web::{HttpRequest, HttpResponse};
+use sqlx::{Pool, Sqlite};
 
-#[post("/new")]
-pub async fn new_user(arg: Form<Menu>, _request: HttpRequest) -> HttpResponse {
+#[post("/add_menu")]
+pub async fn add_menu(arg: Json<Menu>, _request: HttpRequest, pool: Data<Pool<Sqlite>>) -> HttpResponse {
     todo!()
 }
 
-#[get("/list")]
-pub async fn list(arg: Query<()>, _req: HttpRequest) -> HttpResponse {
+#[post("/list_menu")]
+pub async fn list_menu(arg: Json<MenuVo>, _req: HttpRequest, pool: Data<Pool<Sqlite>>) -> HttpResponse {
+    let result = Menu::get_menu_by_user_id(arg.user_id.unwrap(), &pool).await;
+    Api::from_any_result(result).await.to_response_of_json().await
+}
+
+#[post("/edit_menu")]
+pub async fn edit_menu(arg: Json<Menu>, _request: HttpRequest, pool: Data<Pool<Sqlite>>) -> HttpResponse {
     todo!()
 }
 
-#[put("/update")]
-pub async fn update(arg: Form<Menu>, _request: HttpRequest) -> HttpResponse {
+#[post("/delete_menu")]
+pub async fn delete_menu(arg: Json<Menu>, _request: HttpRequest, pool: Data<Pool<Sqlite>>) -> HttpResponse {
     todo!()
 }
 
-#[delete("/delete")]
-pub async fn delete(arg: Form<Menu>) -> HttpResponse {
+#[post("/page_menu")]
+pub async fn page_menu(arg: Json<Menu>) -> HttpResponse {
     todo!()
 }

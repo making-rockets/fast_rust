@@ -6,10 +6,8 @@ use sqlx::{Encode, Executor, Pool, QueryBuilder, Row, Sqlite};
 
 pub mod menu;
 pub mod role;
-pub mod role_menu;
 pub mod student;
 pub mod user;
-pub mod user_role;
 
 #[async_trait]
 pub trait PageInfo<T> where T: Clone + Send + Sync + Serialize + de::DeserializeOwned {
