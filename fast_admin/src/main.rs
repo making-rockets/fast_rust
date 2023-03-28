@@ -49,14 +49,13 @@ mod utils;
 
 #[tokio::main]
 async fn main() -> std::io::Result<()> {
+    let mut config_path = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    let parent_path = config_path.parent().unwrap().to_str().unwrap();
     //注册日志
     std::env::set_var("RUST_LOG", "actix_web=DEBUG");
 
-    log4rs::init_file("config.yaml", Default::default()).unwrap();
+    log4rs::init_file(format!("{}/{}",&parent_path,"config.yaml"), Default::default()).unwrap();
 
-
-    let mut config_path = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
-    let parent_path = config_path.parent().unwrap().to_str().unwrap();
 
     let mut sqlite_connect_options = SqliteConnectOptions::from_str(&format!("sqlite://{}/db.sqlite", parent_path)).unwrap();
     sqlite_connect_options = sqlite_connect_options.journal_mode(SqliteJournalMode::Wal);
@@ -71,9 +70,9 @@ async fn main() -> std::io::Result<()> {
         App::new()
 
             .wrap(Logger::new(r#"远程地址={%a} "请求方式={%r}" 状态码={%s} 相应数据大小={%b}}  useragent ={"%{User-Agent}i"}"#))
-           // .wrap(TracingLogger::default())
+            // .wrap(TracingLogger::default())
             .app_data(Data::new(sql_pool.clone()))
-            //.wrap(middleware::auth::Authorization)
+            .wrap(middleware::auth::Authorization)
             //.wrap(middleware::handle_method::HandleMethod)
             .wrap(actix_web::middleware::Compress::default())
             .service(router::index_router())
@@ -85,6 +84,7 @@ async fn main() -> std::io::Result<()> {
     })
         .keep_alive(KeepAlive::Os)
         .bind("0.0.0.0:3000")?
+        .workers(2)
         .run()
         .await
 }
@@ -102,10 +102,3 @@ lazy_static! {
         }
     };
 }
-
-
-fn log_config() {
-    log4rs::init_file("config.yaml", Default::default()).unwrap();
-    info!("booting up");
-}
-

@@ -30,9 +30,9 @@ async fn is_white_list(path: &str) -> bool {
 pub struct Authorization;
 
 impl<S, B> Transform<S, ServiceRequest> for Authorization
-where
-    S: Service<ServiceRequest, Response = ServiceResponse<B>, Error = Error> + 'static,
-    B: MessageBody,
+    where
+        S: Service<ServiceRequest, Response=ServiceResponse<B>, Error=Error> + 'static,
+        B: MessageBody,
 {
     type Response = ServiceResponse<EitherBody<B>>;
     type Error = Error;
@@ -51,10 +51,9 @@ pub struct AuthorizationMiddleware<S> {
     service: Rc<RefCell<S>>,
 }
 
-impl<S, B> Service<ServiceRequest> for AuthorizationMiddleware<S>
-where
-    S: Service<ServiceRequest, Response = ServiceResponse<B>, Error = Error> + 'static,
-    B: MessageBody,
+impl<S, B> Service<ServiceRequest> for AuthorizationMiddleware<S> where
+    S: Service<ServiceRequest, Response=ServiceResponse<B>, Error=Error> + 'static,
+    B: MessageBody
 {
     type Response = ServiceResponse<EitherBody<B>>;
     type Error = S::Error;
@@ -88,6 +87,6 @@ where
                 srv.call(req).await.map(|res| res.map_into_left_body())
             }
         }
-        .boxed_local()
+            .boxed_local()
     }
 }

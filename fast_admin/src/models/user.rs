@@ -57,17 +57,19 @@ impl User {
     pub async fn edit_user(mut user: User, pool: &Pool<Sqlite>) -> anyhow::Result<i64> {
         let mut sql_builder = QueryBuilder::<Sqlite>::new("update user set ");
         if user.user_name.is_some() {
-            sql_builder.push(&format!(" user_name = '{}'", user.user_name.unwrap()));
+            sql_builder.push(&format!(" user_name = '{}',", user.user_name.unwrap()));
         }
         if user.status.is_some() {
-            sql_builder.push(&format!(", status = {}", user.status.unwrap()));
+            sql_builder.push(&format!("status = {},", user.status.unwrap()));
         }
         if user.password.is_some() {
-            sql_builder.push(&format!(", password = '{}'", user.password.unwrap()));
+            sql_builder.push(&format!("password = '{}',", user.password.unwrap()));
         }
 
-        sql_builder.push(&format!(" where user_id = {}", user.user_id.unwrap()));
-        let result = sqlx::query(sql_builder.sql()).execute(pool).await;
+        let mut trim_sql = sql_builder.sql().to_string();
+        trim_sql.pop();
+
+        let result = sqlx::query(&format!("{} where user_id ={}", trim_sql, user.user_id.unwrap())).execute(pool).await;
         Ok(result.unwrap().rows_affected() as i64)
     }
     // 删除用户
