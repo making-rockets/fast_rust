@@ -49,6 +49,6 @@ pub const CONFIG: Config = Config {
         log_temp_size: Cow::Borrowed("100MB"),
     },
     whitelist: _Config__whitelist {
-        list: Cow::Borrowed(&[Cow::Borrowed("/admin/index/send_reg_code"), Cow::Borrowed("/admin/index/login")]),
+        list: Cow::Borrowed(&[Cow::Borrowed("/admin/index/send_reg_code"), Cow::Borrowed("/admin/index/login"),Cow::Borrowed("/assets")]),
     },
 };

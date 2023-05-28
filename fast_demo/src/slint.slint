@@ -1,0 +1,12 @@
+export component Example inherits Window {
+        width: 200px;
+        height: 310px;
+        Rectangle {
+            x: 100px;
+            y: 70px;
+            width: parent.width - self.x;
+            height: parent.height - self.y;
+            background: green;
+           
+        }
+}

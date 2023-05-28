@@ -19,8 +19,8 @@ use crate::config::toml_config::CONFIG;
 async fn is_white_list(path: &str) -> bool {
     let mut is_access = false;
     for x in CONFIG.whitelist.list.iter() {
-        if x.eq(path) {
-            is_access = true
+        if path.starts_with(&x.to_string()) {
+            is_access = true;
         }
     }
     is_access

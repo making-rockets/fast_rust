@@ -7,7 +7,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-#fast_proc_macro = { path = "../proc_macro" }
+#fast_proc_macro = { path = "../fast_macro" }
 actix-web = "4"
 actix-http = "3"
 actix-files = "0"

@@ -13,8 +13,9 @@ pub(crate) fn user_router() -> impl HttpServiceFactory {
         .service(user::add_user) //创建新用户
         .service(user::edit_user) //编辑用户
         .service(user::delete_user) //删除用户
+        .service(user::delete_users) //删除多个用户
         .service(user::list_user) //用户列表
-        .service(user::page_user)                      //用户分页
+        .service(user::page_user) //用户分页
 }
 
 pub(crate) fn menu_router() -> impl HttpServiceFactory {
@@ -38,6 +39,7 @@ pub(crate) fn index_router() -> impl HttpServiceFactory {
     web::scope("/admin/index")
         .service(index::push_reg_code) //登录发送验证码
         .service(index::login) //登录
+        .service(index::login_submit)
         .service(index::index) //首页
         .service(index::logout) //登出
 }
