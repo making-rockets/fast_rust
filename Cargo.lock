@@ -1368,6 +1368,7 @@ dependencies = [
  "serde",
  "serde_json",
  "short-crypt",
+ "sql-builder",
  "sqlx",
  "tera",
  "tokio",
@@ -1383,6 +1384,7 @@ name = "fast_demo"
 version = "0.1.0"
 dependencies = [
  "slint",
+ "tokio",
 ]
 
 [[package]]
@@ -4137,6 +4139,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "076e103ed41b9864aa838287efe5f4e3a7a0362dd00671ae62a212e5e4612da2"
 dependencies = [
  "pin-utils",
+]
+
+[[package]]
+name = "sql-builder"
+version = "3.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b1008d95d2ec2d062959352527be30e10fec42a1aa5e5a48d990a5ff0fb9bdc0"
+dependencies = [
+ "anyhow",
+ "thiserror",
 ]
 
 [[package]]

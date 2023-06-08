@@ -80,10 +80,9 @@ where
         let page_sql_index = sql.find("from").unwrap();
 
         let page_sql = &("select count(*) as count ".to_string() + &sql[page_sql_index..]);
-        println!("sql 哈哈哈{}", &page_sql);
         let map = sqlx::query(page_sql).fetch_one(pool).await?;
         let count = map.get::<i64, &'static str>("count");
-        let mut page: Page<T> = Page::new(current_page, current_size, count).await;
+        let page: Page<T> = Page::new(current_page, current_size, count).await;
         Ok(page)
     }
 }

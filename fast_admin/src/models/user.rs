@@ -1,19 +1,8 @@
 use anyhow::Ok;
-use async_trait::async_trait;
-use chrono::{DateTime, FixedOffset, Local, NaiveDateTime, TimeZone, Utc};
-use redis::{AsyncCommands, ToRedisArgs};
+use serde::{Deserialize, Serialize};
+use sql_builder::{prelude::Bind, SqlBuilder};
 
-use serde::{Deserialize, Deserializer, Serialize};
-
-use sqlx::database::HasArguments;
-use sqlx::encode::IsNull;
-use sqlx::{
-    database, query, query_as, Encode, Execute, Executor, FromRow, Pool, QueryBuilder, Sqlite,
-    SqliteConnection, Type,
-};
-
-use sqlx::sqlite::SqliteTypeInfo;
-use tracing_subscriber::fmt::format;
+use sqlx::{FromRow, Pool, Sqlite};
 
 use crate::models::{build_limit, Page};
 
@@ -55,9 +44,11 @@ impl User {
         user_id: i64,
         pool: &Pool<Sqlite>,
     ) -> anyhow::Result<Option<User>> {
-        let u = sqlx::query_as(&format!("select * from user where user_id={}", user_id))
-            .fetch_one(pool)
-            .await?;
+        let sql = SqlBuilder::select_from("user")
+            .field("*")
+            .and_where_eq("user_id", user_id)
+            .sql()?;
+        let u = sqlx::query_as(&sql).fetch_one(pool).await?;
         Ok(Some(u))
     }
     // 添加用户逻辑
@@ -66,81 +57,73 @@ impl User {
             let current_time = chrono::Local::now().format("%Y-%m-%d %H:%M:%S").to_string();
             user.create_time = Some(current_time);
         }
-        let add_user = sqlx::query(
-            "INSERT INTO user(user_name, password, create_time, status)values($1,$2,$3,$4)",
-        )
-        .bind(user.user_name)
-        .bind(user.password)
-        .bind(user.create_time)
-        .bind(user.status)
-        .execute(pool)
-        .await?;
+        let sql = SqlBuilder::insert_into("user")
+            .field("user_name")
+            .field("password")
+            .field("create_time")
+            .field("status")
+            .values(&[
+                user.user_name.unwrap(),
+                user.password.unwrap(),
+                user.create_time.unwrap(),
+                user.status.unwrap().to_string(),
+            ])
+            .sql()?;
+        let add_user = sqlx::query(&sql).execute(pool).await?;
 
         Ok(add_user.last_insert_rowid())
     }
     // 编辑用户逻辑
     pub async fn edit_user(mut user: User, pool: &Pool<Sqlite>) -> anyhow::Result<i64> {
-        let mut sql_builder = QueryBuilder::<Sqlite>::new("update user set ");
+        let mut update_builder = SqlBuilder::update_table("user");
         if user.user_name.is_some() {
-            sql_builder.push(&format!(" user_name = '{}',", user.user_name.unwrap()));
+            update_builder.set("user_name", user.user_name.unwrap());
         }
         if user.status.is_some() {
-            sql_builder.push(&format!("status = {},", user.status.unwrap()));
+            update_builder.set("status", user.status.unwrap());
         }
         if user.password.is_some() {
-            sql_builder.push(&format!("password = '{}',", user.password.unwrap()));
+            update_builder.set("password", user.password.unwrap());
         }
+        let sql = update_builder
+            .and_where("user_id = ?".bind(&user.user_id.unwrap()))
+            .sql()?;
 
-        let mut trim_sql = sql_builder.sql().to_string();
-        trim_sql.pop();
+        let result = sqlx::query(&sql).execute(pool).await;
 
-        let result = sqlx::query(&format!(
-            "{} where user_id ={}",
-            trim_sql,
-            user.user_id.unwrap()
-        ))
-        .execute(pool)
-        .await;
         Ok(result.unwrap().rows_affected() as i64)
     }
     // 删除用户
     pub async fn delete_user(user_id: i64, pool: &Pool<Sqlite>) -> anyhow::Result<i64> {
-        let result = sqlx::query(&format!("delete from user where user_id = {}", user_id))
-            .execute(pool)
-            .await;
+        let sql = SqlBuilder::delete_from("user")
+            .and_where_eq("user_id", user_id)
+            .sql()?;
+        let result = sqlx::query(&sql).execute(pool).await;
         Ok(result.unwrap().rows_affected() as i64)
     }
 
     // 用户列表逻辑
     pub async fn user_list(user: ReqPageUserVo, pool: &Pool<Sqlite>) -> anyhow::Result<Vec<User>> {
-        let mut query_builder: QueryBuilder<Sqlite> =
-            sqlx::QueryBuilder::new("select * from user where 1=1 ");
+        let mut sql_builder = SqlBuilder::select_from("user");
         if user.user_name.is_some() {
-            query_builder.push(format!(
-                " and user_name like '%{}%'",
-                user.user_name.unwrap()
-            ));
+            sql_builder.and_where_like_any("user_name", user.user_name.unwrap());
         }
         if user.status.is_some() {
-            query_builder.push(format!(" and status = {}", user.status.unwrap()));
+            sql_builder.and_where_eq("status", user.status.unwrap());
         }
         if user.user_id.is_some() {
-            query_builder.push(format!(" and user_id = {}", user.user_id.unwrap()));
+            sql_builder.and_where_eq("user_id", user.user_id.unwrap());
         }
-        if user.start_time.is_some() {
-            query_builder.push(format!(
-                " and create_time >  '{}'",
-                user.start_time.unwrap()
-            ));
+        if user.start_time.is_some() && user.end_time.is_some() {
+            sql_builder.and_where_between(
+                "create_time",
+                user.start_time.unwrap(),
+                user.end_time.unwrap(),
+            );
         }
-        if user.end_time.is_some() {
-            query_builder.push(format!(" and create_Time < '{}' ", user.end_time.unwrap()));
-        }
-        query_builder.push(" order by create_time desc ");
+        let sql = sql_builder.order_desc("create_time").sql()?;
 
-        let list = sqlx::query_as::<Sqlite, User>(query_builder.sql())
-            .fetch_all(pool)
-            .await?;
+        let list = sqlx::query_as::<Sqlite, User>(&sql).fetch_all(pool).await?;
         Ok(list)
     }
 
@@ -149,41 +132,31 @@ impl User {
         req_page_user: ReqPageUserVo,
         pool: &Pool<Sqlite>,
     ) -> anyhow::Result<Page<User>> {
-        let mut query_builder: QueryBuilder<Sqlite> =
-            sqlx::QueryBuilder::new("select  * from user where 1=1 ");
+        let mut sql_builder = SqlBuilder::select_from("user");
+
         if req_page_user.user_name.is_some() {
-            query_builder.push(format!(
-                " and user_name like '%{}%'",
-                req_page_user.user_name.unwrap()
-            ));
+            sql_builder.and_where_like_any("user_name", req_page_user.user_name.unwrap());
         }
         if req_page_user.status.is_some() {
-            query_builder
-                .push(" and status = ")
-                .push(req_page_user.status.unwrap());
+            sql_builder.and_where_eq("status", req_page_user.status.unwrap());
         }
-        if req_page_user.start_time.is_some() {
-            query_builder.push(format!(
-                " and create_time >  '{}'",
-                req_page_user.start_time.unwrap()
-            ));
+        if req_page_user.start_time.is_some() && req_page_user.end_time.is_some() {
+            sql_builder.and_where_between(
+                "create_time",
+                req_page_user.start_time.unwrap(),
+                req_page_user.end_time.unwrap(),
+            );
         }
-        if req_page_user.end_time.is_some() {
-            query_builder.push(format!(
-                " and create_Time < '{}' ",
-                req_page_user.end_time.unwrap()
-            ));
-        }
-        query_builder.push(" order by create_time desc ");
+        sql_builder.order_desc("create_time");
 
         let current_page = req_page_user.current_page.unwrap_or(1);
         let current_size = req_page_user.current_size.unwrap_or(10);
 
-        let sql = query_builder.sql();
+        let sql = sql_builder.sql()?;
 
-        let mut page_info = Page::page_info(sql, current_page, current_size, pool).await?;
+        let mut page_info = Page::page_info(&sql, current_page, current_size, pool).await?;
 
-        let sql = build_limit(sql, current_page, current_size);
+        let sql = build_limit(&sql, current_page, current_size);
 
         let list = sqlx::query_as::<Sqlite, User>(sql.as_ref())
             .fetch_all(pool)
@@ -194,15 +167,11 @@ impl User {
     }
     // 删除所有用户
     pub async fn delete_users(arg: DeleteUsers, pool: &Pool<Sqlite>) -> anyhow::Result<i64> {
-        let users = arg
-            .user_ids
-            .iter()
-            .map(|s| s.to_string())
-            .collect::<Vec<_>>()
-            .join(",");
-        let sql = format!("delete from user where user_id in ({})", users);
+        let sql = SqlBuilder::delete_from("user")
+            .and_where_in("user_id", &arg.user_ids)
+            .sql()?;
 
         let query_result = sqlx::query(&sql).execute(pool).await?;
-        return Ok(query_result.rows_affected() as i64);
+        Ok(query_result.rows_affected() as i64)
     }
 }

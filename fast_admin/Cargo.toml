@@ -50,6 +50,7 @@ tracing-actix-web = { version = "0" }
 log = { version = "0" }
 log4rs = { version = "1", features = ["default"] }
 sqlx = { version = "0", features = ["sqlite", "chrono", "runtime-tokio-native-tls"] }
+sql-builder = {version = "3" }
 #ormx = {version = "0",features = ["sqlite"]}
 #ormx-macros = {version = "0",fetures = ["sqlite"]}
 utoipa = { version = "3", features = ["actix_extras"] }
