@@ -14,7 +14,7 @@ fn index_component() -> Html {
     html! {
     <>
 
-    <div>{"hello"}</div>
+    <div>{"后台管理入口"}</div>
     <Login/>
     </>
     }

@@ -43,7 +43,7 @@ async fn main() -> std::io::Result<()> {
     let mut sqlite_connect_options =
         SqliteConnectOptions::from_str(&format!("sqlite://{}/db.sqlite", parent_path)).unwrap();
     sqlite_connect_options = sqlite_connect_options.journal_mode(SqliteJournalMode::Wal);
-    sqlite_connect_options.log_statements(LevelFilter::Debug);
+    sqlite_connect_options.clone().log_statements(LevelFilter::Debug);
 
     sqlite_connect_options
         .connect()
