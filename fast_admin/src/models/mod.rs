@@ -1,12 +1,10 @@
-use async_trait::async_trait;
-use futures_util::future::ok;
-use serde::de::value::UsizeDeserializer;
-use serde::{de, Deserialize, Serialize};
-use sqlx::{Encode, Executor, Pool, QueryBuilder, Row, Sqlite};
+ 
+use serde::{de, Serialize};
+use sql_builder::SqlBuilder;
+use sqlx::{  Pool  , Row, Sqlite};
 
 pub mod menu;
 pub mod role;
-pub mod student;
 pub mod user;
 
 // #[async_trait]
@@ -69,7 +67,7 @@ where
     }
 
     pub async fn page_info(
-        sql: &str,
+        sql_builder: &SqlBuilder,
         current_page: i64,
         current_size: i64,
         pool: &Pool<Sqlite>,
@@ -77,7 +75,9 @@ where
     where
         T: Clone + Serialize + de::DeserializeOwned,
     {
-        let page_sql_index = sql.find("from").unwrap();
+        let sql = sql_builder.sql().unwrap();
+        println!("分页SQL = {sql}");
+        let page_sql_index = sql.find("FROM").unwrap();
 
         let page_sql = &("select count(*) as count ".to_string() + &sql[page_sql_index..]);
         let map = sqlx::query(page_sql).fetch_one(pool).await?;
@@ -87,25 +87,18 @@ where
     }
 }
 
-pub fn build_limit(sql: &str, current_page: i64, current_size: i64) -> String {
-    if current_page == 1  {
-        let sql = format!(
-            "{} limit {} offset {}",
-            sql,current_size,1
-            
-            
-        );
-        sql
-    }else {
-        let sql = format!(
-            "{} limit {} offset {}",
-            sql,
-            current_size,
-            (current_page - 1) * current_size
-           
-        );
-         sql
+pub fn build_limit(
+    sql_builder: &mut SqlBuilder,
+    current_page: i64,
+    current_size: i64,
+) -> &mut SqlBuilder {
+    if current_page == 1 {
+        let sql_builder = sql_builder.limit(current_size).offset(1);
+        return sql_builder;
+    } else {
+        let sql_builder = sql_builder
+            .limit(current_size)
+            .offset((current_page - 1) * current_size);
+        return sql_builder;
     }
-    
-   
 }

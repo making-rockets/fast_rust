@@ -1,4 +1,3 @@
-use crate::base::base_service::BaseService;
 use crate::service::menu_service::MenuService;
 use crate::service::role_service::RoleService;
 use crate::service::user_service::UserService;

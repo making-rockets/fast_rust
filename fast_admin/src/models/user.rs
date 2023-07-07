@@ -74,7 +74,7 @@ impl User {
         Ok(add_user.last_insert_rowid())
     }
     // 编辑用户逻辑
-    pub async fn edit_user(mut user: User, pool: &Pool<Sqlite>) -> anyhow::Result<i64> {
+    pub async fn edit_user(  user: User, pool: &Pool<Sqlite>) -> anyhow::Result<i64> {
         let mut update_builder = SqlBuilder::update_table("user");
         if user.user_name.is_some() {
             update_builder.set("user_name", user.user_name.unwrap());
@@ -147,18 +147,17 @@ impl User {
                 req_page_user.end_time.unwrap(),
             );
         }
-        sql_builder.order_desc("create_time");
 
         let current_page = req_page_user.current_page.unwrap_or(1);
         let current_size = req_page_user.current_size.unwrap_or(10);
 
-        let sql = sql_builder.sql()?;
+        let mut page_info = Page::page_info(&sql_builder, current_page, current_size, pool).await?;
 
-        let mut page_info = Page::page_info(&sql, current_page, current_size, pool).await?;
+        let sql_builder = build_limit(&mut sql_builder, current_page, current_size);
+        
+        let sql  = sql_builder.sql()?;
 
-        let sql = build_limit(&sql, current_page, current_size);
-
-        let list = sqlx::query_as::<Sqlite, User>(sql.as_ref())
+        let list = sqlx::query_as::<Sqlite, User>(&sql)
             .fetch_all(pool)
             .await?;
 

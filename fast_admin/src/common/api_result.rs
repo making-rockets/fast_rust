@@ -4,7 +4,7 @@ use actix_web::http::header::{self, ContentType};
 use actix_web::{http::StatusCode, HttpResponse};
 use actix_web::{HttpResponseBuilder, ResponseError};
 
-use serde::{de::DeserializeOwned, Serialize};
+use serde::{  Serialize};
 
 #[derive(Debug, Serialize, Clone)]
 pub struct GlobalError(pub String);

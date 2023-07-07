@@ -1,8 +1,7 @@
 use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
 use sqlx::{FromRow, Pool, Sqlite};
-use sqlx::sqlite::SqliteArguments;
-use tera::ast::Node;
+use crate::utils::util::get_current_time; 
 
 
 #[derive(Debug, Serialize, Deserialize, Clone, FromRow)]
@@ -53,7 +52,7 @@ impl From<Menu> for MenuVo {
 
 impl Menu {
     pub async fn add_menu(menu: Menu, pool: &Pool<Sqlite>) -> anyhow::Result<i64> {
-        let current_time = chrono::Local::now().format("%Y-%m-%d %H:%M:%S").to_string();
+        let current_time = get_current_time();
         let result = sqlx::query("insert into menu(menu_name,parent_id,path,icon,remark,status,create_time,index_no,user_id,clazz)values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)")
             .bind(menu.menu_name.unwrap())
             .bind(menu.parent_id.unwrap())
@@ -92,7 +91,7 @@ impl Menu {
         }
 
         let mut result = Vec::new();
-        if let Some(mut root_menu_items) = menu_tree.remove(&0) {
+        if let Some(  root_menu_items) = menu_tree.remove(&0) {
             for mut root_menu_item in root_menu_items {
                 let children = Self::fetch_children_recursive(&mut menu_tree, &root_menu_item);
                 root_menu_item.children = Some(children);

@@ -1,11 +1,9 @@
-use proc_macro::Ident;
 use proc_macro2::{TokenStream};
 use quote::{quote, ToTokens};
 use syn::{Data, DataStruct, Field, Fields, parse_macro_input, Token};
 use syn::DeriveInput;
 use syn::punctuated::Punctuated;
 use syn::spanned::Spanned;
-use syn::token::Token;
 
 #[proc_macro_derive(ModelAttribute)]
 pub fn derive_builder(input: proc_macro::TokenStream) -> proc_macro::TokenStream {

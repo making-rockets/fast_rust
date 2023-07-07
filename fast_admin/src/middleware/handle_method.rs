@@ -1,10 +1,10 @@
 use actix_web::dev::{forward_ready, Service, ServiceRequest, ServiceResponse, Transform};
-use actix_web::{web, Error};
+use actix_web::{ Error};
 use futures::future::LocalBoxFuture;
-use futures_util::{StreamExt, TryStreamExt};
+
 use std::cell::RefCell;
 use std::future::{ready, Ready};
-use std::rc::Rc;
+
 use std::sync::Arc;
 
 pub struct HandleMethod;

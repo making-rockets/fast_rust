@@ -1,12 +1,11 @@
 use crate::controller::index_controller as index;
 use crate::controller::menu_controller as menu;
-use crate::controller::student_controller as student;
 use crate::controller::user_controller as user;
 
 use actix_web::dev::HttpServiceFactory;
 
-use actix_web::web::{scope, service};
-use actix_web::{guard, web};
+ 
+use actix_web::{ web};
 
 pub(crate) fn user_router() -> impl HttpServiceFactory {
     web::scope("/admin/user")
@@ -26,14 +25,7 @@ pub(crate) fn menu_router() -> impl HttpServiceFactory {
         .service(menu::list_menu) //列表菜单
 }
 
-pub(crate) fn student_router() -> impl HttpServiceFactory {
-    web::scope("/admin/student")
-        .service(student::students) //学生列表
-        .service(student::add_student) //添加学生跳转页面
-        .service(student::add_student_submit) //添加学生
-        .service(student::edit_student) //编辑学生
-        .service(student::student_details) //学生详情
-}
+ 
 
 pub(crate) fn index_router() -> impl HttpServiceFactory {
     web::scope("/admin/index")

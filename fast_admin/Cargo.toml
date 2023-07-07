@@ -53,9 +53,10 @@ sqlx = { version = "0", features = ["sqlite", "chrono", "runtime-tokio-native-tl
 sql-builder = {version = "3" }
 #ormx = {version = "0",features = ["sqlite"]}
 #ormx-macros = {version = "0",fetures = ["sqlite"]}
-utoipa = { version = "3", features = ["actix_extras"] }
-utoipa-swagger-ui = { version = "3", features = ["debug-embed", "actix-web"] }
-
+#utoipa = { version = "3", features = ["actix_extras"] }
+#utoipa-swagger-ui = { version = "3", features = ["debug-embed", "actix-web"] }
+#打包工具
+rust-embed = {version =  "6",features = ["actix-web","tokio"]}
 
 # 此为 开发配置文件, 给 `cargo build` 所使用.
 [profile.dev]

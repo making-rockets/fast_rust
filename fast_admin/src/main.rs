@@ -29,6 +29,7 @@ mod utils;
 #[tokio::main]
 async fn main() -> std::io::Result<()> {
     let config_path = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    
     let parent_path = config_path.parent().unwrap().to_str().unwrap();
     //注册日志
     std::env::set_var("RUST_LOG", "actix_web=DEBUG");
@@ -64,7 +65,7 @@ async fn main() -> std::io::Result<()> {
             .wrap(actix_web::middleware::Compress::default())
             .service(router::index_router())
             .service(router::menu_router())
-            .service(router::student_router())
+             
             .service(router::user_router())
             .service(Files::new("/assets", "src/templates/teacher/assets").show_files_listing())
             .service(Files::new("/fast_wasm/pkg", "../fast_wasm/pkg").show_files_listing())
@@ -81,7 +82,7 @@ lazy_static! {
     //注册tera
   pub static ref  GLOBAL_TERA:Tera = match Tera::new("src/templates/teacher/*.html") {
         Ok(mut tera) => {
-            tera.full_reload();
+            tera.full_reload().expect("tera reload failed");
             tera
         },
         Err(e) => {
