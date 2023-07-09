@@ -14,7 +14,7 @@ fn index_component() -> Html {
     html! {
     <>
 
-    <div>{"后台管理入口"}</div>
+    <div class="text-3xl font-bold underline mx-auto" >{"后台管理入口"}</div>
     <Login/>
     </>
     }
@@ -53,7 +53,7 @@ pub fn login() -> Html {
         Callback::from(move |input_event: InputEvent| {
             let input: HtmlInputElement = input_event.target_unchecked_into();
             let value = input.value();
-            login_info_clone.user_name = Some(value)
+            // login_info_clone.user_name = Some(value)
         })
     };
 
