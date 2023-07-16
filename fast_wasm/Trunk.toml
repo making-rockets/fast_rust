@@ -1,0 +1,9 @@
+[build]
+target = "index.html"
+dist = "dist"
+port = 2000
+
+# [[hooks]]
+# stage = "build"
+# command = "sh"
+# command_arguments = ["-c", "../tailwind/tailwindcss -c ../tailwind/tailwind.config.js -i ../tailwind/tailwind-in.css -o $TRUNK_STAGING_DIR/tailwind.css --minify"]

@@ -31,6 +31,7 @@ pub async fn add_user(
     _request: HttpRequest,
     pool: Data<Pool<Sqlite>>,
 ) -> HttpResponse {
+   
     let result = user::User::add_user(arg.0, &pool).await;
     Api::from_any_result(result)
         .await

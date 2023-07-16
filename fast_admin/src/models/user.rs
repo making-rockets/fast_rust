@@ -1,6 +1,6 @@
 use anyhow::Ok;
 use serde::{Deserialize, Serialize};
-use sql_builder::{prelude::Bind, SqlBuilder};
+use sql_builder::{prelude::Bind, quote, SqlBuilder};
 
 use sqlx::{FromRow, Pool, Sqlite};
 
@@ -57,24 +57,23 @@ impl User {
             let current_time = chrono::Local::now().format("%Y-%m-%d %H:%M:%S").to_string();
             user.create_time = Some(current_time);
         }
+        println!("这是是为什么{:?}", &user);
         let sql = SqlBuilder::insert_into("user")
-            .field("user_name")
-            .field("password")
-            .field("create_time")
-            .field("status")
+            .set_fields(&["user_name", "password", "create_time", "status"])
             .values(&[
-                user.user_name.unwrap(),
-                user.password.unwrap(),
-                user.create_time.unwrap(),
-                user.status.unwrap().to_string(),
+                &quote(user.user_name.unwrap()),
+                &quote(user.password.unwrap()),
+                &quote(user.create_time.unwrap()),
+                &quote(user.status.unwrap()),
             ])
             .sql()?;
+
         let add_user = sqlx::query(&sql).execute(pool).await?;
 
         Ok(add_user.last_insert_rowid())
     }
     // 编辑用户逻辑
-    pub async fn edit_user(  user: User, pool: &Pool<Sqlite>) -> anyhow::Result<i64> {
+    pub async fn edit_user(user: User, pool: &Pool<Sqlite>) -> anyhow::Result<i64> {
         let mut update_builder = SqlBuilder::update_table("user");
         if user.user_name.is_some() {
             update_builder.set("user_name", user.user_name.unwrap());
@@ -154,12 +153,10 @@ impl User {
         let mut page_info = Page::page_info(&sql_builder, current_page, current_size, pool).await?;
 
         let sql_builder = build_limit(&mut sql_builder, current_page, current_size);
-        
-        let sql  = sql_builder.sql()?;
 
-        let list = sqlx::query_as::<Sqlite, User>(&sql)
-            .fetch_all(pool)
-            .await?;
+        let sql = sql_builder.sql()?;
+
+        let list = sqlx::query_as::<Sqlite, User>(&sql).fetch_all(pool).await?;
 
         page_info.add_data(list);
         Ok(page_info)

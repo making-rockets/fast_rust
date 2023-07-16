@@ -3,9 +3,9 @@ use crate::controller::menu_controller as menu;
 use crate::controller::user_controller as user;
 
 use actix_web::dev::HttpServiceFactory;
+use actix_web::web;
 
  
-use actix_web::{ web};
 
 pub(crate) fn user_router() -> impl HttpServiceFactory {
     web::scope("/admin/user")

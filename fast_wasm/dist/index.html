@@ -1,14 +1,16 @@
-<!DOCTYPE html><html lang="en"><head>
-    <script src="https://cdn.tailwindcss.com"></script>
+<!DOCTYPE html><html><head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
 
-<link rel="preload" href="/fast_wasm-9578a010725b73fa_bg.wasm" as="fetch" type="application/wasm" crossorigin="">
-<link rel="modulepreload" href="/fast_wasm-9578a010725b73fa.js"></head>
+<link rel="preload" href="/fast_wasm-1b837c4917d584f2_bg.wasm" as="fetch" type="application/wasm" crossorigin="">
+<link rel="modulepreload" href="/fast_wasm-1b837c4917d584f2.js"></head>
 <body>
+<h1 class="text-3xl ">
+    Hello world!
+</h1>
 
-
-<script type="module">import init from '/fast_wasm-9578a010725b73fa.js';init('/fast_wasm-9578a010725b73fa_bg.wasm');</script><script>(function () {
+<script type="module">import init from '/fast_wasm-1b837c4917d584f2.js';init('/fast_wasm-1b837c4917d584f2_bg.wasm');</script><script>(function () {
     var protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
     var url = protocol + '//' + window.location.host + '/_trunk/ws';
     var poll_interval = 5000;

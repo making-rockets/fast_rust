@@ -23,7 +23,8 @@ web-sys = { version = "0", features = [
     "InputEvent",
     "Headers",
     "MouseEvent",
-
+    "Document",
+    "Storage"
 ] }
 js-sys = "0"
 js-sys-futures = "0"
@@ -31,3 +32,6 @@ wasm-bindgen = { version = "0", features = ["serde-serialize"] }
 wasm-bindgen-futures = "0"
 gloo-utils = { version = "0" }
 gloo-console = { version = "0" }
+async-std = {version = "1"}
+reqwest = {version = "0",features = ["json"]}
+anyhow = {version = "1"}
